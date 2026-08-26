@@ -45,19 +45,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-  <!-- ============================================================
-  🔑 SUPABASE CREDENTIALS – PASTE YOUR URL & ANON KEY BELOW
-  ============================================================ -->
-  <script>
-    const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';   // <-- PASTE YOUR URL
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';                // <-- PASTE YOUR ANON KEY
-  </script>
-
-  <!-- Supabase JS Client (if this fails, try using https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js) -->
-  <script src="https://jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-
   <style>
-    /* ── same custom styles ── */
+    /* ── custom styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -316,16 +305,63 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – APPLICATION LOGIC (with History API & SEO support)
+  JAVASCRIPT – APPLICATION LOGIC
   ============================================================ -->
   <script>
-    (function() {
+    // ─── SUPABASE CREDENTIALS ─────────────────────────────────────
+    const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';   // <-- PASTE YOUR URL
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';                // <-- PASTE YOUR ANON KEY
+  </script>
+
+  <!-- Load Supabase client dynamically with fallback -->
+  <script>
+    (function loadSupabase() {
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.onload = () => resolve(window.supabase);
+          script.onerror = () => reject(new Error('Failed to load: ' + src));
+          document.head.appendChild(script);
+        });
+      }
+
+      // Try jsdelivr, fallback to unpkg
+      loadScript('https://jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js')
+        .catch(() => {
+          console.warn('jsdelivr failed, trying unpkg...');
+          return loadScript('https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js');
+        })
+        .then(() => {
+          // Now Supabase is loaded, start the app
+          startApp();
+        })
+        .catch(err => {
+          console.error('❌ Failed to load Supabase client:', err);
+          document.body.innerHTML = `
+            <div class="flex items-center justify-center min-h-screen bg-red-50">
+              <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                <i class="fas fa-exclamation-triangle text-4xl text-red-500 mb-4"></i>
+                <h2 class="text-xl font-bold text-red-700">Network Error</h2>
+                <p class="text-slate-600 mt-2">Could not load the Supabase client library.</p>
+                <p class="text-sm text-slate-400 mt-1">Please check your internet connection and try again.</p>
+                <button onclick="location.reload()" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-xl hover:bg-indigo-700 transition">
+                  Retry
+                </button>
+              </div>
+            </div>
+          `;
+        });
+    })();
+  </script>
+
+  <script>
+    function startApp() {
       'use strict';
 
-      // ─── Supabase Client (fixed variable name) ──────────────────────
-      // The global `supabase` is provided by the CDN script.
-      // We rename our local client to avoid TDZ error.
-      const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      // ─── Supabase Client ────────────────────────────────────────────
+      // The global `supabase` is now available from the loaded script
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // ─── State ──────────────────────────────────────────────────────
       const state = {
@@ -978,8 +1014,7 @@
       init();
 
       window.__state = state;
-
-    })();
+    }
   </script>
 
 </body>

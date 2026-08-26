@@ -1101,13 +1101,50 @@
 
       // ─── Init ────────────────────────────────────────────────────────
       async function init() {
+        // 1. Handle email verification callback (fragment tokens)
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+
+          if (accessToken && refreshToken) {
+            try {
+              const { data, error } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              if (error) throw error;
+              if (data.user) {
+                state.currentUser = data.user;
+                portalBtnLabel.textContent = 'Dashboard';
+                // Clear the hash from URL
+                window.history.replaceState(null, '', '/');
+                // Navigate to dashboard
+                showView(dashboardView);
+                navigateTo('/dashboard');
+                await loadMyProperties();
+                alert('✅ Email verified! Welcome to your dashboard.');
+                return;
+              }
+            } catch (err) {
+              console.error('Session set error:', err);
+              alert('❌ Verification failed: ' + err.message);
+            }
+          }
+        }
+
+        // 2. Check if user is already logged in
         const { data: { user } } = await supabaseClient.auth.getUser();
         if (user) {
           state.currentUser = user;
           portalBtnLabel.textContent = 'Dashboard';
         }
 
+        // 3. Handle route
         await handleRoute();
+
+        // 4. Fetch properties
         await fetchProperties();
       }
 

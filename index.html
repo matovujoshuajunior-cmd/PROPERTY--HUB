@@ -314,10 +314,13 @@
 
       // ─── 🔧 CONFIGURE YOUR COLUMN NAMES HERE ──────────────────────
       // The foreign key column in 'properties' that references 'profiles.id'
-      const FOREIGN_KEY = 'owner_id';    // ← change to the actual column name (e.g., 'user_id', 'profile_id', 'created_by')
+      const FOREIGN_KEY = 'owner_id';    // ← change to your actual column (e.g., 'user_id', 'profile_id', 'created_by')
       
       // The column name for the property image in 'properties'
-      const IMAGE_COLUMN = 'media_urls';      // ← change to the actual column name (e.g., 'image_url', 'photo', 'img')
+      const IMAGE_COLUMN = 'media_urls';  // ← change to your actual column (e.g., 'image', 'image_url', 'photo', 'media_urls')
+
+      console.log('🔧 Using FOREIGN_KEY:', FOREIGN_KEY);
+      console.log('🔧 Using IMAGE_COLUMN:', IMAGE_COLUMN);
 
       // ─── Supabase Client ───────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -333,7 +336,7 @@
         currentUser: null,
         isSignUpMode: false,
         myProperties: [],
-        profilesMap: {}, // cache broker profiles by ID
+        profilesMap: {},
       };
 
       // ─── DOM refs (shortened) ──────────────────────────────────────
@@ -500,14 +503,13 @@
         emptyState.classList.add('hidden');
         propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
-          // Find broker from cache
           const broker = prop.broker || state.profilesMap[prop[FOREIGN_KEY]] || null;
           const card = createPropertyCard(prop, broker, true);
           listingsGrid.appendChild(card);
         });
       }
 
-      // ─── Fetch profiles and properties separately ──────────────────
+      // ─── Fetch all data ──────────────────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -515,26 +517,23 @@
         emptyState.classList.add('hidden');
 
         try {
-          // 1. Fetch all profiles
+          // 1. Fetch profiles
           const { data: profiles, error: profilesError } = await supabaseClient
             .from('profiles')
             .select('*');
-
           if (profilesError) throw profilesError;
-          // Build map
           const profilesMap = {};
           (profiles || []).forEach(p => { profilesMap[p.id] = p; });
           state.profilesMap = profilesMap;
 
-          // 2. Fetch all properties
+          // 2. Fetch properties
           const { data: properties, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false });
-
           if (propsError) throw propsError;
 
-          // 3. Attach broker to each property using the FOREIGN_KEY
+          // 3. Attach broker
           const enriched = (properties || []).map(prop => ({
             ...prop,
             broker: profilesMap[prop[FOREIGN_KEY]] || null
@@ -554,7 +553,6 @@
           state.allProperties = sorted;
           state.filteredProperties = [...sorted];
           applyFiltersAndSearch();
-
         } catch (err) {
           console.error('❌ Error fetching data:', err);
           listingsGrid.innerHTML = `
@@ -581,7 +579,6 @@
         if (mappedFilter !== 'all') {
           result = result.filter(p => (p.type || '').toLowerCase() === mappedFilter.toLowerCase());
         }
-
         if (query) {
           result = result.filter(p => {
             const address = (p.address || '').toLowerCase();
@@ -589,7 +586,6 @@
             return address.includes(query) || title.includes(query);
           });
         }
-
         state.filteredProperties = result;
         renderListings(result);
       }
@@ -614,13 +610,11 @@
         brokerEmptyState.classList.add('hidden');
 
         try {
-          // Fetch broker details
           const { data: broker, error: brokerError } = await supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', brokerId)
             .single();
-
           if (brokerError) throw brokerError;
           if (!broker) {
             brokerListingsGrid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Broker not found.</div>`;
@@ -639,13 +633,11 @@
           brokerWhatsAppLink.style.display = phone ? 'inline-flex' : 'none';
           brokerBio.innerHTML = `<i class="fas fa-store mr-1.5 text-slate-400"></i> <span>${broker.bio || 'Professional real estate broker.'}</span>`;
 
-          // Fetch properties for this broker
           const { data: props, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
             .eq(FOREIGN_KEY, brokerId)
             .order('created_at', { ascending: false });
-
           if (propsError) throw propsError;
 
           if (!props || props.length === 0) {
@@ -695,7 +687,6 @@
             .select('*')
             .eq(FOREIGN_KEY, state.currentUser.id)
             .order('created_at', { ascending: false });
-
           if (error) throw error;
           state.myProperties = data || [];
           renderMyProperties();
@@ -806,6 +797,8 @@
           insertData[IMAGE_COLUMN] = imageUrl;
           insertData[FOREIGN_KEY] = state.currentUser.id;
 
+          console.log('📝 Inserting property with data:', insertData);
+
           const { data, error } = await supabaseClient
             .from('properties')
             .insert(insertData)
@@ -853,7 +846,6 @@
                 }
               }
             });
-
             if (error) throw error;
             alert('✅ Account created! Please check your email to verify your account.');
             setAuthMode(false);
@@ -867,7 +859,6 @@
               email,
               password
             });
-
             if (error) throw error;
             state.currentUser = data.user;
             alert('✅ Signed in successfully!');
@@ -892,7 +883,6 @@
       // ─── Route Handler ──────────────────────────────────────────────
       async function handleRoute() {
         const path = getCurrentPath();
-
         if (path.startsWith('/broker/')) {
           const brokerId = path.split('/')[2];
           if (brokerId && brokerId !== state.currentBrokerId) {

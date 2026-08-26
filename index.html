@@ -41,7 +41,7 @@
   </script>
 
   <!-- ========== STYLES & CDN ========== -->
-  <!-- For production, replace this with a built Tailwind CSS file to avoid CDN warning -->
+  <!-- For production, replace this with a built Tailwind CSS file -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
@@ -98,6 +98,13 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+
+    /* Responsive clear button – show only icon on small screens */
+    @media (max-width: 640px) {
+      .clear-btn-text { display: none; }
+      .clear-btn-icon { display: inline; }
+    }
+    .clear-btn-icon { display: none; }
   </style>
 </head>
 <body>
@@ -157,7 +164,9 @@
                          class="w-full pl-10 pr-4 py-3 rounded-xl border-0 shadow-lg text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
                 </div>
                 <button id="clearSearchBtn" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-5 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 border border-white/10">
-                  <i class="fas fa-times"></i> Clear
+                  <i class="fas fa-times"></i>
+                  <span class="clear-btn-text">Clear</span>
+                  <span class="clear-btn-icon">×</span>
                 </button>
               </div>
             </div>
@@ -354,7 +363,7 @@
     (function loadSupabase() {
       const loadingOverlay = document.getElementById('loadingOverlay');
 
-      function loadScript(src, timeout = 10000) {
+      function loadScript(src, timeout = 8000) {
         return new Promise((resolve, reject) => {
           const script = document.createElement('script');
           script.src = src;
@@ -372,7 +381,6 @@
             clearTimeout(timer);
             if (!resolved) {
               resolved = true;
-              // Check if supabase is available
               if (window.supabase) {
                 resolve();
               } else {
@@ -393,11 +401,11 @@
         });
       }
 
-      // List of CDN URLs to try (order matters)
+      // Use a known working URL – prefer cdnjs as it's often more reliable
       const cdnList = [
+        'https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.0/umd/supabase.min.js',
         'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js',
-        'https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/supabase/2.39.0/umd/supabase.min.js' // fallback if available
+        'https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
       ];
 
       async function tryLoadAll() {
@@ -405,13 +413,11 @@
         for (const src of cdnList) {
           try {
             await loadScript(src);
-            // If we get here, script loaded and window.supabase exists
             console.log('✅ Supabase client loaded from:', src);
             return true;
           } catch (err) {
             console.warn('❌ Failed from', src, err.message);
             lastError = err;
-            // Continue to next CDN
           }
         }
         throw lastError || new Error('All CDN attempts failed');
@@ -419,13 +425,11 @@
 
       tryLoadAll()
         .then(() => {
-          // Hide loading overlay and start app
           loadingOverlay.classList.add('hidden');
           startApp();
         })
         .catch(err => {
           console.error('❌ Fatal: Could not load Supabase client', err);
-          // Show error screen
           document.body.innerHTML = `
             <div class="flex items-center justify-center min-h-screen bg-red-50 p-4">
               <div class="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
@@ -444,7 +448,7 @@
           `;
         });
 
-      // Also hide overlay after 5s even if still loading (fallback)
+      // Hide overlay after 5s even if still loading (fallback)
       setTimeout(() => {
         loadingOverlay.classList.add('hidden');
       }, 5000);

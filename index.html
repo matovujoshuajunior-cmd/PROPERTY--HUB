@@ -44,7 +44,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ... same as before (kept compact) ... */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -67,7 +66,6 @@
     .auth-toggle-btn:hover:not(.active) { background: #f1f5f9; }
     .dashboard-card { background: white; border-radius: 1.5rem; box-shadow: 0 8px 30px rgba(0,0,0,0.05); }
     .dashboard-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
-
     #loadingOverlay {
       position: fixed; inset: 0; background: white; z-index: 9999;
       display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem;
@@ -267,7 +265,6 @@
         });
       }
 
-      // Only use reliable CDNs (remove broken cdnjs)
       const cdnList = [
         'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js',
         'https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
@@ -316,7 +313,8 @@
       'use strict';
 
       // ─── ⚠️ SET YOUR ACTUAL FOREIGN KEY COLUMN NAME HERE ──────────
-      const FOREIGN_KEY = 'broker_id';  // ← CHANGE THIS to the actual column name in your 'properties' table
+      // Try 'owner_id' first – if that fails, change to 'user_id', 'profile_id', or 'created_by'
+      const FOREIGN_KEY = 'owner_id';
 
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -333,7 +331,7 @@
         myProperties: [],
       };
 
-      // ─── DOM refs ──────────────────────────────────────────────────
+      // ─── DOM refs (shortened for brevity) ──────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -385,11 +383,8 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // ─── Helpers ────────────────────────────────────────────────────
-      function formatPrice(amount) {
-        return Number(amount).toLocaleString('en-UG') + ' UGX';
-      }
-
+      // ─── Helpers (same as before) ──────────────────────────────────
+      function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
       function getTierClass(tier) {
         if (!tier) return 'tier-Bronze';
         const t = tier.toLowerCase();
@@ -397,28 +392,21 @@
         if (t === 'gold') return 'tier-Gold';
         return 'tier-Bronze';
       }
-
       function getTierLabel(tier) {
         if (!tier) return 'Bronze';
         return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase();
       }
-
       function whatsappUrl(phone) {
         if (!phone) return '#';
         const cleaned = phone.replace(/\s/g, '').replace(/^0/, '256');
         return `https://wa.me/${cleaned}`;
       }
-
       function navigateTo(url, replace = false) {
         if (replace) window.history.replaceState(null, '', url);
         else window.history.pushState(null, '', url);
         handleRoute();
       }
-
-      function getCurrentPath() {
-        return window.location.pathname + window.location.search;
-      }
-
+      function getCurrentPath() { return window.location.pathname + window.location.search; }
       function showView(view) {
         [discoveryView, brokerView, authView, dashboardView].forEach(v => {
           v.classList.remove('view-visible');
@@ -427,7 +415,6 @@
         view.classList.remove('view-hidden');
         view.classList.add('view-visible');
       }
-
       function setAuthMode(signUpModeActive) {
         state.isSignUpMode = signUpModeActive;
         if (signUpModeActive) {
@@ -512,7 +499,7 @@
         });
       }
 
-      // ─── Fetch properties ─────────────────────────────────────────
+      // ─── Fetch properties (using FOREIGN_KEY) ─────────────────────
       async function fetchProperties() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -520,7 +507,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // ✅ Use dynamic FOREIGN_KEY in the join
           const { data, error } = await supabaseClient
             .from('properties')
             .select(`*, profiles!${FOREIGN_KEY}(*)`)
@@ -783,7 +769,6 @@
         }
 
         try {
-          // ✅ Use the dynamic FOREIGN_KEY
           const insertData = {
             title,
             price,

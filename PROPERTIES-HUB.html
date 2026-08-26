@@ -1,0 +1,1099 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ========== SEO & META ========== -->
+    <title>Property Hub Uganda – Find Homes, Rentals &amp; Lodges</title>
+    <meta name="description" content="Discover the best properties, rentals, and lodges across Uganda. Search by address, browse trusted brokers, and chat via WhatsApp." />
+    <link rel="canonical" href="https://yourdomain.com/" />
+    <meta name="robots" content="index, follow" />
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Property Hub Uganda" />
+    <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
+    <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
+    <meta property="og:url" content="https://yourdomain.com/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Property Hub Uganda" />
+    <meta name="twitter:description" content="Find your perfect property in Uganda." />
+    <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+        {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Property Hub Uganda",
+        "url": "https://yourdomain.com/",
+        "description": "Discover properties, rentals, and lodges across Uganda.",
+        "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://yourdomain.com/?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+        }
+        }
+    </script>
+
+    <!-- ========== STYLES & CDN ========== -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <!-- ============================================================
+    🔑 SUPABASE CREDENTIALS – PASTE YOUR URL & ANON KEY BELOW
+    ============================================================ -->
+    <script>
+    const SUPABASE_URL = 'https://your-project-url.supabase.co';   // <-- PASTE YOUR URL
+    const SUPABASE_ANON_KEY = 'your-anon-key-here';                // <-- PASTE YOUR ANON KEY
+    </script>
+
+    <!-- Supabase JS Client -->
+    <script src="https://jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+
+    <style>
+        /* ── same custom styles as before ── */
+        body {
+            background: #f8fafc;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        .property-card {
+            transition: transform 0.2s ease, box-shadow 0.25s ease;
+        }
+
+            .property-card:hover {
+                transform: translateY(-6px);
+                box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18);
+            }
+
+        .tier-Platinum {
+            background: linear-gradient(135deg, #e5e4e2, #c0c0c0);
+            color: #1a1a2e;
+        }
+
+        .tier-Gold {
+            background: linear-gradient(135deg, #f9d976, #f39c12);
+            color: #1a1a2e;
+        }
+
+        .tier-Bronze {
+            background: linear-gradient(135deg, #e8a87c, #d35400);
+            color: #fff;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,95,0.72) 100%);
+        }
+
+        .filter-pill.active {
+            background: #1e293b;
+            color: #fff;
+            border-color: #1e293b;
+        }
+
+        .filter-pill {
+            transition: all 0.15s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+
+            .filter-pill:hover {
+                background: #e2e8f0;
+            }
+
+        .btn-whatsapp {
+            background: #25d366;
+            color: #fff;
+            transition: background 0.2s;
+        }
+
+            .btn-whatsapp:hover {
+                background: #1da851;
+            }
+
+        .broker-header {
+            background: linear-gradient(145deg, #ffffff, #f1f5f9);
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .view {
+            transition: opacity 0.25s ease;
+        }
+
+        .view-hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .view-visible {
+            display: block;
+            opacity: 1;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        .auth-toggle-btn {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+            .auth-toggle-btn.active {
+                background: #1e293b;
+                color: white;
+                border-color: #1e293b;
+            }
+
+            .auth-toggle-btn:hover:not(.active) {
+                background: #f1f5f9;
+            }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+        }
+
+            .dashboard-card:hover {
+                box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            }
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen">
+
+        <!-- ========== TOP NAVIGATION ========== -->
+        <header class="bg-white/90 backdrop-blur-sm border-b border-slate-200/60 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl font-bold text-slate-800 tracking-tight">
+                            🏠 Property<span class="text-indigo-600">Hub</span>
+                        </span>
+                        <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">
+                            UGX
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span id="propertyCount" class="bg-slate-100 px-3 py-1 rounded-full text-slate-700 font-medium text-xs">
+                            0 listings
+                        </span>
+                        <button id="brokerPortalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow flex items-center gap-2">
+                            <i class="fas fa-user-tie"></i> <span id="portalBtnLabel">Broker Portal</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- ========== VIEW: DISCOVERY ENGINE ========== -->
+            <section id="discoveryView" class="view view-visible">
+                <!-- Hero -->
+                <div class="relative bg-slate-900 text-white overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1400&q=80')] bg-cover bg-center opacity-30"></div>
+                    <div class="absolute inset-0 hero-gradient"></div>
+                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+                        <div class="max-w-2xl">
+                            <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+                                Find your <span class="text-indigo-300">perfect</span> space
+                            </h1>
+                            <p class="mt-3 text-slate-300 text-lg max-w-xl">
+                                Explore homes, rentals, and lodges from trusted brokers across Uganda.
+                            </p>
+                            <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                                <div class="relative flex-1">
+                                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                    <input id="searchInput" type="text" placeholder="Search by address, city, or area…"
+                                           class="w-full pl-10 pr-4 py-3 rounded-xl border-0 shadow-lg text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                                </div>
+                                <button id="clearSearchBtn" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-5 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 border border-white/10">
+                                    <i class="fas fa-times"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filters & Grid -->
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
+                        <button class="filter-pill active px-5 py-2 rounded-full border border-slate-200 bg-slate-900 text-white text-sm font-medium whitespace-nowrap" data-filter="all">
+                            <i class="fas fa-th-large mr-1.5"></i> All
+                        </button>
+                        <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="rental">
+                            <i class="fas fa-key mr-1.5"></i> Rentals
+                        </button>
+                        <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="property">
+                            <i class="fas fa-building mr-1.5"></i> Properties
+                        </button>
+                        <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="lodge">
+                            <i class="fas fa-bed mr-1.5"></i> Lodges
+                        </button>
+                        <span class="text-xs text-slate-400 ml-2 hidden sm:inline">
+                            <i class="fas fa-arrow-right mr-1"></i> Premium first
+                        </span>
+                    </div>
+
+                    <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                    <div id="emptyState" class="hidden text-center py-20">
+                        <i class="fas fa-home text-5xl text-slate-300 mb-4"></i>
+                        <p class="text-slate-500 text-lg">No properties match your criteria.</p>
+                        <p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p>
+                    </div>
+                    <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                        <div class="skeleton-card" style="display:block;">&nbsp;</div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ========== VIEW: BROKER PROFILE ========== -->
+            <section id="brokerView" class="view view-hidden">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition">
+                        <i class="fas fa-arrow-left"></i> Back to discovery
+                    </button>
+                    <div id="brokerHeader" class="broker-header rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
+                        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                                <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
+                                <div class="flex items-center gap-3 mt-1.5">
+                                    <span id="brokerTierBadge" class="text-xs font-semibold px-3 py-1 rounded-full tier-Bronze">Bronze</span>
+                                    <span id="brokerPhone" class="text-sm text-slate-500 flex items-center gap-1">
+                                        <i class="fas fa-phone-alt"></i> <span>—</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition">
+                                <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
+                            </a>
+                        </div>
+                        <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl">
+                            <i class="fas fa-store mr-1.5 text-slate-400"></i>
+                            <span class="italic">Browse all properties listed by this broker.</span>
+                        </p>
+                    </div>
+                    <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+                    <div id="brokerEmptyState" class="hidden text-center py-20">
+                        <i class="fas fa-box-open text-5xl text-slate-300 mb-4"></i>
+                        <p class="text-slate-500 text-lg">This broker has no listings yet.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========== VIEW: AUTHENTICATION PORTAL ========== -->
+            <section id="authView" class="view view-hidden max-w-md mx-auto my-12 px-4">
+                <div class="auth-card p-8">
+                    <div class="flex rounded-xl bg-slate-100 p-1 mb-8 border border-slate-200/50">
+                        <button id="toggleSignIn" class="auth-toggle-btn active w-1/2 text-center py-2.5 rounded-lg text-sm font-semibold border border-transparent shadow-none">Sign In</button>
+                        <button id="toggleSignUp" class="auth-toggle-btn w-1/2 text-center py-2.5 rounded-lg text-sm font-semibold border border-transparent shadow-none">Create Account</button>
+                    </div>
+                    <h2 id="formTitle" class="text-2xl font-bold text-slate-800 tracking-tight mb-6">Welcome Back</h2>
+                    <form id="authForm" class="space-y-4">
+                        <div id="signUpFields" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business / Brand Name</label>
+                                <input type="text" id="bizNameInput" placeholder="e.g. Sunshine Estates Uganda" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-slate-800" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Account Category</label>
+                                <select id="accTypeSelect" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-slate-800 bg-white">
+                                    <option value="broker">Independent Broker</option>
+                                    <option value="property_owner">Property Owner / Investor</option>
+                                    <option value="lodge_owner">Lodge Operator / Manager</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Business Phone</label>
+                                <input type="text" id="phoneInput" placeholder="e.g. 256700123456" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-slate-800" />
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address</label>
+                            <input type="email" id="emailInput" required placeholder="name@example.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-slate-800" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Password</label>
+                            <input type="password" id="passwordInput" required placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-slate-800" />
+                        </div>
+                        <button type="submit" id="submitAuthBtn" class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-200 text-sm transition-all duration-150">
+                            Access Dashboard
+                        </button>
+                        <button type="button" id="backToSearchBtn" class="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-600 mt-2">
+                            ← Back to public search listings
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- ========== VIEW: BROKER DASHBOARD ========== -->
+            <section id="dashboardView" class="view view-hidden">
+                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
+                        <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition">
+                            <i class="fas fa-sign-out-alt mr-1"></i> Sign Out
+                        </button>
+                    </div>
+
+                    <!-- Add Property Form -->
+                    <div class="dashboard-card p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
+                        <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label>
+                                <input type="text" id="propTitle" required placeholder="e.g. Modern 3-Bedroom Villa" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label>
+                                <input type="number" id="propPrice" required placeholder="e.g. 250000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label>
+                                <select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
+                                    <option value="Rentals">Rentals</option>
+                                    <option value="Properties">Properties</option>
+                                    <option value="Lodges">Lodges</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label>
+                                <input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Image</label>
+                                <input type="file" id="propImage" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                            </div>
+                            <div class="md:col-span-2">
+                                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+                                    <i class="fas fa-plus mr-2"></i> Add Property
+                                </button>
+                            </div>
+                        </form>
+                        <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
+                    </div>
+
+                    <!-- My Properties List -->
+                    <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden">
+                        <i class="fas fa-home text-3xl mb-2"></i>
+                        <p>You haven't added any properties yet.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT – APPLICATION LOGIC (with History API & SEO support)
+    ============================================================ -->
+    <script>
+    (function() {
+      'use strict';
+
+      // ─── Supabase Client ────────────────────────────────────────────
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      // ─── State ──────────────────────────────────────────────────────
+      const state = {
+        allProperties: [],
+        filteredProperties: [],
+        currentFilter: 'all',
+        searchQuery: '',
+        currentBrokerId: null,
+        isLoading: false,
+        currentUser: null,
+        isSignUpMode: false,
+        myProperties: [],
+      };
+
+      // ─── DOM refs ──────────────────────────────────────────────────
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => document.querySelectorAll(sel);
+
+      const discoveryView = $('#discoveryView');
+      const brokerView = $('#brokerView');
+      const authView = $('#authView');
+      const dashboardView = $('#dashboardView');
+
+      const listingsGrid = $('#listingsGrid');
+      const loadingSkeleton = $('#loadingSkeleton');
+      const emptyState = $('#emptyState');
+      const propertyCount = $('#propertyCount');
+      const searchInput = $('#searchInput');
+      const clearSearchBtn = $('#clearSearchBtn');
+      const filterPills = $$('.filter-pill');
+
+      const brokerBusinessName = $('#brokerBusinessName');
+      const brokerTierBadge = $('#brokerTierBadge');
+      const brokerPhone = $('#brokerPhone');
+      const brokerWhatsAppLink = $('#brokerWhatsAppLink');
+      const brokerBio = $('#brokerBio');
+      const brokerListingsGrid = $('#brokerListingsGrid');
+      const brokerEmptyState = $('#brokerEmptyState');
+      const backToDiscovery = $('#backToDiscovery');
+
+      const toggleSignIn = $('#toggleSignIn');
+      const toggleSignUp = $('#toggleSignUp');
+      const signUpFields = $('#signUpFields');
+      const formTitle = $('#formTitle');
+      const submitAuthBtn = $('#submitAuthBtn');
+      const authForm = $('#authForm');
+      const backToSearchBtn = $('#backToSearchBtn');
+      const emailInput = $('#emailInput');
+      const passwordInput = $('#passwordInput');
+      const bizNameInput = $('#bizNameInput');
+      const accTypeSelect = $('#accTypeSelect');
+      const phoneInput = $('#phoneInput');
+
+      const addPropertyForm = $('#addPropertyForm');
+      const propTitle = $('#propTitle');
+      const propPrice = $('#propPrice');
+      const propType = $('#propType');
+      const propAddress = $('#propAddress');
+      const propImage = $('#propImage');
+      const uploadStatus = $('#uploadStatus');
+      const myPropertiesList = $('#myPropertiesList');
+      const myPropertiesEmpty = $('#myPropertiesEmpty');
+      const logoutBtn = $('#logoutBtn');
+      const portalBtnLabel = $('#portalBtnLabel');
+      const brokerPortalBtn = $('#brokerPortalBtn');
+
+      // ─── Helpers ────────────────────────────────────────────────────
+      function formatPrice(amount) {
+        return Number(amount).toLocaleString('en-UG') + ' UGX';
+      }
+
+      function getTierClass(tier) {
+        if (!tier) return 'tier-Bronze';
+        const t = tier.toLowerCase();
+        if (t === 'platinum') return 'tier-Platinum';
+        if (t === 'gold') return 'tier-Gold';
+        return 'tier-Bronze';
+      }
+
+      function getTierLabel(tier) {
+        if (!tier) return 'Bronze';
+        return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase();
+      }
+
+      function whatsappUrl(phone) {
+        if (!phone) return '#';
+        const cleaned = phone.replace(/\s/g, '').replace(/^0/, '256');
+        return `https://wa.me/${cleaned}`;
+      }
+
+      // ─── Routing (clean URLs with History API) ──────────────────────
+      function navigateTo(url, replace = false) {
+        if (replace) {
+          window.history.replaceState(null, '', url);
+        } else {
+          window.history.pushState(null, '', url);
+        }
+        handleRoute(); // call the route handler to update view
+      }
+
+      function getCurrentPath() {
+        return window.location.pathname + window.location.search;
+      }
+
+      // ─── View Management ──────────────────────────────────────────
+      function showView(view) {
+        [discoveryView, brokerView, authView, dashboardView].forEach(v => {
+          v.classList.remove('view-visible');
+          v.classList.add('view-hidden');
+        });
+        view.classList.remove('view-hidden');
+        view.classList.add('view-visible');
+      }
+
+      // ─── Auth Mode ──────────────────────────────────────────────────
+      function setAuthMode(signUpModeActive) {
+        state.isSignUpMode = signUpModeActive;
+        if (signUpModeActive) {
+          toggleSignUp.classList.add('active');
+          toggleSignIn.classList.remove('active');
+          signUpFields.classList.remove('hidden');
+          formTitle.innerText = "Create Hub Space";
+          submitAuthBtn.innerText = "Register Business Hub";
+        } else {
+          toggleSignIn.classList.add('active');
+          toggleSignUp.classList.remove('active');
+          signUpFields.classList.add('hidden');
+          formTitle.innerText = "Welcome Back";
+          submitAuthBtn.innerText = "Access Dashboard";
+        }
+      }
+
+      // ─── Render property card ──────────────────────────────────────
+      function createPropertyCard(property, broker, showBrokerLink = true) {
+        const article = document.createElement('article');
+        article.className =
+          'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
+
+        const imageUrl = property.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        const tierLabel = getTierLabel(broker?.tier);
+        const tierClass = getTierClass(broker?.tier);
+
+        article.innerHTML = `
+          <div class="relative aspect-[4/3] bg-slate-200 overflow-hidden">
+            <img src="${imageUrl}" alt="${property.title || 'Property'}"
+                 class="w-full h-full object-cover" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center'"/>
+            <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md ${tierClass}">
+              ${tierLabel}
+            </span>
+            <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
+              ${property.type || 'Property'}
+            </span>
+          </div>
+          <div class="p-4 flex flex-col flex-1">
+            <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property.title || 'Untitled'}</h3>
+            <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property.price)}</p>
+            <p class="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
+              <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
+              <span class="line-clamp-1">${property.address || 'Location not specified'}</span>
+            </p>
+            <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+              ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
+                <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
+              </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
+              <a href="${whatsappUrl(broker?.phone)}" target="_blank"
+                 class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
+                <i class="fab fa-whatsapp text-sm"></i> Chat
+              </a>
+            </div>
+          </div>
+        `;
+
+        const nameLink = article.querySelector('.broker-name-link');
+        if (nameLink) {
+          nameLink.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const brokerId = nameLink.dataset.brokerId;
+            if (brokerId) navigateToBroker(brokerId);
+          });
+        }
+        return article;
+      }
+
+      // ─── Render listings ──────────────────────────────────────────
+      function renderListings(properties) {
+        listingsGrid.innerHTML = '';
+        if (!properties || properties.length === 0) {
+          emptyState.classList.remove('hidden');
+          propertyCount.textContent = '0 listings';
+          return;
+        }
+        emptyState.classList.add('hidden');
+        propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
+        properties.forEach(prop => {
+          const card = createPropertyCard(prop, prop.broker, true);
+          listingsGrid.appendChild(card);
+        });
+      }
+
+      // ─── Fetch properties ─────────────────────────────────────────
+      async function fetchProperties() {
+        state.isLoading = true;
+        loadingSkeleton.style.display = 'grid';
+        listingsGrid.innerHTML = '';
+        emptyState.classList.add('hidden');
+
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .select(`
+              *,
+              broker:profiles (
+                id, business_name, tier, phone, bio
+              )
+            `)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          const tierRank = { platinum: 0, gold: 1, bronze: 2 };
+          const sorted = (data || []).sort((a, b) => {
+            const tierA = a.broker?.tier?.toLowerCase() || 'bronze';
+            const tierB = b.broker?.tier?.toLowerCase() || 'bronze';
+            const rankA = tierRank[tierA] ?? 2;
+            const rankB = tierRank[tierB] ?? 2;
+            if (rankA !== rankB) return rankA - rankB;
+            return new Date(b.created_at) - new Date(a.created_at);
+          });
+
+          state.allProperties = sorted;
+          state.filteredProperties = [...sorted];
+          applyFiltersAndSearch();
+        } catch (err) {
+          console.error('❌ Error fetching properties:', err);
+          listingsGrid.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500">
+              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
+              <p>Failed to load properties. Check your Supabase connection.</p>
+              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+            </div>
+          `;
+        } finally {
+          state.isLoading = false;
+          loadingSkeleton.style.display = 'none';
+        }
+      }
+
+      // ─── Filter & Search ──────────────────────────────────────────
+      function applyFiltersAndSearch() {
+        const filter = state.currentFilter;
+        const query = state.searchQuery.trim().toLowerCase();
+        let result = [...state.allProperties];
+
+        const filterMap = { 'all': 'all', 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
+        const mappedFilter = filterMap[filter] || filter;
+        if (mappedFilter !== 'all') {
+          result = result.filter(p => (p.type || '').toLowerCase() === mappedFilter.toLowerCase());
+        }
+
+        if (query) {
+          result = result.filter(p => {
+            const address = (p.address || '').toLowerCase();
+            const title = (p.title || '').toLowerCase();
+            return address.includes(query) || title.includes(query);
+          });
+        }
+
+        state.filteredProperties = result;
+        renderListings(result);
+      }
+
+      // ─── Navigation functions ──────────────────────────────────────
+      async function navigateToBroker(brokerId) {
+        if (!brokerId) return;
+        state.currentBrokerId = brokerId;
+        showView(brokerView);
+        navigateTo(`/broker/${brokerId}`);
+        await loadBrokerProfile(brokerId);
+      }
+
+      async function loadBrokerProfile(brokerId) {
+        brokerListingsGrid.innerHTML = `
+          <div class="col-span-full flex justify-center py-12">
+            <div class="text-slate-400 flex items-center gap-3">
+              <i class="fas fa-spinner fa-spin text-xl"></i> Loading broker profile…
+            </div>
+          </div>
+        `;
+        brokerEmptyState.classList.add('hidden');
+
+        try {
+          const { data: broker, error: brokerError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', brokerId)
+            .single();
+
+          if (brokerError) throw brokerError;
+          if (!broker) {
+            brokerListingsGrid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Broker not found.</div>`;
+            return;
+          }
+
+          brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
+          const tierLabel = getTierLabel(broker.tier);
+          const tierClass = getTierClass(broker.tier);
+          brokerTierBadge.textContent = tierLabel;
+          brokerTierBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${tierClass}`;
+
+          const phone = broker.phone || '';
+          brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
+          brokerWhatsAppLink.href = whatsappUrl(phone);
+          brokerWhatsAppLink.style.display = phone ? 'inline-flex' : 'none';
+          brokerBio.innerHTML = `<i class="fas fa-store mr-1.5 text-slate-400"></i> <span>${broker.bio || 'Professional real estate broker.'}</span>`;
+
+          const { data: props, error: propsError } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('broker_id', brokerId)
+            .order('created_at', { ascending: false });
+
+          if (propsError) throw propsError;
+
+          if (!props || props.length === 0) {
+            brokerListingsGrid.innerHTML = '';
+            brokerEmptyState.classList.remove('hidden');
+            return;
+          }
+
+          brokerEmptyState.classList.add('hidden');
+          brokerListingsGrid.innerHTML = '';
+          props.forEach(prop => {
+            const card = createPropertyCard(prop, broker, false);
+            brokerListingsGrid.appendChild(card);
+          });
+        } catch (err) {
+          console.error('❌ Error loading broker profile:', err);
+          brokerListingsGrid.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500">
+              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
+              <p>Could not load broker profile.</p>
+              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function navigateToAuth() {
+        showView(authView);
+        navigateTo('/auth');
+        setAuthMode(false);
+        authForm.reset();
+      }
+
+      function goToDiscovery() {
+        showView(discoveryView);
+        state.currentBrokerId = null;
+        navigateTo('/');
+        applyFiltersAndSearch();
+      }
+
+      // ─── Dashboard ──────────────────────────────────────────────────
+      async function loadMyProperties() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .select('*')
+            .eq('broker_id', state.currentUser.id)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          state.myProperties = data || [];
+          renderMyProperties();
+        } catch (err) {
+          console.error('Error loading my properties:', err);
+        }
+      }
+
+      function renderMyProperties() {
+        myPropertiesList.innerHTML = '';
+        if (state.myProperties.length === 0) {
+          myPropertiesEmpty.classList.remove('hidden');
+          return;
+        }
+        myPropertiesEmpty.classList.add('hidden');
+        state.myProperties.forEach(prop => {
+          const card = createPropertyCard(prop, state.currentUser, false);
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
+          deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
+          deleteBtn.addEventListener('click', async () => {
+            if (confirm('Delete this property?')) {
+              await deleteProperty(prop.id);
+            }
+          });
+          card.querySelector('.p-4').appendChild(deleteBtn);
+          myPropertiesList.appendChild(card);
+        });
+      }
+
+      async function deleteProperty(propId) {
+        try {
+          const { error } = await supabase
+            .from('properties')
+            .delete()
+            .eq('id', propId);
+          if (error) throw error;
+          state.myProperties = state.myProperties.filter(p => p.id !== propId);
+          renderMyProperties();
+          fetchProperties();
+        } catch (err) {
+          alert('Delete failed: ' + err.message);
+        }
+      }
+
+      // ─── Add Property ──────────────────────────────────────────────
+      addPropertyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in first.');
+          return;
+        }
+
+        const title = propTitle.value.trim();
+        const price = parseFloat(propPrice.value);
+        const type = propType.value;
+        const address = propAddress.value.trim();
+        const imageFile = propImage.files[0];
+
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+
+        uploadStatus.textContent = 'Uploading image...';
+        uploadStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        let imageUrl = null;
+
+        if (imageFile) {
+          const fileExt = imageFile.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          const filePath = `${state.currentUser.id}/${fileName}`;
+
+          const { data: uploadData, error: uploadError } = await supabase
+            .storage
+            .from('property-media')
+            .upload(filePath, imageFile);
+
+          if (uploadError) {
+            uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
+            uploadStatus.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+
+          const { data: urlData } = supabase
+            .storage
+            .from('property-media')
+            .getPublicUrl(filePath);
+
+          imageUrl = urlData.publicUrl;
+        }
+
+        try {
+          const { data, error } = await supabase
+            .from('properties')
+            .insert({
+              title,
+              price,
+              type,
+              address,
+              image_url: imageUrl,
+              broker_id: state.currentUser.id,
+            })
+            .select();
+
+          if (error) throw error;
+
+          uploadStatus.textContent = '✅ Property added successfully!';
+          uploadStatus.className = 'mt-3 text-sm text-emerald-600';
+          addPropertyForm.reset();
+          propImage.value = '';
+          loadMyProperties();
+          fetchProperties();
+        } catch (err) {
+          uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
+          uploadStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Auth Handlers ─────────────────────────────────────────────
+      async function handleAuthSubmit(e) {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (state.isSignUpMode) {
+          const businessName = bizNameInput.value.trim();
+          const accountType = accTypeSelect.value;
+          const phone = phoneInput.value.trim();
+
+          if (!businessName) {
+            alert('Please enter your Business / Brand Name.');
+            return;
+          }
+
+          try {
+            const { data, error } = await supabase.auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  business_name: businessName,
+                  account_type: accountType,
+                  phone: phone
+                }
+              }
+            });
+
+            if (error) throw error;
+            alert('✅ Account created! Please check your email to verify your account.');
+            setAuthMode(false);
+            authForm.reset();
+          } catch (err) {
+            alert('❌ Registration failed: ' + err.message);
+          }
+        } else {
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email,
+              password
+            });
+
+            if (error) throw error;
+            state.currentUser = data.user;
+            alert('✅ Signed in successfully!');
+            showView(dashboardView);
+            navigateTo('/dashboard');
+            portalBtnLabel.textContent = 'Dashboard';
+            await loadMyProperties();
+          } catch (err) {
+            alert('❌ Sign in failed: ' + err.message);
+          }
+        }
+      }
+
+      // ─── Logout ──────────────────────────────────────────────────────
+      async function handleLogout() {
+        await supabase.auth.signOut();
+        state.currentUser = null;
+        portalBtnLabel.textContent = 'Broker Portal';
+        goToDiscovery();
+      }
+
+      // ─── Route Handler (based on current URL path) ──────────────
+      async function handleRoute() {
+        const path = getCurrentPath();
+
+        if (path.startsWith('/broker/')) {
+          const brokerId = path.split('/')[2];
+          if (brokerId && brokerId !== state.currentBrokerId) {
+            // If the view is not already showing, navigate
+            if (brokerView.classList.contains('view-hidden')) {
+              showView(brokerView);
+              await loadBrokerProfile(brokerId);
+            }
+          }
+        } else if (path === '/auth') {
+          if (authView.classList.contains('view-hidden')) {
+            showView(authView);
+            setAuthMode(false);
+            authForm.reset();
+          }
+        } else if (path === '/dashboard') {
+          if (state.currentUser) {
+            if (dashboardView.classList.contains('view-hidden')) {
+              showView(dashboardView);
+              await loadMyProperties();
+            }
+          } else {
+            // Not logged in – redirect to auth
+            navigateTo('/auth', true);
+            handleRoute();
+          }
+        } else if (path === '/') {
+          if (!discoveryView.classList.contains('view-visible')) {
+            showView(discoveryView);
+            applyFiltersAndSearch();
+          }
+        } else {
+          // unknown path – fallback to home
+          navigateTo('/', true);
+          handleRoute();
+        }
+      }
+
+      // ─── Event Binding ─────────────────────────────────────────────
+      // Search
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        applyFiltersAndSearch();
+      });
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        applyFiltersAndSearch();
+        searchInput.focus();
+      });
+
+      // Filters
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.currentFilter = pill.dataset.filter;
+          applyFiltersAndSearch();
+        });
+      });
+
+      // Back to discovery
+      backToDiscovery.addEventListener('click', goToDiscovery);
+      backToSearchBtn.addEventListener('click', goToDiscovery);
+      logoutBtn.addEventListener('click', handleLogout);
+
+      // Broker Portal button
+      brokerPortalBtn.addEventListener('click', () => {
+        if (state.currentUser) {
+          showView(dashboardView);
+          navigateTo('/dashboard');
+          loadMyProperties();
+        } else {
+          navigateToAuth();
+        }
+      });
+
+      // Auth toggles
+      toggleSignIn.addEventListener('click', () => setAuthMode(false));
+      toggleSignUp.addEventListener('click', () => setAuthMode(true));
+
+      authForm.addEventListener('submit', handleAuthSubmit);
+
+      // History API: popstate (back/forward)
+      window.addEventListener('popstate', handleRoute);
+
+      // ─── Init ────────────────────────────────────────────────────────
+      async function init() {
+        // Check current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          state.currentUser = user;
+          portalBtnLabel.textContent = 'Dashboard';
+        }
+
+        // Handle initial route
+        await handleRoute();
+
+        // Fetch properties for discovery (always)
+        await fetchProperties();
+      }
+
+      init();
+
+      // Expose state for debugging
+      window.__state = state;
+
+      // ============================================================
+      // Optional: Enable Prerender.io for full SEO
+      // Uncomment the following lines if you use Prerender.io
+      // (Replace 'your-prerender-token' with your actual token)
+      // ============================================================
+      /*
+      (function() {
+        var protocol = window.location.protocol;
+        var host = window.location.host;
+        var script = document.createElement('script');
+        script.src = protocol + '//cdn.prerender.io/prerender.js';
+        script.setAttribute('data-prerender-token', 'your-prerender-token');
+        document.head.appendChild(script);
+      })();
+      */
+
+    })();
+    </script>
+
+</body>
+</html>

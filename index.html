@@ -312,10 +312,14 @@
     function startApp() {
       'use strict';
 
-      // ─── ⚠️ SET YOUR ACTUAL FOREIGN KEY COLUMN NAME HERE ──────────
-      // Try 'owner_id' first – if that fails, change to 'user_id', 'profile_id', or 'created_by'
-      const FOREIGN_KEY = 'owner_id';
+      // ─── 🔧 CONFIGURE YOUR COLUMN NAMES HERE ──────────────────────
+      // The foreign key column in 'properties' that references 'profiles.id'
+      const FOREIGN_KEY = 'owner_id';    // ← change to the actual column name (e.g., 'user_id', 'profile_id', 'created_by')
+      
+      // The column name for the property image in 'properties'
+      const IMAGE_COLUMN = 'image';      // ← change to the actual column name (e.g., 'image_url', 'photo', 'img')
 
+      // ─── Supabase Client ───────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // ─── State ──────────────────────────────────────────────────────
@@ -329,9 +333,10 @@
         currentUser: null,
         isSignUpMode: false,
         myProperties: [],
+        profilesMap: {}, // cache broker profiles by ID
       };
 
-      // ─── DOM refs (shortened for brevity) ──────────────────────────
+      // ─── DOM refs (shortened) ──────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -383,7 +388,7 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // ─── Helpers (same as before) ──────────────────────────────────
+      // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
       function getTierClass(tier) {
         if (!tier) return 'tier-Bronze';
@@ -438,7 +443,8 @@
         article.className =
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
 
-        const imageUrl = property.image_url || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        // Use the configurable image column
+        const imageUrl = property[IMAGE_COLUMN] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
         const tierLabel = getTierLabel(broker?.tier);
         const tierClass = getTierClass(broker?.tier);
 
@@ -494,33 +500,49 @@
         emptyState.classList.add('hidden');
         propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
-          const card = createPropertyCard(prop, prop.broker, true);
+          // Find broker from cache
+          const broker = prop.broker || state.profilesMap[prop[FOREIGN_KEY]] || null;
+          const card = createPropertyCard(prop, broker, true);
           listingsGrid.appendChild(card);
         });
       }
 
-      // ─── Fetch properties (using FOREIGN_KEY) ─────────────────────
-      async function fetchProperties() {
+      // ─── Fetch profiles and properties separately ──────────────────
+      async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
         listingsGrid.innerHTML = '';
         emptyState.classList.add('hidden');
 
         try {
-          const { data, error } = await supabaseClient
+          // 1. Fetch all profiles
+          const { data: profiles, error: profilesError } = await supabaseClient
+            .from('profiles')
+            .select('*');
+
+          if (profilesError) throw profilesError;
+          // Build map
+          const profilesMap = {};
+          (profiles || []).forEach(p => { profilesMap[p.id] = p; });
+          state.profilesMap = profilesMap;
+
+          // 2. Fetch all properties
+          const { data: properties, error: propsError } = await supabaseClient
             .from('properties')
-            .select(`*, profiles!${FOREIGN_KEY}(*)`)
+            .select('*')
             .order('created_at', { ascending: false });
 
-          if (error) throw error;
+          if (propsError) throw propsError;
 
-          const transformed = (data || []).map(item => ({
-            ...item,
-            broker: item.profiles
+          // 3. Attach broker to each property using the FOREIGN_KEY
+          const enriched = (properties || []).map(prop => ({
+            ...prop,
+            broker: profilesMap[prop[FOREIGN_KEY]] || null
           }));
 
+          // 4. Sort by tier
           const tierRank = { platinum: 0, gold: 1, bronze: 2 };
-          const sorted = transformed.sort((a, b) => {
+          const sorted = enriched.sort((a, b) => {
             const tierA = a.broker?.tier?.toLowerCase() || 'bronze';
             const tierB = b.broker?.tier?.toLowerCase() || 'bronze';
             const rankA = tierRank[tierA] ?? 2;
@@ -532,12 +554,14 @@
           state.allProperties = sorted;
           state.filteredProperties = [...sorted];
           applyFiltersAndSearch();
+
         } catch (err) {
-          console.error('❌ Error fetching properties:', err);
+          console.error('❌ Error fetching data:', err);
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
-              <p>Failed to load properties. Check your foreign key column name (currently '${FOREIGN_KEY}').</p>
+              <p>Failed to load data. Check your column names:</p>
+              <p class="text-xs text-slate-400 mt-1">FOREIGN_KEY = '${FOREIGN_KEY}' &nbsp;|&nbsp; IMAGE_COLUMN = '${IMAGE_COLUMN}'</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
             </div>
           `;
@@ -590,6 +614,7 @@
         brokerEmptyState.classList.add('hidden');
 
         try {
+          // Fetch broker details
           const { data: broker, error: brokerError } = await supabaseClient
             .from('profiles')
             .select('*')
@@ -614,6 +639,7 @@
           brokerWhatsAppLink.style.display = phone ? 'inline-flex' : 'none';
           brokerBio.innerHTML = `<i class="fas fa-store mr-1.5 text-slate-400"></i> <span>${broker.bio || 'Professional real estate broker.'}</span>`;
 
+          // Fetch properties for this broker
           const { data: props, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
@@ -691,7 +717,8 @@
         }
         myPropertiesEmpty.classList.add('hidden');
         state.myProperties.forEach(prop => {
-          const card = createPropertyCard(prop, state.currentUser, false);
+          const broker = state.currentUser;
+          const card = createPropertyCard(prop, broker, false);
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
           deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
@@ -714,7 +741,7 @@
           if (error) throw error;
           state.myProperties = state.myProperties.filter(p => p.id !== propId);
           renderMyProperties();
-          fetchProperties();
+          fetchAllData();
         } catch (err) {
           alert('Delete failed: ' + err.message);
         }
@@ -774,8 +801,9 @@
             price,
             type,
             address,
-            image_url: imageUrl,
           };
+          // Use the configurable image column
+          insertData[IMAGE_COLUMN] = imageUrl;
           insertData[FOREIGN_KEY] = state.currentUser.id;
 
           const { data, error } = await supabaseClient
@@ -790,7 +818,7 @@
           addPropertyForm.reset();
           propImage.value = '';
           loadMyProperties();
-          fetchProperties();
+          fetchAllData();
         } catch (err) {
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
           uploadStatus.className = 'mt-3 text-sm text-red-600';
@@ -986,7 +1014,7 @@
         }
 
         await handleRoute();
-        await fetchProperties();
+        await fetchAllData();
       }
 
       init();

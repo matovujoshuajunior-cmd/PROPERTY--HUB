@@ -313,17 +313,14 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 COLUMN MAPPING – CONFIRMED WITH YOUR SCHEMA ────────────
-      // Your columns: id, owner_id, title, description, property_type,
-      // price_amount, price_period, address, amenities, media_urls,
-      // is_available, created_at, image_urls
+      // ─── 🔧 COLUMN MAPPING – MATCHES YOUR SCHEMA ──────────────────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',      // foreign key to profiles.id
-        IMAGE: 'image_url',          // image column – you have both media_urls and image_urls
-        TITLE: 'title',               // property title
-        PRICE: 'price_amount',        // ✅ your price column is 'price_amount'
-        TYPE: 'property_type',        // type column (Rentals, Properties, Lodges)
-        ADDRESS: 'address',           // address column
+        IMAGE: 'image_urls',          // your image column
+        TITLE: 'title',
+        PRICE: 'price_amount',        // ✅ your price column
+        TYPE: 'property_type',
+        ADDRESS: 'address',
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);
@@ -345,7 +342,7 @@
         profilesMap: {},
       };
 
-      // ─── DOM refs (shortened) ──────────────────────────────────────
+      // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -795,10 +792,10 @@
         }
 
         try {
-          // Build insert object using the configured column names
+          // Build insert object
           const insertData = {};
           insertData[COLUMNS.TITLE] = title;
-          insertData[COLUMNS.PRICE] = price;                // ✅ uses 'price_amount' from mapping
+          insertData[COLUMNS.PRICE] = price;                // price_amount
           insertData[COLUMNS.TYPE] = type;
           insertData[COLUMNS.ADDRESS] = address;
           insertData[COLUMNS.IMAGE] = imageUrl;
@@ -814,21 +811,15 @@
           if (error) {
             // Log the full error details
             console.error('❌ Supabase insert error:', error);
-            const errMsg = error.message || 'Unknown error';
+            // Try to extract a human-friendly message
+            let errMsg = error.message || 'Unknown error';
+            if (error.details) errMsg += '\nDetails: ' + error.details;
+            if (error.hint) errMsg += '\nHint: ' + error.hint;
+            
+            // Show available columns by attempting a HEAD request (or simply alert the error)
             uploadStatus.textContent = '❌ Failed to add property: ' + errMsg;
             uploadStatus.className = 'mt-3 text-sm text-red-600';
-            // Try to fetch one record to show available columns
-            try {
-              const { data: sample } = await supabaseClient.from('properties').select('*').limit(1);
-              if (sample && sample.length > 0) {
-                const available = Object.keys(sample[0]).join(', ');
-                alert(`Insert failed.\nError: ${errMsg}\n\nAvailable columns in your table:\n${available}`);
-              } else {
-                alert(`Insert failed.\nError: ${errMsg}\n\nYour table is empty. Check your column names in Supabase.`);
-              }
-            } catch (e2) {
-              alert(`Insert failed.\nError: ${errMsg}`);
-            }
+            alert('Insert failed.\n' + errMsg + '\n\nCheck the console for the full error.');
             return;
           }
 

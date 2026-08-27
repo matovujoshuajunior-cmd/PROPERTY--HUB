@@ -214,7 +214,11 @@
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="propTitle" required placeholder="e.g. Modern 3-Bedroom Villa" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="propPrice" required placeholder="e.g. 250000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white"><option value="Rentals">Rentals</option><option value="Properties">Properties</option><option value="Lodges">Lodges</option></select></div>
+              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
+                <option value="Rentals">Rentals</option>
+                <option value="Properties">Properties</option>
+                <option value="Lodges">Lodges</option>
+              </select></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Image</label><input type="file" id="propImage" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
               <div class="md:col-span-2"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-plus mr-2"></i> Add Property</button></div>
@@ -313,14 +317,26 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 COLUMN MAPPING – updated for array support ────────────
+      // ─── 🔧 CONFIGURATION ──────────────────────────────────────────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',
-        IMAGE: 'media_urls',          // this is a text[] (array) column
+        IMAGE: 'media_urls',          // text[] column
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
         ADDRESS: 'address',
+      };
+
+      // ─── 🔧 MAP form property-type values to database values ──────
+      // If your check constraint expects lowercase (e.g., 'rental'), change the mapping.
+      const TYPE_MAP = {
+        'Rentals': 'Rentals',
+        'Properties': 'Properties',
+        'Lodges': 'Lodges',
+        // Example if your DB expects lowercase:
+        // 'Rentals': 'rental',
+        // 'Properties': 'property',
+        // 'Lodges': 'lodge',
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);
@@ -397,7 +413,6 @@
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
 
-      // ─── Helper to get first image from media_urls array ───────────
       function getImageUrl(property) {
         const val = property[COLUMNS.IMAGE];
         if (!val) return 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
@@ -529,7 +544,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // 1. Profiles
           const { data: profiles, error: profilesError } = await supabaseClient
             .from('profiles')
             .select('*');
@@ -538,20 +552,17 @@
           (profiles || []).forEach(p => { profilesMap[p.id] = p; });
           state.profilesMap = profilesMap;
 
-          // 2. Properties
           const { data: properties, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false });
           if (propsError) throw propsError;
 
-          // 3. Enrich
           const enriched = (properties || []).map(prop => ({
             ...prop,
             broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null
           }));
 
-          // 4. Sort
           const tierRank = { platinum: 0, gold: 1, bronze: 2 };
           const sorted = enriched.sort((a, b) => {
             const tierA = a.broker?.tier?.toLowerCase() || 'bronze';
@@ -571,8 +582,7 @@
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
-              <p>Failed to load data. Check your column names:</p>
-              <p class="text-xs text-slate-400 mt-1">FOREIGN_KEY = '${COLUMNS.FOREIGN_KEY}'</p>
+              <p>Failed to load data. Check your column names.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
             </div>
           `;
@@ -763,7 +773,7 @@
 
         const title = propTitle.value.trim();
         const price = parseFloat(propPrice.value);
-        const type = propType.value;
+        const type = propType.value;                       // e.g., "Rentals"
         const address = propAddress.value.trim();
         const imageFile = propImage.files[0];
 
@@ -802,12 +812,15 @@
         }
 
         try {
+          // ─── Map the type using TYPE_MAP ──────────────────────────
+          const dbType = TYPE_MAP[type] || type;   // fallback to original if not mapped
+          console.log(`Mapping property type: "${type}" → "${dbType}"`);
+
           const insertData = {};
           insertData[COLUMNS.TITLE] = title;
           insertData[COLUMNS.PRICE] = price;
-          insertData[COLUMNS.TYPE] = type;
+          insertData[COLUMNS.TYPE] = dbType;                // mapped value
           insertData[COLUMNS.ADDRESS] = address;
-          // ✅ Store as a single‑element array (PostgreSQL text[])
           insertData[COLUMNS.IMAGE] = imageUrl ? [imageUrl] : null;
           insertData[COLUMNS.FOREIGN_KEY] = state.currentUser.id;
 
@@ -1020,7 +1033,6 @@
           }
         }
 
-        // Check existing session
         try {
           const { data: { user } } = await supabaseClient.auth.getUser();
           if (user) {

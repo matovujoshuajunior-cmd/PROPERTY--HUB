@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
+    /* ... same styles as before (kept compact) ... */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -313,14 +314,19 @@
       'use strict';
 
       // ─── 🔧 CONFIGURE YOUR COLUMN NAMES HERE ──────────────────────
-      // The foreign key column in 'properties' that references 'profiles.id'
-      const FOREIGN_KEY = 'owner_id';    // ← change to your actual column (e.g., 'user_id', 'profile_id', 'created_by')
-      
-      // The column name for the property image in 'properties'
-      const IMAGE_COLUMN = 'image_url';  // ← change to your actual column (e.g., 'image', 'image_url', 'photo', 'media_urls')
+      // Run this SQL in Supabase SQL Editor to see your columns:
+      // SELECT column_name FROM information_schema.columns WHERE table_name = 'properties';
+      // Then update the values below with the correct names.
+      const COLUMNS = {
+        FOREIGN_KEY: 'owner_id',      // e.g., 'owner_id', 'user_id', 'profile_id'
+        IMAGE: 'media_urls',          // e.g., 'image_url', 'image', 'photo', 'media_urls'
+        TITLE: 'title',               // e.g., 'title', 'name', 'property_name'
+        PRICE: 'price',               // e.g., 'price', 'listing_price', 'amount'  <-- FIX THIS
+        TYPE: 'type',                 // e.g., 'type', 'category', 'property_type'
+        ADDRESS: 'address',           // e.g., 'address', 'location', 'property_address'
+      };
 
-      console.log('🔧 Using FOREIGN_KEY:', FOREIGN_KEY);
-      console.log('🔧 Using IMAGE_COLUMN:', IMAGE_COLUMN);
+      console.log('🔧 Using column mapping:', COLUMNS);
 
       // ─── Supabase Client ───────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -446,29 +452,28 @@
         article.className =
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
 
-        // Use the configurable image column
-        const imageUrl = property[IMAGE_COLUMN] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        const imageUrl = property[COLUMNS.IMAGE] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
         const tierLabel = getTierLabel(broker?.tier);
         const tierClass = getTierClass(broker?.tier);
 
         article.innerHTML = `
           <div class="relative aspect-[4/3] bg-slate-200 overflow-hidden">
-            <img src="${imageUrl}" alt="${property.title || 'Property'}" 
+            <img src="${imageUrl}" alt="${property[COLUMNS.TITLE] || 'Property'}" 
                  class="w-full h-full object-cover" loading="lazy"
                  onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center'"/>
             <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md ${tierClass}">
               ${tierLabel}
             </span>
             <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
-              ${property.type || 'Property'}
+              ${property[COLUMNS.TYPE] || 'Property'}
             </span>
           </div>
           <div class="p-4 flex flex-col flex-1">
-            <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property.title || 'Untitled'}</h3>
-            <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property.price)}</p>
+            <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
+            <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property[COLUMNS.PRICE])}</p>
             <p class="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
               <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
-              <span class="line-clamp-1">${property.address || 'Location not specified'}</span>
+              <span class="line-clamp-1">${property[COLUMNS.ADDRESS] || 'Location not specified'}</span>
             </p>
             <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
@@ -503,13 +508,13 @@
         emptyState.classList.add('hidden');
         propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
-          const broker = prop.broker || state.profilesMap[prop[FOREIGN_KEY]] || null;
+          const broker = prop.broker || state.profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null;
           const card = createPropertyCard(prop, broker, true);
           listingsGrid.appendChild(card);
         });
       }
 
-      // ─── Fetch all data ──────────────────────────────────────────
+      // ─── Fetch all data ────────────────────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -517,7 +522,7 @@
         emptyState.classList.add('hidden');
 
         try {
-          // 1. Fetch profiles
+          // 1. Profiles
           const { data: profiles, error: profilesError } = await supabaseClient
             .from('profiles')
             .select('*');
@@ -526,20 +531,20 @@
           (profiles || []).forEach(p => { profilesMap[p.id] = p; });
           state.profilesMap = profilesMap;
 
-          // 2. Fetch properties
+          // 2. Properties
           const { data: properties, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
             .order('created_at', { ascending: false });
           if (propsError) throw propsError;
 
-          // 3. Attach broker
+          // 3. Enrich
           const enriched = (properties || []).map(prop => ({
             ...prop,
-            broker: profilesMap[prop[FOREIGN_KEY]] || null
+            broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null
           }));
 
-          // 4. Sort by tier
+          // 4. Sort
           const tierRank = { platinum: 0, gold: 1, bronze: 2 };
           const sorted = enriched.sort((a, b) => {
             const tierA = a.broker?.tier?.toLowerCase() || 'bronze';
@@ -553,13 +558,14 @@
           state.allProperties = sorted;
           state.filteredProperties = [...sorted];
           applyFiltersAndSearch();
+
         } catch (err) {
           console.error('❌ Error fetching data:', err);
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
               <p>Failed to load data. Check your column names:</p>
-              <p class="text-xs text-slate-400 mt-1">FOREIGN_KEY = '${FOREIGN_KEY}' &nbsp;|&nbsp; IMAGE_COLUMN = '${IMAGE_COLUMN}'</p>
+              <p class="text-xs text-slate-400 mt-1">FOREIGN_KEY = '${COLUMNS.FOREIGN_KEY}'</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
             </div>
           `;
@@ -577,15 +583,17 @@
         const filterMap = { 'all': 'all', 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
         const mappedFilter = filterMap[filter] || filter;
         if (mappedFilter !== 'all') {
-          result = result.filter(p => (p.type || '').toLowerCase() === mappedFilter.toLowerCase());
+          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === mappedFilter.toLowerCase());
         }
+
         if (query) {
           result = result.filter(p => {
-            const address = (p.address || '').toLowerCase();
-            const title = (p.title || '').toLowerCase();
+            const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
+            const title = (p[COLUMNS.TITLE] || '').toLowerCase();
             return address.includes(query) || title.includes(query);
           });
         }
+
         state.filteredProperties = result;
         renderListings(result);
       }
@@ -636,7 +644,7 @@
           const { data: props, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
-            .eq(FOREIGN_KEY, brokerId)
+            .eq(COLUMNS.FOREIGN_KEY, brokerId)
             .order('created_at', { ascending: false });
           if (propsError) throw propsError;
 
@@ -685,7 +693,7 @@
           const { data, error } = await supabaseClient
             .from('properties')
             .select('*')
-            .eq(FOREIGN_KEY, state.currentUser.id)
+            .eq(COLUMNS.FOREIGN_KEY, state.currentUser.id)
             .order('created_at', { ascending: false });
           if (error) throw error;
           state.myProperties = data || [];
@@ -694,7 +702,7 @@
           console.error('Error loading my properties:', err);
           myPropertiesList.innerHTML = `
             <div class="col-span-full text-center py-8 text-slate-500">
-              Could not load your properties. Check RLS policies and column '${FOREIGN_KEY}'.
+              Could not load your properties. Check RLS policies and column '${COLUMNS.FOREIGN_KEY}'.
             </div>
           `;
         }
@@ -787,17 +795,16 @@
         }
 
         try {
-          const insertData = {
-            title,
-            price,
-            type,
-            address,
-          };
-          // Use the configurable image column
-          insertData[IMAGE_COLUMN] = imageUrl;
-          insertData[FOREIGN_KEY] = state.currentUser.id;
+          // Build insert object using the configured column names
+          const insertData = {};
+          insertData[COLUMNS.TITLE] = title;
+          insertData[COLUMNS.PRICE] = price;
+          insertData[COLUMNS.TYPE] = type;
+          insertData[COLUMNS.ADDRESS] = address;
+          insertData[COLUMNS.IMAGE] = imageUrl;
+          insertData[COLUMNS.FOREIGN_KEY] = state.currentUser.id;
 
-          console.log('📝 Inserting property with data:', insertData);
+          console.log('📦 Inserting property with data:', insertData);
 
           const { data, error } = await supabaseClient
             .from('properties')
@@ -813,6 +820,25 @@
           loadMyProperties();
           fetchAllData();
         } catch (err) {
+          // --- DIAGNOSTIC: attempt to fetch available columns ---
+          try {
+            const { data: colData } = await supabaseClient
+              .from('properties')
+              .select('*')
+              .limit(1);
+            if (colData && colData.length > 0) {
+              const availableCols = Object.keys(colData[0]);
+              console.error('❌ Available columns in properties:', availableCols);
+              alert(`❌ Failed to add property.\n\nThe column '${err.message.match(/'([^']+)'/)[1] || 'unknown'}' does not exist.\n\nAvailable columns:\n${availableCols.join('\n')}\n\nUpdate the COLUMNS object in the code.`);
+            } else {
+              // Table might be empty
+              console.error('❌ Table is empty, cannot detect columns. Please check your table schema.');
+              alert('❌ Failed to add property: ' + err.message + '\n\nCheck your column names in the code.');
+            }
+          } catch (e2) {
+            console.error('Could not fetch schema:', e2);
+            alert('❌ Failed to add property: ' + err.message + '\n\nPlease check your column names in the COLUMNS object.');
+          }
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
           uploadStatus.className = 'mt-3 text-sm text-red-600';
         }
@@ -846,6 +872,7 @@
                 }
               }
             });
+
             if (error) throw error;
             alert('✅ Account created! Please check your email to verify your account.');
             setAuthMode(false);
@@ -859,6 +886,7 @@
               email,
               password
             });
+
             if (error) throw error;
             state.currentUser = data.user;
             alert('✅ Signed in successfully!');
@@ -883,6 +911,7 @@
       // ─── Route Handler ──────────────────────────────────────────────
       async function handleRoute() {
         const path = getCurrentPath();
+
         if (path.startsWith('/broker/')) {
           const brokerId = path.split('/')[2];
           if (brokerId && brokerId !== state.currentBrokerId) {

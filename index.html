@@ -83,6 +83,36 @@
       .clear-btn-icon { display: inline; }
     }
     .clear-btn-icon { display: none; }
+
+    /* modal backdrop */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+    .modal-backdrop.hidden { display: none; }
+    .modal-content {
+      background: white; border-radius: 2rem; max-width: 600px; width: 100%;
+      max-height: 90vh; overflow-y: auto; padding: 2rem;
+    }
+    .image-thumb {
+      position: relative; display: inline-block; margin: 0.25rem;
+    }
+    .image-thumb img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .image-thumb .remove-img {
+      position: absolute; top: -6px; right: -6px;
+      background: #ef4444; color: white; border-radius: 50%;
+      width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; cursor: pointer; border: none;
+    }
+    .image-thumb .remove-img:hover { background: #dc2626; }
+    .favorite-btn {
+      cursor: pointer; transition: transform 0.15s; background: none; border: none;
+      font-size: 1.5rem; color: #94a3b8;
+    }
+    .favorite-btn.active { color: #ef4444; }
+    .favorite-btn:hover { transform: scale(1.2); }
   </style>
 </head>
 <body>
@@ -91,6 +121,47 @@
   <div id="loadingOverlay">
     <div class="loader"></div>
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
+  </div>
+
+  <!-- ===== EDIT PROPERTY MODAL ===== -->
+  <div id="editModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">✏️ Edit Property</h2>
+        <button id="closeEditModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <form id="editPropertyForm" class="space-y-4">
+        <input type="hidden" id="editPropertyId" />
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label>
+          <input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label>
+          <input type="number" id="editPrice" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label>
+          <select id="editType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
+            <option value="Rentals">Rentals</option>
+            <option value="Properties">Properties</option>
+            <option value="Lodges">Lodges</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label>
+          <input type="text" id="editAddress" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label>
+          <div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div>
+          <input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-save mr-2"></i> Update Property
+        </button>
+      </form>
+    </div>
   </div>
 
   <div id="app" class="min-h-screen">
@@ -209,6 +280,7 @@
             <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
+          <!-- Add Property Form -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -220,11 +292,12 @@
                 <option value="Lodges">Lodges</option>
               </select></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-              <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Image</label><input type="file" id="propImage" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
+              <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><input type="file" id="propImage" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
               <div class="md:col-span-2"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-plus mr-2"></i> Add Property</button></div>
             </form>
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
+          <!-- My Properties List -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
         </div>
@@ -320,15 +393,13 @@
       // ─── 🔧 CONFIGURATION ──────────────────────────────────────────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',
-        IMAGE: 'media_urls',          // text[] column
+        IMAGE: 'media_urls',          // text[] array
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
         ADDRESS: 'address',
       };
 
-      // ─── 🔧 MAP form property-type values to database values ──────
-      // The check constraint expects exactly: 'rental', 'property', 'lodge'
       const TYPE_MAP = {
         'Rentals': 'rental',
         'Properties': 'property',
@@ -352,9 +423,10 @@
         isSignUpMode: false,
         myProperties: [],
         profilesMap: {},
+        favorites: new Set(), // store favorite property IDs
       };
 
-      // ─── DOM refs (shortened for brevity) ──────────────────────────
+      // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -406,15 +478,32 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
+      // Edit modal elements
+      const editModal = $('#editModal');
+      const closeEditModal = $('#closeEditModal');
+      const editPropertyForm = $('#editPropertyForm');
+      const editPropertyId = $('#editPropertyId');
+      const editTitle = $('#editTitle');
+      const editPrice = $('#editPrice');
+      const editType = $('#editType');
+      const editAddress = $('#editAddress');
+      const editImageInput = $('#editImageInput');
+      const editImagePreviews = $('#editImagePreviews');
+
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
 
-      function getImageUrl(property) {
+      function getImageArray(property) {
         const val = property[COLUMNS.IMAGE];
-        if (!val) return 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
-        if (Array.isArray(val) && val.length > 0) return val[0];
-        if (typeof val === 'string') return val;
-        return 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') return [val];
+        return [];
+      }
+
+      function getImageUrl(property) {
+        const arr = getImageArray(property);
+        return arr.length > 0 ? arr[0] : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
       }
 
       function getTierClass(tier) {
@@ -464,8 +553,52 @@
         }
       }
 
-      // ─── Render property card ──────────────────────────────────────
-      function createPropertyCard(property, broker, showBrokerLink = true) {
+      // ─── Favorites ──────────────────────────────────────────────────
+      async function fetchFavorites() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('favorites')
+            .select('property_id')
+            .eq('user_id', state.currentUser.id);
+          if (error) throw error;
+          state.favorites = new Set(data.map(f => f.property_id));
+        } catch (err) {
+          console.error('Error fetching favorites:', err);
+        }
+      }
+
+      async function toggleFavorite(propertyId) {
+        if (!state.currentUser) {
+          alert('Please sign in to save favorites.');
+          return;
+        }
+        const isFav = state.favorites.has(propertyId);
+        try {
+          if (isFav) {
+            const { error } = await supabaseClient
+              .from('favorites')
+              .delete()
+              .eq('user_id', state.currentUser.id)
+              .eq('property_id', propertyId);
+            if (error) throw error;
+            state.favorites.delete(propertyId);
+          } else {
+            const { error } = await supabaseClient
+              .from('favorites')
+              .insert({ user_id: state.currentUser.id, property_id: propertyId });
+            if (error) throw error;
+            state.favorites.add(propertyId);
+          }
+          // re-render the grid to update heart icons (optimistic update)
+          renderListings(state.filteredProperties);
+        } catch (err) {
+          alert('Error updating favorite: ' + err.message);
+        }
+      }
+
+      // ─── Render property card (with heart and edit button) ──────────
+      function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
@@ -473,6 +606,12 @@
         const imageUrl = getImageUrl(property);
         const tierLabel = getTierLabel(broker?.tier);
         const tierClass = getTierClass(broker?.tier);
+        const isFav = state.favorites.has(property.id);
+
+        let actionsHtml = '';
+        if (showEdit) {
+          actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
+        }
 
         article.innerHTML = `
           <div class="relative aspect-[4/3] bg-slate-200 overflow-hidden">
@@ -485,6 +624,7 @@
             <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
               ${property[COLUMNS.TYPE] || 'Property'}
             </span>
+            ${state.currentUser ? `<button class="favorite-btn absolute top-3 right-3 ${isFav ? 'active' : ''}" data-id="${property.id}"><i class="fas fa-heart"></i></button>` : ''}
           </div>
           <div class="p-4 flex flex-col flex-1">
             <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
@@ -497,14 +637,36 @@
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
                 <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
               </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
-              <a href="${whatsappUrl(broker?.phone)}" target="_blank" 
-                 class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
-                <i class="fab fa-whatsapp text-sm"></i> Chat
-              </a>
+              <div class="flex gap-2">
+                ${actionsHtml}
+                <a href="${whatsappUrl(broker?.phone)}" target="_blank" 
+                   class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
+                  <i class="fab fa-whatsapp text-sm"></i> Chat
+                </a>
+              </div>
             </div>
           </div>
         `;
 
+        // Heart toggle
+        const favBtn = article.querySelector('.favorite-btn');
+        if (favBtn) {
+          favBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFavorite(property.id);
+          });
+        }
+
+        // Edit button
+        const editBtn = article.querySelector('.edit-btn');
+        if (editBtn) {
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditModal(property.id);
+          });
+        }
+
+        // Broker name click
         const nameLink = article.querySelector('.broker-name-link');
         if (nameLink) {
           nameLink.addEventListener('click', (e) => {
@@ -516,6 +678,7 @@
         return article;
       }
 
+      // ─── Render listings ──────────────────────────────────────────
       function renderListings(properties) {
         listingsGrid.innerHTML = '';
         if (!properties || properties.length === 0) {
@@ -527,12 +690,178 @@
         propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
           const broker = prop.broker || state.profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null;
-          const card = createPropertyCard(prop, broker, true);
+          // In discovery view, show broker link and not edit
+          const card = createPropertyCard(prop, broker, true, false);
           listingsGrid.appendChild(card);
         });
       }
 
-      // ─── Fetch all data ────────────────────────────────────────────
+      // ─── Render my properties (dashboard) ─────────────────────────
+      function renderMyProperties() {
+        myPropertiesList.innerHTML = '';
+        if (state.myProperties.length === 0) {
+          myPropertiesEmpty.classList.remove('hidden');
+          return;
+        }
+        myPropertiesEmpty.classList.add('hidden');
+        state.myProperties.forEach(prop => {
+          const broker = state.currentUser;
+          // show edit button on dashboard cards
+          const card = createPropertyCard(prop, broker, false, true);
+          // Also add a delete button
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
+          deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
+          deleteBtn.addEventListener('click', async () => {
+            if (confirm('Delete this property?')) {
+              await deleteProperty(prop.id);
+            }
+          });
+          card.querySelector('.p-4').appendChild(deleteBtn);
+          myPropertiesList.appendChild(card);
+        });
+      }
+
+      // ─── Delete property ─────────────────────────────────────────
+      async function deleteProperty(propId) {
+        try {
+          const { error } = await supabaseClient
+            .from('properties')
+            .delete()
+            .eq('id', propId);
+          if (error) throw error;
+          state.myProperties = state.myProperties.filter(p => p.id !== propId);
+          renderMyProperties();
+          fetchAllData(); // refresh main grid
+        } catch (err) {
+          alert('Delete failed: ' + err.message);
+        }
+      }
+
+      // ─── Edit Property modal ──────────────────────────────────────
+      async function openEditModal(propertyId) {
+        const prop = state.myProperties.find(p => p.id === propertyId);
+        if (!prop) return;
+        editPropertyId.value = propertyId;
+        editTitle.value = prop[COLUMNS.TITLE] || '';
+        editPrice.value = prop[COLUMNS.PRICE] || '';
+        // map database type back to form value
+        const dbType = prop[COLUMNS.TYPE] || '';
+        let formType = 'Rentals';
+        if (dbType === 'property') formType = 'Properties';
+        else if (dbType === 'lodge') formType = 'Lodges';
+        else if (dbType === 'rental') formType = 'Rentals';
+        editType.value = formType;
+        editAddress.value = prop[COLUMNS.ADDRESS] || '';
+
+        // Show existing images
+        const images = getImageArray(prop);
+        renderEditImagePreviews(images);
+
+        // Store current images for later update
+        editModal._currentImages = images;
+        editModal._propertyId = propertyId;
+        editModal.classList.remove('hidden');
+      }
+
+      function renderEditImagePreviews(images) {
+        editImagePreviews.innerHTML = '';
+        images.forEach((url, index) => {
+          const div = document.createElement('div');
+          div.className = 'image-thumb';
+          div.innerHTML = `
+            <img src="${url}" alt="Property image" />
+            <button class="remove-img" data-index="${index}">&times;</button>
+          `;
+          div.querySelector('.remove-img').addEventListener('click', () => {
+            // Remove from the temporary array
+            const current = editModal._currentImages || [];
+            current.splice(index, 1);
+            renderEditImagePreviews(current);
+            editModal._currentImages = current;
+          });
+          editImagePreviews.appendChild(div);
+        });
+      }
+
+      // ─── Edit form submit ─────────────────────────────────────────
+      editPropertyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = editPropertyId.value;
+        if (!id) return;
+
+        const title = editTitle.value.trim();
+        const price = parseFloat(editPrice.value);
+        const type = editType.value;
+        const address = editAddress.value.trim();
+
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+
+        // Get current images array
+        let currentImages = editModal._currentImages || [];
+
+        // Upload new images if any
+        const files = editImageInput.files;
+        if (files && files.length > 0) {
+          for (const file of files) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `${state.currentUser.id}/${fileName}`;
+            const { error: uploadError } = await supabaseClient
+              .storage
+              .from('property-media')
+              .upload(filePath, file);
+            if (uploadError) {
+              alert('Image upload failed: ' + uploadError.message);
+              return;
+            }
+            const { data: urlData } = supabaseClient
+              .storage
+              .from('property-media')
+              .getPublicUrl(filePath);
+            currentImages.push(urlData.publicUrl);
+          }
+          editImageInput.value = ''; // clear
+        }
+
+        // Update the property
+        const dbType = TYPE_MAP[type] || type;
+        const updateData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: currentImages,
+        };
+
+        try {
+          const { error } = await supabaseClient
+            .from('properties')
+            .update(updateData)
+            .eq('id', id);
+          if (error) throw error;
+          alert('✅ Property updated successfully!');
+          editModal.classList.add('hidden');
+          // Refresh dashboard and discovery
+          await loadMyProperties();
+          await fetchAllData();
+        } catch (err) {
+          alert('Update failed: ' + err.message);
+        }
+      });
+
+      // ─── Close modal ──────────────────────────────────────────────
+      closeEditModal.addEventListener('click', () => {
+        editModal.classList.add('hidden');
+      });
+      editModal.addEventListener('click', (e) => {
+        if (e.target === editModal) editModal.classList.add('hidden');
+      });
+
+      // ─── Fetch all data (profiles + properties) ───────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -540,6 +869,7 @@
         emptyState.classList.add('hidden');
 
         try {
+          // 1. Profiles
           const { data: profiles, error: profilesError } = await supabaseClient
             .from('profiles')
             .select('*');
@@ -548,6 +878,7 @@
           (profiles || []).forEach(p => { profilesMap[p.id] = p; });
           state.profilesMap = profilesMap;
 
+          // 2. Properties
           const { data: properties, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
@@ -670,7 +1001,8 @@
           brokerEmptyState.classList.add('hidden');
           brokerListingsGrid.innerHTML = '';
           props.forEach(prop => {
-            const card = createPropertyCard(prop, broker, false);
+            const brokerObj = broker;
+            const card = createPropertyCard(prop, brokerObj, false, false);
             brokerListingsGrid.appendChild(card);
           });
         } catch (err) {
@@ -721,44 +1053,6 @@
         }
       }
 
-      function renderMyProperties() {
-        myPropertiesList.innerHTML = '';
-        if (state.myProperties.length === 0) {
-          myPropertiesEmpty.classList.remove('hidden');
-          return;
-        }
-        myPropertiesEmpty.classList.add('hidden');
-        state.myProperties.forEach(prop => {
-          const broker = state.currentUser;
-          const card = createPropertyCard(prop, broker, false);
-          const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
-          deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
-          deleteBtn.addEventListener('click', async () => {
-            if (confirm('Delete this property?')) {
-              await deleteProperty(prop.id);
-            }
-          });
-          card.querySelector('.p-4').appendChild(deleteBtn);
-          myPropertiesList.appendChild(card);
-        });
-      }
-
-      async function deleteProperty(propId) {
-        try {
-          const { error } = await supabaseClient
-            .from('properties')
-            .delete()
-            .eq('id', propId);
-          if (error) throw error;
-          state.myProperties = state.myProperties.filter(p => p.id !== propId);
-          renderMyProperties();
-          fetchAllData();
-        } catch (err) {
-          alert('Delete failed: ' + err.message);
-        }
-      }
-
       // ─── Add Property ──────────────────────────────────────────────
       addPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -769,86 +1063,65 @@
 
         const title = propTitle.value.trim();
         const price = parseFloat(propPrice.value);
-        const type = propType.value;                       // e.g., "Rentals"
+        const type = propType.value;
         const address = propAddress.value.trim();
-        const imageFile = propImage.files[0];
+        const imageFiles = propImage.files;
 
         if (!title || !price || !address) {
           alert('Please fill in all required fields.');
           return;
         }
 
-        uploadStatus.textContent = 'Uploading image...';
+        uploadStatus.textContent = 'Uploading images...';
         uploadStatus.className = 'mt-3 text-sm text-indigo-600';
 
-        let imageUrl = null;
-
-        if (imageFile) {
-          const fileExt = imageFile.name.split('.').pop();
-          const fileName = `${Date.now()}.${fileExt}`;
-          const filePath = `${state.currentUser.id}/${fileName}`;
-
-          const { data: uploadData, error: uploadError } = await supabaseClient
-            .storage
-            .from('property-media')
-            .upload(filePath, imageFile);
-
-          if (uploadError) {
-            uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
-            uploadStatus.className = 'mt-3 text-sm text-red-600';
-            return;
+        const imageUrls = [];
+        if (imageFiles && imageFiles.length > 0) {
+          for (const file of imageFiles) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `${state.currentUser.id}/${fileName}`;
+            const { error: uploadError } = await supabaseClient
+              .storage
+              .from('property-media')
+              .upload(filePath, file);
+            if (uploadError) {
+              uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
+              uploadStatus.className = 'mt-3 text-sm text-red-600';
+              return;
+            }
+            const { data: urlData } = supabaseClient
+              .storage
+              .from('property-media')
+              .getPublicUrl(filePath);
+            imageUrls.push(urlData.publicUrl);
           }
-
-          const { data: urlData } = supabaseClient
-            .storage
-            .from('property-media')
-            .getPublicUrl(filePath);
-
-          imageUrl = urlData.publicUrl;
         }
 
+        const dbType = TYPE_MAP[type] || type;
+        const insertData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: imageUrls,
+          [COLUMNS.FOREIGN_KEY]: state.currentUser.id,
+        };
+
         try {
-          // ─── Map the type using TYPE_MAP ──────────────────────────
-          const dbType = TYPE_MAP[type] || type;   // fallback to original if not mapped
-          console.log(`Mapping property type: "${type}" → "${dbType}"`);
-
-          const insertData = {};
-          insertData[COLUMNS.TITLE] = title;
-          insertData[COLUMNS.PRICE] = price;
-          insertData[COLUMNS.TYPE] = dbType;                // mapped value
-          insertData[COLUMNS.ADDRESS] = address;
-          insertData[COLUMNS.IMAGE] = imageUrl ? [imageUrl] : null;
-          insertData[COLUMNS.FOREIGN_KEY] = state.currentUser.id;
-
-          console.log('📦 Inserting property with data:', insertData);
-
-          const { data, error } = await supabaseClient
+          const { error } = await supabaseClient
             .from('properties')
-            .insert(insertData)
-            .select();
-
-          if (error) {
-            console.error('❌ Supabase insert error:', error);
-            let errMsg = error.message || 'Unknown error';
-            if (error.details) errMsg += '\nDetails: ' + error.details;
-            if (error.hint) errMsg += '\nHint: ' + error.hint;
-            uploadStatus.textContent = '❌ Failed to add property: ' + errMsg;
-            uploadStatus.className = 'mt-3 text-sm text-red-600';
-            alert('Insert failed.\n' + errMsg);
-            return;
-          }
-
+            .insert(insertData);
+          if (error) throw error;
           uploadStatus.textContent = '✅ Property added successfully!';
           uploadStatus.className = 'mt-3 text-sm text-emerald-600';
           addPropertyForm.reset();
           propImage.value = '';
-          loadMyProperties();
-          fetchAllData();
+          await loadMyProperties();
+          await fetchAllData();
         } catch (err) {
-          console.error('❌ Insert error:', err);
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
           uploadStatus.className = 'mt-3 text-sm text-red-600';
-          alert('Insert error: ' + err.message);
         }
       });
 
@@ -901,7 +1174,9 @@
             showView(dashboardView);
             navigateTo('/dashboard');
             portalBtnLabel.textContent = 'Dashboard';
+            await fetchFavorites();
             await loadMyProperties();
+            await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
           }
@@ -912,6 +1187,7 @@
       async function handleLogout() {
         await supabaseClient.auth.signOut();
         state.currentUser = null;
+        state.favorites = new Set();
         portalBtnLabel.textContent = 'Broker Portal';
         goToDiscovery();
       }
@@ -1018,7 +1294,9 @@
                 window.history.replaceState(null, '', '/');
                 showView(dashboardView);
                 navigateTo('/dashboard');
+                await fetchFavorites();
                 await loadMyProperties();
+                await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
                 return;
               }
@@ -1034,6 +1312,7 @@
           if (user) {
             state.currentUser = user;
             portalBtnLabel.textContent = 'Dashboard';
+            await fetchFavorites();
           }
         } catch (err) {
           console.log('No active session (403 is normal).');

@@ -313,12 +313,15 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 COLUMN MAPPING (based on your actual columns) ─────────
+      // ─── 🔧 COLUMN MAPPING – CONFIRMED WITH YOUR SCHEMA ────────────
+      // Your columns: id, owner_id, title, description, property_type,
+      // price_amount, price_period, address, amenities, media_urls,
+      // is_available, created_at, image_urls
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',      // foreign key to profiles.id
-        IMAGE: 'image_urls',          // image URL column (changed from media_urls to image_urls)
+        IMAGE: 'image_urls',          // image column – you have both media_urls and image_urls
         TITLE: 'title',               // property title
-        PRICE: 'price_amount',        // price column
+        PRICE: 'price_amount',        // ✅ your price column is 'price_amount'
         TYPE: 'property_type',        // type column (Rentals, Properties, Lodges)
         ADDRESS: 'address',           // address column
       };
@@ -795,7 +798,7 @@
           // Build insert object using the configured column names
           const insertData = {};
           insertData[COLUMNS.TITLE] = title;
-          insertData[COLUMNS.PRICE] = price;
+          insertData[COLUMNS.PRICE] = price;                // ✅ uses 'price_amount' from mapping
           insertData[COLUMNS.TYPE] = type;
           insertData[COLUMNS.ADDRESS] = address;
           insertData[COLUMNS.IMAGE] = imageUrl;
@@ -811,11 +814,21 @@
           if (error) {
             // Log the full error details
             console.error('❌ Supabase insert error:', error);
-            // Try to get the error message from the response
             const errMsg = error.message || 'Unknown error';
             uploadStatus.textContent = '❌ Failed to add property: ' + errMsg;
             uploadStatus.className = 'mt-3 text-sm text-red-600';
-            alert('Insert failed. Check console for details.\nError: ' + errMsg);
+            // Try to fetch one record to show available columns
+            try {
+              const { data: sample } = await supabaseClient.from('properties').select('*').limit(1);
+              if (sample && sample.length > 0) {
+                const available = Object.keys(sample[0]).join(', ');
+                alert(`Insert failed.\nError: ${errMsg}\n\nAvailable columns in your table:\n${available}`);
+              } else {
+                alert(`Insert failed.\nError: ${errMsg}\n\nYour table is empty. Check your column names in Supabase.`);
+              }
+            } catch (e2) {
+              alert(`Insert failed.\nError: ${errMsg}`);
+            }
             return;
           }
 

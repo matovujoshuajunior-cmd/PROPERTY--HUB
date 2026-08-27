@@ -328,15 +328,14 @@
       };
 
       // ─── 🔧 MAP form property-type values to database values ──────
-      // If your check constraint expects lowercase (e.g., 'rental'), change the mapping.
+      // ⚠️ FIND THE ACTUAL ALLOWED VALUES FIRST:
+      // Run this SQL in Supabase SQL Editor:
+      //   SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'properties_property_type_check';
+      // Then update the right-hand values below.
       const TYPE_MAP = {
-        'Rentals': 'Rentals',
-        'Properties': 'Properties',
-        'Lodges': 'Lodges',
-        // Example if your DB expects lowercase:
-        // 'Rentals': 'rental',
-        // 'Properties': 'property',
-        // 'Lodges': 'lodge',
+        'Rentals': 'rental',    // ← change to match your constraint
+        'Properties': 'property', // ← change to match your constraint
+        'Lodges': 'lodge',        // ← change to match your constraint
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);
@@ -358,7 +357,7 @@
         profilesMap: {},
       };
 
-      // ─── DOM refs ──────────────────────────────────────────────────
+      // ─── DOM refs (shortened for brevity) ──────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 

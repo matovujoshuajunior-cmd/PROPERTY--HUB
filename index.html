@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ... same styles as before (kept compact) ... */
+    /* ── Styles (same as before, kept compact) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -313,17 +313,14 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 CONFIGURE YOUR COLUMN NAMES HERE ──────────────────────
-      // Run this SQL in Supabase SQL Editor to see your columns:
-      // SELECT column_name FROM information_schema.columns WHERE table_name = 'properties';
-      // Then update the values below with the correct names.
+      // ─── 🔧 COLUMN MAPPING (based on your actual columns) ─────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',      // e.g., 'owner_id', 'user_id', 'profile_id'
-        IMAGE: 'media_urls',          // e.g., 'image_url', 'image', 'photo', 'media_urls'
-        TITLE: 'title',               // e.g., 'title', 'name', 'property_name'
-        PRICE: 'price',               // e.g., 'price', 'listing_price', 'amount'  <-- FIX THIS
-        TYPE: 'type',                 // e.g., 'type', 'category', 'property_type'
-        ADDRESS: 'address',           // e.g., 'address', 'location', 'property_address'
+        FOREIGN_KEY: 'owner_id',      // foreign key to profiles.id
+        IMAGE: 'media_urls',          // image URL column
+        TITLE: 'title',               // property title
+        PRICE: 'price_amount',        // price column
+        TYPE: 'property_type',        // type column (Rentals, Properties, Lodges)
+        ADDRESS: 'address',           // address column
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);
@@ -820,27 +817,9 @@
           loadMyProperties();
           fetchAllData();
         } catch (err) {
-          // --- DIAGNOSTIC: attempt to fetch available columns ---
-          try {
-            const { data: colData } = await supabaseClient
-              .from('properties')
-              .select('*')
-              .limit(1);
-            if (colData && colData.length > 0) {
-              const availableCols = Object.keys(colData[0]);
-              console.error('❌ Available columns in properties:', availableCols);
-              alert(`❌ Failed to add property.\n\nThe column '${err.message.match(/'([^']+)'/)[1] || 'unknown'}' does not exist.\n\nAvailable columns:\n${availableCols.join('\n')}\n\nUpdate the COLUMNS object in the code.`);
-            } else {
-              // Table might be empty
-              console.error('❌ Table is empty, cannot detect columns. Please check your table schema.');
-              alert('❌ Failed to add property: ' + err.message + '\n\nCheck your column names in the code.');
-            }
-          } catch (e2) {
-            console.error('Could not fetch schema:', e2);
-            alert('❌ Failed to add property: ' + err.message + '\n\nPlease check your column names in the COLUMNS object.');
-          }
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
           uploadStatus.className = 'mt-3 text-sm text-red-600';
+          console.error('Insert error:', err);
         }
       });
 

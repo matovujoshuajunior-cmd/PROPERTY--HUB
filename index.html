@@ -328,14 +328,11 @@
       };
 
       // ─── 🔧 MAP form property-type values to database values ──────
-      // ⚠️ FIND THE ACTUAL ALLOWED VALUES FIRST:
-      // Run this SQL in Supabase SQL Editor:
-      //   SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'properties_property_type_check';
-      // Then update the right-hand values below.
+      // The check constraint expects exactly: 'rental', 'property', 'lodge'
       const TYPE_MAP = {
-        'Rentals': 'rental',    // ← change to match your constraint
-        'Properties': 'property', // ← change to match your constraint
-        'Lodges': 'lodge',        // ← change to match your constraint
+        'Rentals': 'rental',
+        'Properties': 'property',
+        'Lodges': 'lodge',
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);

@@ -44,7 +44,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Styles (kept compact) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -313,10 +312,10 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 COLUMN MAPPING – UPDATED: IMAGE = 'media_urls' ───────
+      // ─── 🔧 COLUMN MAPPING ──────────────────────────────────────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',      // foreign key to profiles.id
-        IMAGE: 'media_urls',          // ✅ your actual image column
+        FOREIGN_KEY: 'owner_id',
+        IMAGE: 'media_urls',          // this is a text[] column
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
@@ -449,7 +448,26 @@
         article.className =
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
 
-        const imageUrl = property[COLUMNS.IMAGE] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        // Handle image – it may be an array (text[]) or a string
+        let imageUrl = property[COLUMNS.IMAGE];
+        if (Array.isArray(imageUrl) && imageUrl.length > 0) {
+          imageUrl = imageUrl[0];
+        } else if (typeof imageUrl === 'string') {
+          // If it's a PostgreSQL array literal like "{url1,url2}", parse it
+          if (imageUrl.startsWith('{') && imageUrl.endsWith('}')) {
+            try {
+              // Remove braces and split by comma (simple)
+              const arr = imageUrl.slice(1, -1).split(',');
+              imageUrl = arr[0].trim();
+            } catch (e) {
+              imageUrl = imageUrl;
+            }
+          }
+        }
+        if (!imageUrl || imageUrl === '') {
+          imageUrl = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+        }
+
         const tierLabel = getTierLabel(broker?.tier);
         const tierClass = getTierClass(broker?.tier);
 
@@ -798,7 +816,8 @@
           insertData[COLUMNS.PRICE] = price;
           insertData[COLUMNS.TYPE] = type;
           insertData[COLUMNS.ADDRESS] = address;
-          insertData[COLUMNS.IMAGE] = imageUrl;   // ✅ uses 'media_urls'
+          // ✅ Store as an array (PostgreSQL text[] column)
+          insertData[COLUMNS.IMAGE] = imageUrl ? [imageUrl] : null;
           insertData[COLUMNS.FOREIGN_KEY] = state.currentUser.id;
 
           console.log('📦 Inserting property with data:', insertData);

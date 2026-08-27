@@ -313,12 +313,12 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 COLUMN MAPPING – MATCHES YOUR SCHEMA ──────────────────
+      // ─── 🔧 COLUMN MAPPING – UPDATED: IMAGE = 'media_urls' ───────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',      // foreign key to profiles.id
-        IMAGE: 'image_urls',          // your image column
+        IMAGE: 'media_urls',          // ✅ your actual image column
         TITLE: 'title',
-        PRICE: 'price_amount',        // ✅ your price column
+        PRICE: 'price_amount',
         TYPE: 'property_type',
         ADDRESS: 'address',
       };
@@ -795,10 +795,10 @@
           // Build insert object
           const insertData = {};
           insertData[COLUMNS.TITLE] = title;
-          insertData[COLUMNS.PRICE] = price;                // price_amount
+          insertData[COLUMNS.PRICE] = price;
           insertData[COLUMNS.TYPE] = type;
           insertData[COLUMNS.ADDRESS] = address;
-          insertData[COLUMNS.IMAGE] = imageUrl;
+          insertData[COLUMNS.IMAGE] = imageUrl;   // ✅ uses 'media_urls'
           insertData[COLUMNS.FOREIGN_KEY] = state.currentUser.id;
 
           console.log('📦 Inserting property with data:', insertData);
@@ -809,17 +809,13 @@
             .select();
 
           if (error) {
-            // Log the full error details
             console.error('❌ Supabase insert error:', error);
-            // Try to extract a human-friendly message
             let errMsg = error.message || 'Unknown error';
             if (error.details) errMsg += '\nDetails: ' + error.details;
             if (error.hint) errMsg += '\nHint: ' + error.hint;
-            
-            // Show available columns by attempting a HEAD request (or simply alert the error)
             uploadStatus.textContent = '❌ Failed to add property: ' + errMsg;
             uploadStatus.className = 'mt-3 text-sm text-red-600';
-            alert('Insert failed.\n' + errMsg + '\n\nCheck the console for the full error.');
+            alert('Insert failed.\n' + errMsg);
             return;
           }
 

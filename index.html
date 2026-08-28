@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Styles (same as before, kept compact) ── */
+    /* ── Styles (same as before, plus modal for reviews) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -113,10 +113,16 @@
     .favorite-btn.active { color: #ef4444; }
     .favorite-btn:hover { transform: scale(1.2); }
 
-    /* rating stars */
     .stars { color: #f59e0b; letter-spacing: 2px; }
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
+
+    /* Rating stars (clickable) */
+    .star-rating .star {
+      cursor: pointer; font-size: 2rem; color: #d1d5db; transition: 0.15s;
+    }
+    .star-rating .star.active { color: #f59e0b; }
+    .star-rating .star:hover { transform: scale(1.2); }
   </style>
 </head>
 <body>
@@ -127,7 +133,38 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== EDIT PROPERTY MODAL ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
+  <div id="reviewModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">⭐ Rate this Broker</h2>
+        <button id="closeReviewModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <form id="reviewForm">
+        <input type="hidden" id="reviewBrokerId" />
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Rating</label>
+          <div id="starSelector" class="star-rating flex gap-1">
+            <span class="star" data-value="1">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="5">★</span>
+          </div>
+          <input type="hidden" id="reviewRating" value="5" />
+        </div>
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Review (optional)</label>
+          <textarea id="reviewText" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-paper-plane mr-2"></i> Submit Review
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== EDIT PROPERTY MODAL (same as before) ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -284,7 +321,33 @@
             <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
-          <!-- Add Property Form -->
+
+          <!-- ===== PROFILE SETTINGS ===== -->
+          <div class="dashboard-card p-6 mb-8">
+            <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
+            <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
+                <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
+                <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Bio</label>
+                <textarea id="settingsBio" rows="2" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="Tell clients about your services..."></textarea>
+              </div>
+              <div class="md:col-span-2">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
+                  <i class="fas fa-save mr-2"></i> Update Profile
+                </button>
+              </div>
+            </form>
+            <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
+          </div>
+
+          <!-- ===== ADD PROPERTY FORM ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -301,7 +364,8 @@
             </form>
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
-          <!-- My Properties List -->
+
+          <!-- ===== MY PROPERTIES LIST ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
         </div>
@@ -394,7 +458,7 @@
     function startApp() {
       'use strict';
 
-      // ─── 🔧 CONFIGURATION ──────────────────────────────────────────
+      // ─── CONFIGURATION ──────────────────────────────────────────────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',
         IMAGE: 'media_urls',
@@ -412,7 +476,6 @@
 
       console.log('🔧 Using column mapping:', COLUMNS);
 
-      // ─── Supabase Client ───────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // ─── State ──────────────────────────────────────────────────────
@@ -428,17 +491,20 @@
         myProperties: [],
         profilesMap: {},
         favorites: new Set(),
+        brokerProfile: null, // for profile settings
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
+      // Views
       const discoveryView = $('#discoveryView');
       const brokerView = $('#brokerView');
       const authView = $('#authView');
       const dashboardView = $('#dashboardView');
 
+      // Discovery
       const listingsGrid = $('#listingsGrid');
       const loadingSkeleton = $('#loadingSkeleton');
       const emptyState = $('#emptyState');
@@ -447,6 +513,7 @@
       const clearSearchBtn = $('#clearSearchBtn');
       const filterPills = $$('.filter-pill');
 
+      // Broker profile
       const brokerBusinessName = $('#brokerBusinessName');
       const brokerTierBadge = $('#brokerTierBadge');
       const brokerPhone = $('#brokerPhone');
@@ -456,6 +523,7 @@
       const brokerEmptyState = $('#brokerEmptyState');
       const backToDiscovery = $('#backToDiscovery');
 
+      // Auth
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
       const signUpFields = $('#signUpFields');
@@ -469,6 +537,7 @@
       const accTypeSelect = $('#accTypeSelect');
       const phoneInput = $('#phoneInput');
 
+      // Dashboard
       const addPropertyForm = $('#addPropertyForm');
       const propTitle = $('#propTitle');
       const propPrice = $('#propPrice');
@@ -482,7 +551,7 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // Edit modal elements
+      // Edit property modal
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
       const editPropertyForm = $('#editPropertyForm');
@@ -494,9 +563,24 @@
       const editImageInput = $('#editImageInput');
       const editImagePreviews = $('#editImagePreviews');
 
+      // Review modal
+      const reviewModal = $('#reviewModal');
+      const closeReviewModal = $('#closeReviewModal');
+      const reviewForm = $('#reviewForm');
+      const reviewBrokerId = $('#reviewBrokerId');
+      const reviewRating = $('#reviewRating');
+      const reviewText = $('#reviewText');
+      const starSelector = $('#starSelector');
+
+      // Profile settings
+      const profileSettingsForm = $('#profileSettingsForm');
+      const settingsBusinessName = $('#settingsBusinessName');
+      const settingsPhone = $('#settingsPhone');
+      const settingsBio = $('#settingsBio');
+      const profileStatus = $('#profileStatus');
+
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
-
       function getImageArray(property) {
         const val = property[COLUMNS.IMAGE];
         if (!val) return [];
@@ -504,12 +588,10 @@
         if (typeof val === 'string') return [val];
         return [];
       }
-
       function getImageUrl(property) {
         const arr = getImageArray(property);
         return arr.length > 0 ? arr[0] : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
       }
-
       function getTierClass(tier) {
         if (!tier) return 'tier-Bronze';
         const t = tier.toLowerCase();
@@ -557,50 +639,7 @@
         }
       }
 
-      // ─── Favorites ──────────────────────────────────────────────────
-      async function fetchFavorites() {
-        if (!state.currentUser) return;
-        try {
-          const { data, error } = await supabaseClient
-            .from('favorites')
-            .select('property_id')
-            .eq('user_id', state.currentUser.id);
-          if (error) throw error;
-          state.favorites = new Set(data.map(f => f.property_id));
-        } catch (err) {
-          console.error('Error fetching favorites:', err);
-        }
-      }
-
-      async function toggleFavorite(propertyId) {
-        if (!state.currentUser) {
-          alert('Please sign in to save favorites.');
-          return;
-        }
-        const isFav = state.favorites.has(propertyId);
-        try {
-          if (isFav) {
-            const { error } = await supabaseClient
-              .from('favorites')
-              .delete()
-              .eq('user_id', state.currentUser.id)
-              .eq('property_id', propertyId);
-            if (error) throw error;
-            state.favorites.delete(propertyId);
-          } else {
-            const { error } = await supabaseClient
-              .from('favorites')
-              .insert({ user_id: state.currentUser.id, property_id: propertyId });
-            if (error) throw error;
-            state.favorites.add(propertyId);
-          }
-          renderListings(state.filteredProperties);
-        } catch (err) {
-          alert('Error updating favorite: ' + err.message);
-        }
-      }
-
-      // ─── Render star rating ────────────────────────────────────────
+      // ─── Render stars (for display) ──────────────────────────────
       function renderStars(rating) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -612,7 +651,35 @@
         return html;
       }
 
-      // ─── Render property card (with ranking badges) ────────────────
+      // ─── Favorites ──────────────────────────────────────────────────
+      async function fetchFavorites() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('favorites')
+            .select('property_id')
+            .eq('user_id', state.currentUser.id);
+          if (error) throw error;
+          state.favorites = new Set(data.map(f => f.property_id));
+        } catch (err) { console.error('Error fetching favorites:', err); }
+      }
+
+      async function toggleFavorite(propertyId) {
+        if (!state.currentUser) { alert('Please sign in to save favorites.'); return; }
+        const isFav = state.favorites.has(propertyId);
+        try {
+          if (isFav) {
+            await supabaseClient.from('favorites').delete().eq('user_id', state.currentUser.id).eq('property_id', propertyId);
+            state.favorites.delete(propertyId);
+          } else {
+            await supabaseClient.from('favorites').insert({ user_id: state.currentUser.id, property_id: propertyId });
+            state.favorites.add(propertyId);
+          }
+          renderListings(state.filteredProperties);
+        } catch (err) { alert('Error updating favorite: ' + err.message); }
+      }
+
+      // ─── Create property card (with review & profile update) ─────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -625,16 +692,21 @@
         const rating = broker?.average_rating || 0;
         const reviewCount = broker?.review_count || 0;
         const leadScore = broker?.lead_score || 0;
+        const isOwner = state.currentUser && broker && state.currentUser.id === broker.id;
 
         let actionsHtml = '';
-        if (showEdit) {
-          actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
-        }
+        if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
 
-        // Boost lead score button (for demo)
+        // Boost button (only if owner)
         let boostHtml = '';
         if (showEdit && state.currentUser) {
           boostHtml = `<button class="boost-btn text-xs text-emerald-600 hover:text-emerald-800 font-medium ml-2" data-broker-id="${state.currentUser.id}"><i class="fas fa-rocket mr-1"></i>Boost</button>`;
+        }
+
+        // Rate button (only if logged in, not owner)
+        let rateHtml = '';
+        if (state.currentUser && broker && !isOwner) {
+          rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
         }
 
         article.innerHTML = `
@@ -657,14 +729,11 @@
               <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
               <span class="line-clamp-1">${property[COLUMNS.ADDRESS] || 'Location not specified'}</span>
             </p>
-
-            <!-- Broker rating & review count -->
             <div class="mt-2 flex items-center gap-2 text-xs">
               <span class="stars text-xs">${renderStars(rating)}</span>
               <span class="text-slate-500">(${reviewCount})</span>
               <span class="badge-lead">⚡ ${leadScore}</span>
             </div>
-
             <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 flex-wrap">
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
                 <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
@@ -672,6 +741,7 @@
               <div class="flex gap-2">
                 ${actionsHtml}
                 ${boostHtml}
+                ${rateHtml}
                 <a href="${whatsappUrl(broker?.phone)}" target="_blank" 
                    class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
                   <i class="fab fa-whatsapp text-sm"></i> Chat
@@ -681,57 +751,45 @@
           </div>
         `;
 
-        // Favorite toggle
-        const favBtn = article.querySelector('.favorite-btn');
-        if (favBtn) {
-          favBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFavorite(property.id);
-          });
-        }
+        // Event listeners
+        article.querySelector('.favorite-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          toggleFavorite(property.id);
+        });
 
-        // Edit button
-        const editBtn = article.querySelector('.edit-btn');
-        if (editBtn) {
-          editBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            openEditModal(property.id);
-          });
-        }
+        article.querySelector('.edit-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          openEditModal(property.id);
+        });
 
-        // Boost button (increment lead score)
-        const boostBtn = article.querySelector('.boost-btn');
-        if (boostBtn) {
-          boostBtn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const brokerId = boostBtn.dataset.brokerId;
-            if (!brokerId) return;
-            try {
-              const { error } = await supabaseClient.rpc('increment_lead_score', { broker_id: brokerId, amount: 5 });
-              if (error) throw error;
-              alert('✅ Lead score boosted by 5!');
-              // Refresh data
-              await fetchAllData();
-              if (state.currentUser) await loadMyProperties();
-            } catch (err) {
-              alert('Error boosting lead score: ' + err.message);
-            }
-          });
-        }
+        article.querySelector('.boost-btn')?.addEventListener('click', async e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          try {
+            const { error } = await supabaseClient.rpc('increment_lead_score', { broker_id: brokerId, amount: 5 });
+            if (error) throw error;
+            alert('✅ Lead score boosted by 5!');
+            await fetchAllData();
+            if (state.currentUser) await loadMyProperties();
+          } catch (err) { alert('Error boosting lead score: ' + err.message); }
+        });
 
-        // Broker name click
-        const nameLink = article.querySelector('.broker-name-link');
-        if (nameLink) {
-          nameLink.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const brokerId = nameLink.dataset.brokerId;
-            if (brokerId) navigateToBroker(brokerId);
-          });
-        }
+        article.querySelector('.rate-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          openReviewModal(brokerId);
+        });
+
+        article.querySelector('.broker-name-link')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          if (brokerId) navigateToBroker(brokerId);
+        });
+
         return article;
       }
 
-      // ─── Render listings (discovery) ──────────────────────────────
+      // ─── Render listings ──────────────────────────────────────────
       function renderListings(properties) {
         listingsGrid.innerHTML = '';
         if (!properties || properties.length === 0) {
@@ -748,7 +806,7 @@
         });
       }
 
-      // ─── Render my properties (dashboard) ─────────────────────────
+      // ─── Render my properties ──────────────────────────────────────
       function renderMyProperties() {
         myPropertiesList.innerHTML = '';
         if (state.myProperties.length === 0) {
@@ -759,7 +817,6 @@
         state.myProperties.forEach(prop => {
           const broker = state.currentUser;
           const card = createPropertyCard(prop, broker, false, true);
-          // Delete button
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
           deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
@@ -773,23 +830,18 @@
         });
       }
 
-      // ─── Delete property ─────────────────────────────────────────
+      // ─── Delete property ──────────────────────────────────────────
       async function deleteProperty(propId) {
         try {
-          const { error } = await supabaseClient
-            .from('properties')
-            .delete()
-            .eq('id', propId);
+          const { error } = await supabaseClient.from('properties').delete().eq('id', propId);
           if (error) throw error;
           state.myProperties = state.myProperties.filter(p => p.id !== propId);
           renderMyProperties();
           await fetchAllData();
-        } catch (err) {
-          alert('Delete failed: ' + err.message);
-        }
+        } catch (err) { alert('Delete failed: ' + err.message); }
       }
 
-      // ─── Edit Property modal (same as before) ────────────────────
+      // ─── Edit property modal ──────────────────────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
@@ -807,7 +859,6 @@
         const images = getImageArray(prop);
         renderEditImagePreviews(images);
         editModal._currentImages = images;
-        editModal._propertyId = propertyId;
         editModal.classList.remove('hidden');
       }
 
@@ -849,18 +900,12 @@
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
             const filePath = `${state.currentUser.id}/${fileName}`;
-            const { error: uploadError } = await supabaseClient
-              .storage
-              .from('property-media')
-              .upload(filePath, file);
+            const { error: uploadError } = await supabaseClient.storage.from('property-media').upload(filePath, file);
             if (uploadError) {
               alert('Image upload failed: ' + uploadError.message);
               return;
             }
-            const { data: urlData } = supabaseClient
-              .storage
-              .from('property-media')
-              .getPublicUrl(filePath);
+            const { data: urlData } = supabaseClient.storage.from('property-media').getPublicUrl(filePath);
             currentImages.push(urlData.publicUrl);
           }
           editImageInput.value = '';
@@ -874,28 +919,131 @@
           [COLUMNS.IMAGE]: currentImages,
         };
         try {
-          const { error } = await supabaseClient
-            .from('properties')
-            .update(updateData)
-            .eq('id', id);
+          const { error } = await supabaseClient.from('properties').update(updateData).eq('id', id);
           if (error) throw error;
           alert('✅ Property updated successfully!');
           editModal.classList.add('hidden');
           await loadMyProperties();
           await fetchAllData();
+        } catch (err) { alert('Update failed: ' + err.message); }
+      });
+
+      closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
+      editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
+
+      // ─── Review modal ─────────────────────────────────────────────
+      function openReviewModal(brokerId) {
+        reviewBrokerId.value = brokerId;
+        reviewRating.value = 5;
+        reviewText.value = '';
+        updateStarUI(5);
+        reviewModal.classList.remove('hidden');
+      }
+
+      // Star selection
+      starSelector.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', () => {
+          const val = parseInt(star.dataset.value);
+          reviewRating.value = val;
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseenter', () => {
+          const val = parseInt(star.dataset.value);
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseleave', () => {
+          const current = parseInt(reviewRating.value) || 5;
+          updateStarUI(current);
+        });
+      });
+
+      function updateStarUI(active) {
+        starSelector.querySelectorAll('.star').forEach(el => {
+          const val = parseInt(el.dataset.value);
+          el.classList.toggle('active', val <= active);
+        });
+      }
+
+      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
+      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
+
+      reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brokerId = reviewBrokerId.value;
+        const rating = parseInt(reviewRating.value);
+        const review = reviewText.value.trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          alert('Please select a rating (1-5 stars).');
+          return;
+        }
+
+        try {
+          const { error } = await supabaseClient.from('reviews').insert({
+            broker_id: brokerId,
+            user_id: state.currentUser.id,
+            rating: rating,
+            review_text: review || null,
+          });
+          if (error) throw error;
+          alert('✅ Review submitted! Thank you.');
+          reviewModal.classList.add('hidden');
+          // Refresh data to update ratings
+          await fetchAllData();
         } catch (err) {
-          alert('Update failed: ' + err.message);
+          alert('Error submitting review: ' + err.message);
         }
       });
 
-      closeEditModal.addEventListener('click', () => {
-        editModal.classList.add('hidden');
-      });
-      editModal.addEventListener('click', (e) => {
-        if (e.target === editModal) editModal.classList.add('hidden');
+      // ─── Profile Settings ──────────────────────────────────────────
+      async function loadProfileSettings() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('business_name, phone, bio')
+            .eq('id', state.currentUser.id)
+            .single();
+          if (error) throw error;
+          settingsBusinessName.value = data.business_name || '';
+          settingsPhone.value = data.phone || '';
+          settingsBio.value = data.bio || '';
+        } catch (err) {
+          console.error('Error loading profile:', err);
+        }
+      }
+
+      profileSettingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) return;
+        const businessName = settingsBusinessName.value.trim();
+        const phone = settingsPhone.value.trim();
+        const bio = settingsBio.value.trim();
+
+        try {
+          const { error } = await supabaseClient
+            .from('profiles')
+            .update({ business_name: businessName, phone: phone, bio: bio })
+            .eq('id', state.currentUser.id);
+          if (error) throw error;
+          profileStatus.textContent = '✅ Profile updated successfully!';
+          profileStatus.className = 'mt-3 text-sm text-emerald-600';
+          // Update local state (for display)
+          if (state.currentUser) {
+            state.currentUser.business_name = businessName;
+            state.currentUser.phone = phone;
+            state.currentUser.bio = bio;
+          }
+          // Refresh data to reflect changes
+          await fetchAllData();
+          if (state.currentUser) await loadMyProperties();
+        } catch (err) {
+          profileStatus.textContent = '❌ Update failed: ' + err.message;
+          profileStatus.className = 'mt-3 text-sm text-red-600';
+        }
       });
 
-      // ─── Fetch all data with new ranking algorithm ────────────────
+      // ─── Fetch all data with ranking ──────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -903,7 +1051,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // Use the new ranking query with join and multiple ordering
           const { data: properties, error } = await supabaseClient
             .from('properties')
             .select(`
@@ -914,7 +1061,8 @@
                 phone,
                 average_rating,
                 review_count,
-                lead_score
+                lead_score,
+                bio
               )
             `)
             .order('average_rating', { foreignTable: 'profiles', ascending: false })
@@ -924,23 +1072,18 @@
 
           if (error) throw error;
 
-          // Transform to keep the same structure: property has a 'broker' key
           const enriched = (properties || []).map(prop => ({
             ...prop,
             broker: prop.profiles,
           }));
 
-          // Also build profilesMap for other uses (e.g., broker profile view)
           const profilesMap = {};
-          enriched.forEach(p => {
-            if (p.broker) profilesMap[p.broker.id] = p.broker;
-          });
+          enriched.forEach(p => { if (p.broker) profilesMap[p.broker.id] = p.broker; });
           state.profilesMap = profilesMap;
 
           state.allProperties = enriched;
           state.filteredProperties = [...enriched];
           applyFiltersAndSearch();
-
         } catch (err) {
           console.error('❌ Error fetching data:', err);
           listingsGrid.innerHTML = `
@@ -956,7 +1099,6 @@
         }
       }
 
-      // ─── Filter & Search ──────────────────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
@@ -1118,19 +1260,13 @@
             const fileExt = file.name.split('.').pop();
             const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
             const filePath = `${state.currentUser.id}/${fileName}`;
-            const { error: uploadError } = await supabaseClient
-              .storage
-              .from('property-media')
-              .upload(filePath, file);
+            const { error: uploadError } = await supabaseClient.storage.from('property-media').upload(filePath, file);
             if (uploadError) {
               uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
               uploadStatus.className = 'mt-3 text-sm text-red-600';
               return;
             }
-            const { data: urlData } = supabaseClient
-              .storage
-              .from('property-media')
-              .getPublicUrl(filePath);
+            const { data: urlData } = supabaseClient.storage.from('property-media').getPublicUrl(filePath);
             imageUrls.push(urlData.publicUrl);
           }
         }
@@ -1146,9 +1282,7 @@
         };
 
         try {
-          const { error } = await supabaseClient
-            .from('properties')
-            .insert(insertData);
+          const { error } = await supabaseClient.from('properties').insert(insertData);
           if (error) throw error;
           uploadStatus.textContent = '✅ Property added successfully!';
           uploadStatus.className = 'mt-3 text-sm text-emerald-600';
@@ -1190,7 +1324,6 @@
                 }
               }
             });
-
             if (error) throw error;
             alert('✅ Account created! Please check your email to verify your account.');
             setAuthMode(false);
@@ -1200,11 +1333,7 @@
           }
         } else {
           try {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({
-              email,
-              password
-            });
-
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
             state.currentUser = data.user;
             alert('✅ Signed in successfully!');
@@ -1212,6 +1341,7 @@
             navigateTo('/dashboard');
             portalBtnLabel.textContent = 'Dashboard';
             await fetchFavorites();
+            await loadProfileSettings();
             await loadMyProperties();
             await fetchAllData();
           } catch (err) {
@@ -1232,7 +1362,6 @@
       // ─── Route Handler ──────────────────────────────────────────────
       async function handleRoute() {
         const path = getCurrentPath();
-
         if (path.startsWith('/broker/')) {
           const brokerId = path.split('/')[2];
           if (brokerId && brokerId !== state.currentBrokerId) {
@@ -1332,6 +1461,7 @@
                 showView(dashboardView);
                 navigateTo('/dashboard');
                 await fetchFavorites();
+                await loadProfileSettings();
                 await loadMyProperties();
                 await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
@@ -1350,6 +1480,7 @@
             state.currentUser = user;
             portalBtnLabel.textContent = 'Dashboard';
             await fetchFavorites();
+            await loadProfileSettings();
           }
         } catch (err) {
           console.log('No active session (403 is normal).');

@@ -22,8 +22,17 @@
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
+  <!-- Tailwind CSS with fallback -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    if (!window.tailwind) {
+      document.write('<script src="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.js"><\/script>');
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
   <style>
-    /* ── same styles as before ── */
+    /* ── base styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -449,8 +458,8 @@
 
       // ─── CONFIGURATION ──────────────────────────────────────────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',
-        IMAGE: 'media_urls',
+        FOREIGN_KEY: 'owner_id',      // column in properties linking to profiles.id
+        IMAGE: 'media_urls',          // array column for images
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
@@ -462,8 +471,6 @@
         'Properties': 'property',
         'Lodges': 'lodge',
       };
-
-      console.log('🔧 Using column mapping:', COLUMNS);
 
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -538,7 +545,7 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // Edit property modal
+      // Modals
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
       const editPropertyForm = $('#editPropertyForm');
@@ -550,7 +557,6 @@
       const editImageInput = $('#editImageInput');
       const editImagePreviews = $('#editImagePreviews');
 
-      // Review modal
       const reviewModal = $('#reviewModal');
       const closeReviewModal = $('#closeReviewModal');
       const reviewForm = $('#reviewForm');
@@ -559,7 +565,6 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      // Profile settings
       const profileSettingsForm = $('#profileSettingsForm');
       const settingsBusinessName = $('#settingsBusinessName');
       const settingsPhone = $('#settingsPhone');
@@ -735,7 +740,6 @@
           </div>
         `;
 
-        // --- Event listeners ---
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
@@ -1021,7 +1025,7 @@
         }
       });
 
-      // ─── Fetch all data with ranking (removed `bio`) ──────────────
+      // ─── Fetch all data (no `bio`) ──────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1130,7 +1134,6 @@
             return;
           }
 
-          // Fill header
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
           const tierLabel = getTierLabel(broker.tier);
           const tierClass = getTierClass(broker.tier);

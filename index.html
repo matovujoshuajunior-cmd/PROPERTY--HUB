@@ -9,7 +9,7 @@
   <meta name="robots" content="index, follow" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
 
-  <!-- Open Graph & Twitter Card (same as before) -->
+  <!-- Open Graph & Twitter Card -->
   <meta property="og:title" content="Property Hub Uganda" />
   <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
   <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
@@ -20,14 +20,14 @@
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
-  <!-- Tailwind CSS (static CDN) & Font Awesome -->
+  <!-- Tailwind CSS (static) & Font Awesome -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
   <link href="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
 
   <style>
-    /* ── Custom styles (same as before) ── */
+    /* ── custom styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -422,14 +422,12 @@
         ADDRESS: 'address',
       };
 
-      // Map form type values to database values
       const TYPE_MAP = {
         'Rentals': 'rental',
         'Properties': 'property',
         'Lodges': 'lodge',
       };
 
-      // Map filter data-attribute to database type
       const FILTER_MAP = {
         'all': null,
         'rental': 'rental',
@@ -454,7 +452,7 @@
         favorites: new Set(),
       };
 
-      // ─── DOM refs (same as before) ──────────────────────────────────
+      // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -706,7 +704,7 @@
           </div>
         `;
 
-        // Attach event listeners
+        // Event listeners
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
@@ -1047,13 +1045,12 @@
         }
       }
 
-      // ─── Filter and Search (fixed) ─────────────────────────────
+      // ─── Filter and Search ─────────────────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
         let result = [...state.allProperties];
 
-        // Filter by type: use FILTER_MAP to get database value
         if (filter !== 'all') {
           const dbType = FILTER_MAP[filter];
           if (dbType) {
@@ -1061,7 +1058,6 @@
           }
         }
 
-        // Search by address or title
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();

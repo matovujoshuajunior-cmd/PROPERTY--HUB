@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Styles (kept compact) ── */
+    /* ── Styles (same as before, kept compact) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -84,7 +84,6 @@
     }
     .clear-btn-icon { display: none; }
 
-    /* modal backdrop */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
       display: flex; align-items: center; justify-content: center;
@@ -113,6 +112,11 @@
     }
     .favorite-btn.active { color: #ef4444; }
     .favorite-btn:hover { transform: scale(1.2); }
+
+    /* rating stars */
+    .stars { color: #f59e0b; letter-spacing: 2px; }
+    .stars .empty { color: #d1d5db; }
+    .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -393,7 +397,7 @@
       // ─── 🔧 CONFIGURATION ──────────────────────────────────────────
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',
-        IMAGE: 'media_urls',          // text[] array
+        IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
@@ -423,7 +427,7 @@
         isSignUpMode: false,
         myProperties: [],
         profilesMap: {},
-        favorites: new Set(), // store favorite property IDs
+        favorites: new Set(),
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -590,14 +594,25 @@
             if (error) throw error;
             state.favorites.add(propertyId);
           }
-          // re-render the grid to update heart icons (optimistic update)
           renderListings(state.filteredProperties);
         } catch (err) {
           alert('Error updating favorite: ' + err.message);
         }
       }
 
-      // ─── Render property card (with heart and edit button) ──────────
+      // ─── Render star rating ────────────────────────────────────────
+      function renderStars(rating) {
+        const full = Math.floor(rating);
+        const half = rating % 1 >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        let html = '';
+        for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+        if (half) html += '<i class="fas fa-star-half-alt"></i>';
+        for (let i = 0; i < empty; i++) html += '<i class="far fa-star empty"></i>';
+        return html;
+      }
+
+      // ─── Render property card (with ranking badges) ────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -607,10 +622,19 @@
         const tierLabel = getTierLabel(broker?.tier);
         const tierClass = getTierClass(broker?.tier);
         const isFav = state.favorites.has(property.id);
+        const rating = broker?.average_rating || 0;
+        const reviewCount = broker?.review_count || 0;
+        const leadScore = broker?.lead_score || 0;
 
         let actionsHtml = '';
         if (showEdit) {
           actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
+        }
+
+        // Boost lead score button (for demo)
+        let boostHtml = '';
+        if (showEdit && state.currentUser) {
+          boostHtml = `<button class="boost-btn text-xs text-emerald-600 hover:text-emerald-800 font-medium ml-2" data-broker-id="${state.currentUser.id}"><i class="fas fa-rocket mr-1"></i>Boost</button>`;
         }
 
         article.innerHTML = `
@@ -633,12 +657,21 @@
               <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
               <span class="line-clamp-1">${property[COLUMNS.ADDRESS] || 'Location not specified'}</span>
             </p>
-            <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
+
+            <!-- Broker rating & review count -->
+            <div class="mt-2 flex items-center gap-2 text-xs">
+              <span class="stars text-xs">${renderStars(rating)}</span>
+              <span class="text-slate-500">(${reviewCount})</span>
+              <span class="badge-lead">⚡ ${leadScore}</span>
+            </div>
+
+            <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 flex-wrap">
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
                 <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
               </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
               <div class="flex gap-2">
                 ${actionsHtml}
+                ${boostHtml}
                 <a href="${whatsappUrl(broker?.phone)}" target="_blank" 
                    class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
                   <i class="fab fa-whatsapp text-sm"></i> Chat
@@ -648,7 +681,7 @@
           </div>
         `;
 
-        // Heart toggle
+        // Favorite toggle
         const favBtn = article.querySelector('.favorite-btn');
         if (favBtn) {
           favBtn.addEventListener('click', (e) => {
@@ -666,6 +699,26 @@
           });
         }
 
+        // Boost button (increment lead score)
+        const boostBtn = article.querySelector('.boost-btn');
+        if (boostBtn) {
+          boostBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const brokerId = boostBtn.dataset.brokerId;
+            if (!brokerId) return;
+            try {
+              const { error } = await supabaseClient.rpc('increment_lead_score', { broker_id: brokerId, amount: 5 });
+              if (error) throw error;
+              alert('✅ Lead score boosted by 5!');
+              // Refresh data
+              await fetchAllData();
+              if (state.currentUser) await loadMyProperties();
+            } catch (err) {
+              alert('Error boosting lead score: ' + err.message);
+            }
+          });
+        }
+
         // Broker name click
         const nameLink = article.querySelector('.broker-name-link');
         if (nameLink) {
@@ -678,7 +731,7 @@
         return article;
       }
 
-      // ─── Render listings ──────────────────────────────────────────
+      // ─── Render listings (discovery) ──────────────────────────────
       function renderListings(properties) {
         listingsGrid.innerHTML = '';
         if (!properties || properties.length === 0) {
@@ -690,7 +743,6 @@
         propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
           const broker = prop.broker || state.profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null;
-          // In discovery view, show broker link and not edit
           const card = createPropertyCard(prop, broker, true, false);
           listingsGrid.appendChild(card);
         });
@@ -706,9 +758,8 @@
         myPropertiesEmpty.classList.add('hidden');
         state.myProperties.forEach(prop => {
           const broker = state.currentUser;
-          // show edit button on dashboard cards
           const card = createPropertyCard(prop, broker, false, true);
-          // Also add a delete button
+          // Delete button
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
           deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
@@ -732,20 +783,19 @@
           if (error) throw error;
           state.myProperties = state.myProperties.filter(p => p.id !== propId);
           renderMyProperties();
-          fetchAllData(); // refresh main grid
+          await fetchAllData();
         } catch (err) {
           alert('Delete failed: ' + err.message);
         }
       }
 
-      // ─── Edit Property modal ──────────────────────────────────────
+      // ─── Edit Property modal (same as before) ────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
         editPropertyId.value = propertyId;
         editTitle.value = prop[COLUMNS.TITLE] || '';
         editPrice.value = prop[COLUMNS.PRICE] || '';
-        // map database type back to form value
         const dbType = prop[COLUMNS.TYPE] || '';
         let formType = 'Rentals';
         if (dbType === 'property') formType = 'Properties';
@@ -754,11 +804,8 @@
         editType.value = formType;
         editAddress.value = prop[COLUMNS.ADDRESS] || '';
 
-        // Show existing images
         const images = getImageArray(prop);
         renderEditImagePreviews(images);
-
-        // Store current images for later update
         editModal._currentImages = images;
         editModal._propertyId = propertyId;
         editModal.classList.remove('hidden');
@@ -774,7 +821,6 @@
             <button class="remove-img" data-index="${index}">&times;</button>
           `;
           div.querySelector('.remove-img').addEventListener('click', () => {
-            // Remove from the temporary array
             const current = editModal._currentImages || [];
             current.splice(index, 1);
             renderEditImagePreviews(current);
@@ -784,26 +830,19 @@
         });
       }
 
-      // ─── Edit form submit ─────────────────────────────────────────
       editPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = editPropertyId.value;
         if (!id) return;
-
         const title = editTitle.value.trim();
         const price = parseFloat(editPrice.value);
         const type = editType.value;
         const address = editAddress.value.trim();
-
         if (!title || !price || !address) {
           alert('Please fill in all required fields.');
           return;
         }
-
-        // Get current images array
         let currentImages = editModal._currentImages || [];
-
-        // Upload new images if any
         const files = editImageInput.files;
         if (files && files.length > 0) {
           for (const file of files) {
@@ -824,10 +863,8 @@
               .getPublicUrl(filePath);
             currentImages.push(urlData.publicUrl);
           }
-          editImageInput.value = ''; // clear
+          editImageInput.value = '';
         }
-
-        // Update the property
         const dbType = TYPE_MAP[type] || type;
         const updateData = {
           [COLUMNS.TITLE]: title,
@@ -836,7 +873,6 @@
           [COLUMNS.ADDRESS]: address,
           [COLUMNS.IMAGE]: currentImages,
         };
-
         try {
           const { error } = await supabaseClient
             .from('properties')
@@ -845,7 +881,6 @@
           if (error) throw error;
           alert('✅ Property updated successfully!');
           editModal.classList.add('hidden');
-          // Refresh dashboard and discovery
           await loadMyProperties();
           await fetchAllData();
         } catch (err) {
@@ -853,7 +888,6 @@
         }
       });
 
-      // ─── Close modal ──────────────────────────────────────────────
       closeEditModal.addEventListener('click', () => {
         editModal.classList.add('hidden');
       });
@@ -861,7 +895,7 @@
         if (e.target === editModal) editModal.classList.add('hidden');
       });
 
-      // ─── Fetch all data (profiles + properties) ───────────────────
+      // ─── Fetch all data with new ranking algorithm ────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -869,39 +903,42 @@
         emptyState.classList.add('hidden');
 
         try {
-          // 1. Profiles
-          const { data: profiles, error: profilesError } = await supabaseClient
-            .from('profiles')
-            .select('*');
-          if (profilesError) throw profilesError;
-          const profilesMap = {};
-          (profiles || []).forEach(p => { profilesMap[p.id] = p; });
-          state.profilesMap = profilesMap;
-
-          // 2. Properties
-          const { data: properties, error: propsError } = await supabaseClient
+          // Use the new ranking query with join and multiple ordering
+          const { data: properties, error } = await supabaseClient
             .from('properties')
-            .select('*')
+            .select(`
+              *,
+              profiles!inner (
+                business_name,
+                tier,
+                phone,
+                average_rating,
+                review_count,
+                lead_score
+              )
+            `)
+            .order('average_rating', { foreignTable: 'profiles', ascending: false })
+            .order('lead_score', { foreignTable: 'profiles', ascending: false })
+            .order('review_count', { foreignTable: 'profiles', ascending: false })
             .order('created_at', { ascending: false });
-          if (propsError) throw propsError;
 
+          if (error) throw error;
+
+          // Transform to keep the same structure: property has a 'broker' key
           const enriched = (properties || []).map(prop => ({
             ...prop,
-            broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null
+            broker: prop.profiles,
           }));
 
-          const tierRank = { platinum: 0, gold: 1, bronze: 2 };
-          const sorted = enriched.sort((a, b) => {
-            const tierA = a.broker?.tier?.toLowerCase() || 'bronze';
-            const tierB = b.broker?.tier?.toLowerCase() || 'bronze';
-            const rankA = tierRank[tierA] ?? 2;
-            const rankB = tierRank[tierB] ?? 2;
-            if (rankA !== rankB) return rankA - rankB;
-            return new Date(b.created_at) - new Date(a.created_at);
+          // Also build profilesMap for other uses (e.g., broker profile view)
+          const profilesMap = {};
+          enriched.forEach(p => {
+            if (p.broker) profilesMap[p.broker.id] = p.broker;
           });
+          state.profilesMap = profilesMap;
 
-          state.allProperties = sorted;
-          state.filteredProperties = [...sorted];
+          state.allProperties = enriched;
+          state.filteredProperties = [...enriched];
           applyFiltersAndSearch();
 
         } catch (err) {
@@ -909,7 +946,7 @@
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
-              <p>Failed to load data. Check your column names.</p>
+              <p>Failed to load data. Check your database schema.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
             </div>
           `;
@@ -919,6 +956,7 @@
         }
       }
 
+      // ─── Filter & Search ──────────────────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
@@ -1001,8 +1039,7 @@
           brokerEmptyState.classList.add('hidden');
           brokerListingsGrid.innerHTML = '';
           props.forEach(prop => {
-            const brokerObj = broker;
-            const card = createPropertyCard(prop, brokerObj, false, false);
+            const card = createPropertyCard(prop, broker, false, false);
             brokerListingsGrid.appendChild(card);
           });
         } catch (err) {

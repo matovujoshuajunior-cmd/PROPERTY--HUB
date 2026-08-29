@@ -9,7 +9,7 @@
   <meta name="robots" content="index, follow" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph & Twitter Card (same as before) -->
   <meta property="og:title" content="Property Hub Uganda" />
   <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
   <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
@@ -20,18 +20,15 @@
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
-  <!-- ===== TAILWIND CSS (with robust fallback) ===== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" />
-  <link rel="stylesheet" href="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
-
-  <!-- ===== FONT AWESOME ===== -->
+  <!-- Tailwind CSS (static CDN) & Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
 
   <style>
-    /* ── Custom styles (applied on top of Tailwind) ── */
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: #f8fafc; }
+    /* ── Custom styles (same as before) ── */
+    body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
     .tier-Platinum { background: linear-gradient(135deg, #e5e4e2, #c0c0c0); color: #1a1a2e; }
@@ -89,6 +86,7 @@
     }
     .favorite-btn.active { color: #ef4444; }
     .favorite-btn:hover { transform: scale(1.2); }
+
     .stars { color: #f59e0b; letter-spacing: 2px; }
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
@@ -211,14 +209,7 @@
           </div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
-          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-          </div>
+          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div></div>
         </section>
       </section>
 
@@ -291,7 +282,7 @@
             </div>
           </div>
 
-          <!-- Profile Settings -->
+          <!-- Profile Settings (collapsible) -->
           <div id="settingsPanel" class="dashboard-card p-6 mb-8 hidden">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -431,12 +422,14 @@
         ADDRESS: 'address',
       };
 
+      // Map form type values to database values
       const TYPE_MAP = {
         'Rentals': 'rental',
         'Properties': 'property',
         'Lodges': 'lodge',
       };
 
+      // Map filter data-attribute to database type
       const FILTER_MAP = {
         'all': null,
         'rental': 'rental',
@@ -461,7 +454,7 @@
         favorites: new Set(),
       };
 
-      // ─── DOM refs ──────────────────────────────────────────────────
+      // ─── DOM refs (same as before) ──────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -517,6 +510,7 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
+      // Dashboard settings
       const settingsToggleBtn = $('#settingsToggleBtn');
       const settingsPanel = $('#settingsPanel');
       const profileSettingsForm = $('#profileSettingsForm');
@@ -524,6 +518,7 @@
       const settingsPhone = $('#settingsPhone');
       const profileStatus = $('#profileStatus');
 
+      // Modals
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
       const editPropertyForm = $('#editPropertyForm');
@@ -603,6 +598,7 @@
         }
       }
 
+      // ─── Render stars ──────────────────────────────────────────────
       function renderStars(rating) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -710,7 +706,7 @@
           </div>
         `;
 
-        // Event listeners
+        // Attach event listeners
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
@@ -996,7 +992,7 @@
         }
       });
 
-      // ─── Fetch all data ──────────────────────────────────────────
+      // ─── Fetch all data (no `bio`) ──────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1051,12 +1047,13 @@
         }
       }
 
-      // ─── Filter and Search ─────────────────────────────────────────
+      // ─── Filter and Search (fixed) ─────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
         let result = [...state.allProperties];
 
+        // Filter by type: use FILTER_MAP to get database value
         if (filter !== 'all') {
           const dbType = FILTER_MAP[filter];
           if (dbType) {
@@ -1064,6 +1061,7 @@
           }
         }
 
+        // Search by address or title
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();

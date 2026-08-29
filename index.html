@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Property Hub Uganda – Find Homes, Rentals &amp; Lodges</title>
   <meta name="description" content="Discover the best properties, rentals, and lodges across Uganda." />
   <link rel="canonical" href="https://yourdomain.com/" />
@@ -22,17 +23,28 @@
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
-  <!-- Tailwind CSS with fallback -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    if (!window.tailwind) {
-      document.write('<script src="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.js"><\/script>');
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Property Hub Uganda",
+    "url": "https://yourdomain.com/",
+    "description": "Discover properties, rentals, and lodges across Uganda.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://yourdomain.com/?search={search_term_string}",
+      "query-input": "required name=search_term_string"
     }
+  }
   </script>
+
+  <!-- Styles -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── base styles ── */
+    /* ── Styles (same as before, plus modal for reviews) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -105,6 +117,7 @@
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
 
+    /* Rating stars (clickable) */
     .star-rating .star {
       cursor: pointer; font-size: 2rem; color: #d1d5db; transition: 0.15s;
     }
@@ -151,7 +164,7 @@
     </div>
   </div>
 
-  <!-- ===== EDIT PROPERTY MODAL ===== -->
+  <!-- ===== EDIT PROPERTY MODAL (same as before) ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -269,25 +282,10 @@
                   <span id="brokerTierBadge" class="text-xs font-semibold px-3 py-1 rounded-full tier-Bronze">Bronze</span>
                   <span id="brokerPhone" class="text-sm text-slate-500 flex items-center gap-1"><i class="fas fa-phone-alt"></i> <span>—</span></span>
                 </div>
-                <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
-                  <span class="stars" id="brokerStars"></span>
-                  <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
-                  <span class="badge-lead" id="brokerLeadScore">⚡ 0</span>
-                </div>
               </div>
-              <div class="flex items-center gap-3">
-                <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-star"></i> Rate Broker
-                </button>
-                <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition">
-                  <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
-                </a>
-              </div>
+              <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition"><i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp</a>
             </div>
-            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl">
-              <i class="fas fa-store mr-1.5 text-slate-400"></i>
-              <span class="italic">Browse all properties listed by this broker.</span>
-            </p>
+            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl"><i class="fas fa-store mr-1.5 text-slate-400"></i> <span class="italic">Browse all properties listed by this broker.</span></p>
           </div>
           <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="brokerEmptyState" class="hidden text-center py-20"><i class="fas fa-box-open text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">This broker has no listings yet.</p></div>
@@ -324,7 +322,7 @@
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- Profile Settings -->
+          <!-- ===== PROFILE SETTINGS ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,6 +335,10 @@
                 <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
               </div>
               <div class="md:col-span-2">
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Bio</label>
+                <textarea id="settingsBio" rows="2" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="Tell clients about your services..."></textarea>
+              </div>
+              <div class="md:col-span-2">
                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
                   <i class="fas fa-save mr-2"></i> Update Profile
                 </button>
@@ -345,7 +347,7 @@
             <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- Add Property -->
+          <!-- ===== ADD PROPERTY FORM ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -363,7 +365,7 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- My Properties -->
+          <!-- ===== MY PROPERTIES LIST ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
         </div>
@@ -458,8 +460,8 @@
 
       // ─── CONFIGURATION ──────────────────────────────────────────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',      // column in properties linking to profiles.id
-        IMAGE: 'media_urls',          // array column for images
+        FOREIGN_KEY: 'owner_id',
+        IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
@@ -471,6 +473,8 @@
         'Properties': 'property',
         'Lodges': 'lodge',
       };
+
+      console.log('🔧 Using column mapping:', COLUMNS);
 
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -487,17 +491,20 @@
         myProperties: [],
         profilesMap: {},
         favorites: new Set(),
+        brokerProfile: null, // for profile settings
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
+      // Views
       const discoveryView = $('#discoveryView');
       const brokerView = $('#brokerView');
       const authView = $('#authView');
       const dashboardView = $('#dashboardView');
 
+      // Discovery
       const listingsGrid = $('#listingsGrid');
       const loadingSkeleton = $('#loadingSkeleton');
       const emptyState = $('#emptyState');
@@ -506,6 +513,7 @@
       const clearSearchBtn = $('#clearSearchBtn');
       const filterPills = $$('.filter-pill');
 
+      // Broker profile
       const brokerBusinessName = $('#brokerBusinessName');
       const brokerTierBadge = $('#brokerTierBadge');
       const brokerPhone = $('#brokerPhone');
@@ -514,11 +522,8 @@
       const brokerListingsGrid = $('#brokerListingsGrid');
       const brokerEmptyState = $('#brokerEmptyState');
       const backToDiscovery = $('#backToDiscovery');
-      const brokerStars = $('#brokerStars');
-      const brokerReviewCount = $('#brokerReviewCount');
-      const brokerLeadScore = $('#brokerLeadScore');
-      const rateBrokerBtn = $('#rateBrokerBtn');
 
+      // Auth
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
       const signUpFields = $('#signUpFields');
@@ -532,6 +537,7 @@
       const accTypeSelect = $('#accTypeSelect');
       const phoneInput = $('#phoneInput');
 
+      // Dashboard
       const addPropertyForm = $('#addPropertyForm');
       const propTitle = $('#propTitle');
       const propPrice = $('#propPrice');
@@ -545,7 +551,7 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // Modals
+      // Edit property modal
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
       const editPropertyForm = $('#editPropertyForm');
@@ -557,6 +563,7 @@
       const editImageInput = $('#editImageInput');
       const editImagePreviews = $('#editImagePreviews');
 
+      // Review modal
       const reviewModal = $('#reviewModal');
       const closeReviewModal = $('#closeReviewModal');
       const reviewForm = $('#reviewForm');
@@ -565,9 +572,11 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
+      // Profile settings
       const profileSettingsForm = $('#profileSettingsForm');
       const settingsBusinessName = $('#settingsBusinessName');
       const settingsPhone = $('#settingsPhone');
+      const settingsBio = $('#settingsBio');
       const profileStatus = $('#profileStatus');
 
       // ─── Helpers ────────────────────────────────────────────────────
@@ -630,7 +639,7 @@
         }
       }
 
-      // ─── Render stars ──────────────────────────────────────────────
+      // ─── Render stars (for display) ──────────────────────────────
       function renderStars(rating) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -670,7 +679,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card ──────────────────────────────────────
+      // ─── Create property card (with review & profile update) ─────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -688,11 +697,13 @@
         let actionsHtml = '';
         if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
 
+        // Boost button (only if owner)
         let boostHtml = '';
         if (showEdit && state.currentUser) {
           boostHtml = `<button class="boost-btn text-xs text-emerald-600 hover:text-emerald-800 font-medium ml-2" data-broker-id="${state.currentUser.id}"><i class="fas fa-rocket mr-1"></i>Boost</button>`;
         }
 
+        // Rate button (only if logged in, not owner)
         let rateHtml = '';
         if (state.currentUser && broker && !isOwner) {
           rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
@@ -740,6 +751,7 @@
           </div>
         `;
 
+        // Event listeners
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
@@ -928,6 +940,7 @@
         reviewModal.classList.remove('hidden');
       }
 
+      // Star selection
       starSelector.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
@@ -975,10 +988,8 @@
           if (error) throw error;
           alert('✅ Review submitted! Thank you.');
           reviewModal.classList.add('hidden');
+          // Refresh data to update ratings
           await fetchAllData();
-          if (state.currentBrokerId) {
-            await loadBrokerProfile(state.currentBrokerId);
-          }
         } catch (err) {
           alert('Error submitting review: ' + err.message);
         }
@@ -990,13 +1001,16 @@
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
-            .select('business_name, phone')
+            .select('business_name, phone, bio')
             .eq('id', state.currentUser.id)
             .single();
           if (error) throw error;
           settingsBusinessName.value = data.business_name || '';
           settingsPhone.value = data.phone || '';
-        } catch (err) { console.error('Error loading profile:', err); }
+          settingsBio.value = data.bio || '';
+        } catch (err) {
+          console.error('Error loading profile:', err);
+        }
       }
 
       profileSettingsForm.addEventListener('submit', async (e) => {
@@ -1004,19 +1018,23 @@
         if (!state.currentUser) return;
         const businessName = settingsBusinessName.value.trim();
         const phone = settingsPhone.value.trim();
+        const bio = settingsBio.value.trim();
 
         try {
           const { error } = await supabaseClient
             .from('profiles')
-            .update({ business_name: businessName, phone: phone })
+            .update({ business_name: businessName, phone: phone, bio: bio })
             .eq('id', state.currentUser.id);
           if (error) throw error;
           profileStatus.textContent = '✅ Profile updated successfully!';
           profileStatus.className = 'mt-3 text-sm text-emerald-600';
+          // Update local state (for display)
           if (state.currentUser) {
             state.currentUser.business_name = businessName;
             state.currentUser.phone = phone;
+            state.currentUser.bio = bio;
           }
+          // Refresh data to reflect changes
           await fetchAllData();
           if (state.currentUser) await loadMyProperties();
         } catch (err) {
@@ -1025,7 +1043,7 @@
         }
       });
 
-      // ─── Fetch all data (no `bio`) ──────────────────────────────
+      // ─── Fetch all data with ranking ──────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1043,7 +1061,8 @@
                 phone,
                 average_rating,
                 review_count,
-                lead_score
+                lead_score,
+                bio
               )
             `)
             .order('average_rating', { foreignTable: 'profiles', ascending: false })
@@ -1144,20 +1163,7 @@
           brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
           brokerWhatsAppLink.href = whatsappUrl(phone);
           brokerWhatsAppLink.style.display = phone ? 'inline-flex' : 'none';
-
-          const rating = broker.average_rating || 0;
-          const reviewCount = broker.review_count || 0;
-          const leadScore = broker.lead_score || 0;
-          brokerStars.innerHTML = renderStars(rating);
-          brokerReviewCount.textContent = `(${reviewCount} reviews)`;
-          brokerLeadScore.textContent = `⚡ ${leadScore}`;
-
-          if (state.currentUser && state.currentUser.id !== brokerId) {
-            rateBrokerBtn.classList.remove('hidden');
-            rateBrokerBtn.onclick = () => openReviewModal(brokerId);
-          } else {
-            rateBrokerBtn.classList.add('hidden');
-          }
+          brokerBio.innerHTML = `<i class="fas fa-store mr-1.5 text-slate-400"></i> <span>${broker.bio || 'Professional real estate broker.'}</span>`;
 
           const { data: props, error: propsError } = await supabaseClient
             .from('properties')
@@ -1435,6 +1441,7 @@
 
       // ─── Init ────────────────────────────────────────────────────────
       async function init() {
+        // Email verification
         const hash = window.location.hash;
         if (hash && hash.includes('access_token')) {
           const params = new URLSearchParams(hash.substring(1));

@@ -9,25 +9,30 @@
   <meta name="robots" content="index, follow" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
 
-  <!-- Open Graph & Twitter Card (same as before) -->
+  <!-- Open Graph -->
   <meta property="og:title" content="Property Hub Uganda" />
   <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
   <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
   <meta property="og:url" content="https://yourdomain.com/" />
   <meta property="og:type" content="website" />
+
+  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Property Hub Uganda" />
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
-  <!-- Tailwind CSS (static CDN) & Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
-  <link href="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.css" rel="stylesheet" />
+  <!-- Tailwind CSS with fallback -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    if (!window.tailwind) {
+      document.write('<script src="https://unpkg.com/tailwindcss@3.4.0/dist/tailwind.min.js"><\/script>');
+    }
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0-beta3/css/all.css" />
 
   <style>
-    /* ── Custom styles (same as before) ── */
+    /* ── base styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -56,22 +61,31 @@
       transition: opacity 0.5s;
     }
     #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
-    .loader { border: 4px solid #f3f4f6; border-top: 4px solid #4f46e5; border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite; }
+    .loader {
+      border: 4px solid #f3f4f6; border-top: 4px solid #4f46e5;
+      border-radius: 50%; width: 48px; height: 48px; animation: spin 1s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @media (max-width: 640px) { .clear-btn-text { display: none; } .clear-btn-icon { display: inline; } }
+    @media (max-width: 640px) {
+      .clear-btn-text { display: none; }
+      .clear-btn-icon { display: inline; }
+    }
     .clear-btn-icon { display: none; }
 
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
       display: flex; align-items: center; justify-content: center;
-      padding: 1rem; backdrop-filter: blur(4px);
+      padding: 1rem;
+      backdrop-filter: blur(4px);
     }
     .modal-backdrop.hidden { display: none; }
     .modal-content {
       background: white; border-radius: 2rem; max-width: 600px; width: 100%;
       max-height: 90vh; overflow-y: auto; padding: 2rem;
     }
-    .image-thumb { position: relative; display: inline-block; margin: 0.25rem; }
+    .image-thumb {
+      position: relative; display: inline-block; margin: 0.25rem;
+    }
     .image-thumb img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
     .image-thumb .remove-img {
       position: absolute; top: -6px; right: -6px;
@@ -90,7 +104,10 @@
     .stars { color: #f59e0b; letter-spacing: 2px; }
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
-    .star-rating .star { cursor: pointer; font-size: 2rem; color: #d1d5db; transition: 0.15s; }
+
+    .star-rating .star {
+      cursor: pointer; font-size: 2rem; color: #d1d5db; transition: 0.15s;
+    }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
   </style>
@@ -143,14 +160,34 @@
       </div>
       <form id="editPropertyForm" class="space-y-4">
         <input type="hidden" id="editPropertyId" />
-        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="editPrice" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="editType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-          <option value="Rentals">Rentals</option><option value="Properties">Properties</option><option value="Lodges">Lodges</option>
-        </select></div>
-        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="editAddress" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div><input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-save mr-2"></i> Update Property</button>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label>
+          <input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label>
+          <input type="number" id="editPrice" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label>
+          <select id="editType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
+            <option value="Rentals">Rentals</option>
+            <option value="Properties">Properties</option>
+            <option value="Lodges">Lodges</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label>
+          <input type="text" id="editAddress" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label>
+          <div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div>
+          <input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-save mr-2"></i> Update Property
+        </button>
       </form>
     </div>
   </div>
@@ -209,7 +246,14 @@
           </div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
-          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div></div>
+          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+            <div class="skeleton-card" style="display:block;">&nbsp;</div>
+          </div>
         </section>
       </section>
 
@@ -240,7 +284,10 @@
                 </a>
               </div>
             </div>
-            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl"><i class="fas fa-store mr-1.5 text-slate-400"></i> <span class="italic">Browse all properties listed by this broker.</span></p>
+            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl">
+              <i class="fas fa-store mr-1.5 text-slate-400"></i>
+              <span class="italic">Browse all properties listed by this broker.</span>
+            </p>
           </div>
           <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="brokerEmptyState" class="hidden text-center py-20"><i class="fas fa-box-open text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">This broker has no listings yet.</p></div>
@@ -274,16 +321,11 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
-            <div class="flex gap-2">
-              <button id="settingsToggleBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2">
-                <i class="fas fa-cog"></i> Settings
-              </button>
-              <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
-            </div>
+            <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- Profile Settings (collapsible) -->
-          <div id="settingsPanel" class="dashboard-card p-6 mb-8 hidden">
+          <!-- Profile Settings -->
+          <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -310,7 +352,9 @@
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="propTitle" required placeholder="e.g. Modern 3-Bedroom Villa" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="propPrice" required placeholder="e.g. 250000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-                <option value="Rentals">Rentals</option><option value="Properties">Properties</option><option value="Lodges">Lodges</option>
+                <option value="Rentals">Rentals</option>
+                <option value="Properties">Properties</option>
+                <option value="Lodges">Lodges</option>
               </select></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><input type="file" id="propImage" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
@@ -414,27 +458,18 @@
 
       // ─── CONFIGURATION ──────────────────────────────────────────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',
-        IMAGE: 'media_urls',
+        FOREIGN_KEY: 'owner_id',      // column in properties linking to profiles.id
+        IMAGE: 'media_urls',          // array column for images
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
         ADDRESS: 'address',
       };
 
-      // Map form type values to database values
       const TYPE_MAP = {
         'Rentals': 'rental',
         'Properties': 'property',
         'Lodges': 'lodge',
-      };
-
-      // Map filter data-attribute to database type
-      const FILTER_MAP = {
-        'all': null,
-        'rental': 'rental',
-        'property': 'property',
-        'lodge': 'lodge',
       };
 
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -454,7 +489,7 @@
         favorites: new Set(),
       };
 
-      // ─── DOM refs (same as before) ──────────────────────────────────
+      // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -510,14 +545,6 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // Dashboard settings
-      const settingsToggleBtn = $('#settingsToggleBtn');
-      const settingsPanel = $('#settingsPanel');
-      const profileSettingsForm = $('#profileSettingsForm');
-      const settingsBusinessName = $('#settingsBusinessName');
-      const settingsPhone = $('#settingsPhone');
-      const profileStatus = $('#profileStatus');
-
       // Modals
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
@@ -537,6 +564,11 @@
       const reviewRating = $('#reviewRating');
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
+
+      const profileSettingsForm = $('#profileSettingsForm');
+      const settingsBusinessName = $('#settingsBusinessName');
+      const settingsPhone = $('#settingsPhone');
+      const profileStatus = $('#profileStatus');
 
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
@@ -655,10 +687,12 @@
 
         let actionsHtml = '';
         if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
+
         let boostHtml = '';
         if (showEdit && state.currentUser) {
           boostHtml = `<button class="boost-btn text-xs text-emerald-600 hover:text-emerald-800 font-medium ml-2" data-broker-id="${state.currentUser.id}"><i class="fas fa-rocket mr-1"></i>Boost</button>`;
         }
+
         let rateHtml = '';
         if (state.currentUser && broker && !isOwner) {
           rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
@@ -706,15 +740,16 @@
           </div>
         `;
 
-        // Attach event listeners
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
         });
+
         article.querySelector('.edit-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           openEditModal(property.id);
         });
+
         article.querySelector('.boost-btn')?.addEventListener('click', async e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
@@ -726,11 +761,13 @@
             if (state.currentUser) await loadMyProperties();
           } catch (err) { alert('Error boosting lead score: ' + err.message); }
         });
+
         article.querySelector('.rate-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           openReviewModal(brokerId);
         });
+
         article.querySelector('.broker-name-link')?.addEventListener('click', e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
@@ -948,10 +985,6 @@
       });
 
       // ─── Profile Settings ──────────────────────────────────────────
-      settingsToggleBtn.addEventListener('click', () => {
-        settingsPanel.classList.toggle('hidden');
-      });
-
       async function loadProfileSettings() {
         if (!state.currentUser) return;
         try {
@@ -1047,21 +1080,17 @@
         }
       }
 
-      // ─── Filter and Search (fixed) ─────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
         let result = [...state.allProperties];
 
-        // Filter by type: use FILTER_MAP to get database value
-        if (filter !== 'all') {
-          const dbType = FILTER_MAP[filter];
-          if (dbType) {
-            result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === dbType);
-          }
+        const filterMap = { 'all': 'all', 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
+        const mappedFilter = filterMap[filter] || filter;
+        if (mappedFilter !== 'all') {
+          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === mappedFilter.toLowerCase());
         }
 
-        // Search by address or title
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();

@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Your original styles ── */
+    /* ── Styles (unchanged) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -204,7 +204,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: QUIZ MODAL ===== -->
+  <!-- ===== QUIZ MODAL (Hardcoded questions) ===== -->
   <div id="quizModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-lg">
       <div class="flex justify-between items-center mb-4">
@@ -213,6 +213,7 @@
       </div>
       <form id="quizForm">
         <input type="hidden" id="quizPropertyId" />
+        <!-- Step 1: Contact Info -->
         <div id="quizStep1">
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label>
@@ -228,8 +229,41 @@
           </div>
           <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
         </div>
+
+        <!-- Step 2: Hardcoded Questions -->
         <div id="quizStep2" class="hidden">
-          <div id="quizQuestionsContainer" class="space-y-4"></div>
+          <div id="quizQuestionsContainer" class="space-y-4">
+            <!-- Question 1: Timeline -->
+            <div class="mb-4">
+              <p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p>
+              <div class="flex flex-wrap gap-2">
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q1" value="1" required /> More than 6 months
+                </label>
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q1" value="2" /> 1 – 6 months
+                </label>
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q1" value="3" /> Less than 1 month / ASAP
+                </label>
+              </div>
+            </div>
+            <!-- Question 2: Budget -->
+            <div class="mb-4">
+              <p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p>
+              <div class="flex flex-wrap gap-2">
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q2" value="1" required /> Below property price
+                </label>
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q2" value="2" /> Matches property price
+                </label>
+                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+                  <input type="radio" name="q2" value="3" /> Above property price
+                </label>
+              </div>
+            </div>
+          </div>
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4">
             <i class="fas fa-paper-plane mr-2"></i> Submit Request
           </button>
@@ -238,7 +272,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: WAITING ROOM ===== -->
+  <!-- ===== WAITING ROOM ===== -->
   <div id="waitingModal" class="modal-backdrop hidden">
     <div class="modal-content text-center max-w-md">
       <div class="py-8">
@@ -252,7 +286,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: OTP VERIFICATION ===== -->
+  <!-- ===== OTP VERIFICATION ===== -->
   <div id="otpModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
@@ -393,7 +427,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (Clean) ===== -->
+      <!-- ===== DASHBOARD VIEW ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -453,7 +487,6 @@
   ============================================================ -->
 
   <script>
-    // ─── Supabase Config ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
   </script>
@@ -535,7 +568,7 @@
       'use strict';
 
       // ─── CONFIGURATION ──────────────────────────────────────────────
-      // 🔥 IMPORTANT: Change 'owner_id' if your column is named differently (e.g., 'user_id', 'broker_id')
+      // 🔥 IMPORTANT: Change 'owner_id' to match your actual foreign key column name
       const COLUMNS = {
         FOREIGN_KEY: 'owner_id',
         IMAGE: 'media_urls',
@@ -572,7 +605,7 @@
         brokerProfile: null,
       };
 
-      // ─── DOM refs ──────────────────────────────────────────────────
+      // ─── DOM refs (complete set) ──────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -652,7 +685,7 @@
       const settingsPhone = $('#settingsPhone');
       const profileStatus = $('#profileStatus');
 
-      // ─── New DOM refs ──────────────────────────────────────────────
+      // Quiz modals
       const quizModal = $('#quizModal');
       const closeQuizModal = $('#closeQuizModal');
       const quizForm = $('#quizForm');
@@ -1142,7 +1175,7 @@
         }
       });
 
-      // ─── Fetch all data (TWO-STEP) ────────────────────────────────
+      // ─── Fetch all data (two‑step) ────────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1177,7 +1210,7 @@
             broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null,
           }));
 
-          // 4️⃣ Sort by tier (Platinum > Gold > Bronze) and then by rating/score
+          // 4️⃣ Sort by tier (Platinum > Gold > Bronze) then lead score
           const tierOrder = { 'platinum': 3, 'gold': 2, 'bronze': 1 };
           enriched.sort((a, b) => {
             const aTier = tierOrder[(a.broker?.tier || 'bronze').toLowerCase()] || 0;
@@ -1210,12 +1243,14 @@
         const query = state.searchQuery.trim().toLowerCase();
         let result = [...state.allProperties];
 
-        const filterMap = { 'all': 'all', 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
-        const mappedFilter = filterMap[filter] || filter;
-        if (mappedFilter !== 'all') {
-          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === mappedFilter.toLowerCase());
+        // Apply category filter (unless "all")
+        if (filter !== 'all') {
+          const typeMap = { 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
+          const targetType = typeMap[filter];
+          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === targetType.toLowerCase());
         }
 
+        // Apply search query
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
@@ -1515,28 +1550,13 @@
         }
       }
 
-      // ─── QUIZ FLOW ──────────────────────────────────────────────────
+      // ─── QUIZ FLOW (Hardcoded questions) ──────────────────────────
       async function openQuizModal(propertyId) {
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');
         quizStep2.classList.add('hidden');
         quizForm.reset();
         quizModal.classList.remove('hidden');
-        await loadQuizQuestions();
-      }
-
-      async function loadQuizQuestions() {
-        try {
-          const { data, error } = await supabaseClient
-            .from('quiz_questions')
-            .select('*, quiz_options(*)')
-            .order('display_order');
-          if (error) throw error;
-          window._quizQuestions = data || [];
-        } catch (err) {
-          console.error('Error loading quiz:', err);
-          window._quizQuestions = [];
-        }
       }
 
       quizNextBtn.addEventListener('click', function() {
@@ -1549,33 +1569,7 @@
         }
         quizStep1.classList.add('hidden');
         quizStep2.classList.remove('hidden');
-        renderQuizQuestions();
       });
-
-      function renderQuizQuestions() {
-        const container = quizQuestionsContainer;
-        container.innerHTML = '';
-        const questions = window._quizQuestions || [];
-        if (questions.length === 0) {
-          container.innerHTML = '<p class="text-slate-500">No quiz questions configured.</p>';
-          return;
-        }
-        questions.forEach((q, idx) => {
-          const div = document.createElement('div');
-          div.className = 'mb-4';
-          let optionsHtml = q.quiz_options.map(opt => `
-            <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-              <input type="radio" name="q_${q.id}" value="${opt.score_value}" data-question="${q.id}" required />
-              ${opt.option_text}
-            </label>
-          `).join('');
-          div.innerHTML = `
-            <p class="font-medium text-slate-700 text-sm mb-1">${idx+1}. ${q.question_text}</p>
-            <div class="flex flex-wrap gap-2">${optionsHtml}</div>
-          `;
-          container.appendChild(div);
-        });
-      }
 
       quizForm.addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -1584,23 +1578,25 @@
         const email = quizEmail.value.trim();
         const whatsapp = quizWhatsapp.value.trim();
 
-        const radioGroups = document.querySelectorAll('#quizQuestionsContainer input[type="radio"]:checked');
-        if (radioGroups.length === 0) {
-          alert('Please answer all quiz questions.');
+        // Get selected answers
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        if (!q1 || !q2) {
+          alert('Please answer both quiz questions.');
           return;
         }
-        const answers = {};
-        let totalScore = 0;
-        radioGroups.forEach(radio => {
-          const qId = radio.dataset.question;
-          const score = parseInt(radio.value);
-          answers[qId] = score;
-          totalScore += score;
-        });
 
+        const score1 = parseInt(q1.value);
+        const score2 = parseInt(q2.value);
+        const totalScore = score1 + score2;
+
+        // Determine lead type
         let leadType = 'cold';
         if (totalScore >= 7) leadType = 'hot';
         else if (totalScore >= 4) leadType = 'warm';
+
+        // Build answers object (for the Edge Function)
+        const answers = { q1: score1, q2: score2 };
 
         try {
           const { data, error } = await supabaseClient.functions.invoke('request-lead', {

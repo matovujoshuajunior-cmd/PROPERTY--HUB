@@ -122,6 +122,17 @@
     }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
+
+    /* Debug info */
+    #debugInfo {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: #475569;
+    }
   </style>
 </head>
 <body>
@@ -132,7 +143,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== REVIEW MODAL ===== -->
+  <!-- ===== REVIEW MODAL (unchanged) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -204,7 +215,7 @@
     </div>
   </div>
 
-  <!-- ===== QUIZ MODAL (Hardcoded questions) ===== -->
+  <!-- ===== QUIZ MODAL (Hardcoded) ===== -->
   <div id="quizModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-lg">
       <div class="flex justify-between items-center mb-4">
@@ -213,7 +224,6 @@
       </div>
       <form id="quizForm">
         <input type="hidden" id="quizPropertyId" />
-        <!-- Step 1: Contact Info -->
         <div id="quizStep1">
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label>
@@ -229,11 +239,9 @@
           </div>
           <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
         </div>
-
-        <!-- Step 2: Hardcoded Questions -->
         <div id="quizStep2" class="hidden">
           <div id="quizQuestionsContainer" class="space-y-4">
-            <!-- Question 1: Timeline -->
+            <!-- Question 1 -->
             <div class="mb-4">
               <p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p>
               <div class="flex flex-wrap gap-2">
@@ -248,7 +256,7 @@
                 </label>
               </div>
             </div>
-            <!-- Question 2: Budget -->
+            <!-- Question 2 -->
             <div class="mb-4">
               <p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p>
               <div class="flex flex-wrap gap-2">
@@ -355,6 +363,8 @@
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="lodge"><i class="fas fa-bed mr-1.5"></i> Lodges</button>
             <span class="text-xs text-slate-400 ml-2 hidden sm:inline"><i class="fas fa-arrow-right mr-1"></i> Premium first</span>
           </div>
+          <!-- Debug info -->
+          <div id="debugInfo" class="hidden">Debug: <span id="debugMessage">Loading...</span></div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
           <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -567,20 +577,15 @@
     function startApp() {
       'use strict';
 
-      // ─── CONFIGURATION ──────────────────────────────────────────────
-      const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',   // Change if your column is named differently
+      // ─── Column mapping (will be auto-detected) ────────────────────
+      // We'll detect the broker ID column name from the first property
+      let COLUMNS = {
+        FOREIGN_KEY: null, // will be set dynamically
         IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
         TYPE: 'property_type',
         ADDRESS: 'address',
-      };
-
-      const TYPE_MAP = {
-        'Rentals': 'rental',
-        'Properties': 'property',
-        'Lodges': 'lodge',
       };
 
       console.log('🔧 Using column mapping:', COLUMNS);
@@ -604,7 +609,7 @@
         brokerProfile: null,
       };
 
-      // ─── DOM refs (complete) ──────────────────────────────────────
+      // ─── DOM refs ──────────────────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -620,6 +625,9 @@
       const searchInput = $('#searchInput');
       const clearSearchBtn = $('#clearSearchBtn');
       const filterPills = $$('.filter-pill');
+
+      const debugInfo = $('#debugInfo');
+      const debugMessage = $('#debugMessage');
 
       const brokerBusinessName = $('#brokerBusinessName');
       const brokerTierBadge = $('#brokerTierBadge');
@@ -779,7 +787,7 @@
         return html;
       }
 
-      // ─── Favorites (unchanged) ─────────────────────────────────────
+      // ─── Favorites ──────────────────────────────────────────────────
       async function fetchFavorites() {
         if (!state.currentUser) return;
         try {
@@ -807,7 +815,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card (unchanged) ──────────────────────────
+      // ─── Create property card ──────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -1174,12 +1182,14 @@
         }
       });
 
-      // ─── Fetch all data (two‑step) ────────────────────────────────
+      // ─── Fetch all data (robust version) ──────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
         listingsGrid.innerHTML = '';
         emptyState.classList.add('hidden');
+        debugInfo.classList.remove('hidden');
+        debugMessage.textContent = 'Fetching properties...';
 
         try {
           // 1️⃣ Fetch all properties
@@ -1190,26 +1200,74 @@
 
           if (propError) throw propError;
 
-          // 2️⃣ Fetch all profiles for the broker IDs
-          const brokerIds = [...new Set(properties.map(p => p[COLUMNS.FOREIGN_KEY]).filter(id => id))];
+          if (!properties || properties.length === 0) {
+            debugMessage.textContent = '✅ 0 properties found. Your table might be empty.';
+            loadingSkeleton.style.display = 'none';
+            state.allProperties = [];
+            state.filteredProperties = [];
+            renderListings([]);
+            state.isLoading = false;
+            return;
+          }
+
+          debugMessage.textContent = `✅ Found ${properties.length} properties. Fetching broker details...`;
+
+          // 2️⃣ Auto-detect the foreign key column name
+          // Look for common names: owner_id, user_id, broker_id, created_by, etc.
+          const firstProp = properties[0];
+          const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
+          let fkColumn = null;
+          for (const key of possibleKeys) {
+            if (firstProp.hasOwnProperty(key)) {
+              fkColumn = key;
+              break;
+            }
+          }
+          // If none found, just use the first column that ends with '_id' or looks like a UUID
+          if (!fkColumn) {
+            for (const key of Object.keys(firstProp)) {
+              if (key.endsWith('_id') && typeof firstProp[key] === 'string' && firstProp[key].length > 20) {
+                fkColumn = key;
+                break;
+              }
+            }
+          }
+          // If still none, we'll just skip broker enrichment
+          if (!fkColumn) {
+            console.warn('⚠️ Could not detect foreign key column. Broker names will be "Unknown".');
+            debugMessage.textContent += ' (no broker ID column)';
+          } else {
+            COLUMNS.FOREIGN_KEY = fkColumn;
+            debugMessage.textContent += ` Using foreign key: "${fkColumn}"`;
+            console.log('✅ Detected foreign key column:', fkColumn);
+          }
+
+          // 3️⃣ Fetch profiles for those broker IDs (if we have a column)
           let profilesMap = {};
-          if (brokerIds.length > 0) {
-            const { data: profiles, error: profError } = await supabaseClient
-              .from('profiles')
-              .select('*')
-              .in('id', brokerIds);
-            if (profError) throw profError;
-            profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+          if (fkColumn) {
+            const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
+            if (brokerIds.length > 0) {
+              const { data: profiles, error: profError } = await supabaseClient
+                .from('profiles')
+                .select('*')
+                .in('id', brokerIds);
+              if (profError) {
+                console.warn('⚠️ Could not fetch profiles:', profError);
+              } else {
+                profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+                debugMessage.textContent += ` (${Object.keys(profilesMap).length} brokers loaded)`;
+              }
+            }
           }
           state.profilesMap = profilesMap;
 
-          // 3️⃣ Enrich properties with broker data
-          const enriched = (properties || []).map(prop => ({
+          // 4️⃣ Enrich properties with broker data
+          const enriched = properties.map(prop => ({
             ...prop,
-            broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null,
+            broker: fkColumn ? profilesMap[prop[fkColumn]] || null : null,
           }));
 
-          // 4️⃣ Sort by tier (Platinum > Gold > Bronze) then lead score
+          // 5️⃣ Sort by tier (Platinum > Gold > Bronze) then lead score
           const tierOrder = { 'platinum': 3, 'gold': 2, 'bronze': 1 };
           enriched.sort((a, b) => {
             const aTier = tierOrder[(a.broker?.tier || 'bronze').toLowerCase()] || 0;
@@ -1220,15 +1278,17 @@
 
           state.allProperties = enriched;
           state.filteredProperties = [...enriched];
+          debugMessage.textContent += ` ✅ Ready.`;
           applyFiltersAndSearch();
         } catch (err) {
           console.error('❌ Error fetching data:', err);
+          debugMessage.textContent = `❌ Error: ${err.message}`;
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
               <p>Failed to load properties.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
-              <p class="text-xs text-slate-400 mt-2">Check that your 'properties' table has an 'owner_id' column referencing 'profiles(id)'.</p>
+              <p class="text-xs text-slate-400 mt-2">Check your Supabase table and permissions.</p>
             </div>
           `;
         } finally {
@@ -1237,25 +1297,19 @@
         }
       }
 
-      // ─── 🔥 FIXED: applyFiltersAndSearch() – now works correctly ──
+      // ─── applyFiltersAndSearch (fixed) ────────────────────────────
       function applyFiltersAndSearch() {
-        const filter = state.currentFilter; // 'all', 'rental', 'property', 'lodge'
+        const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
-
-        // Start with the full list of all properties (already sorted by rank)
         let result = [...state.allProperties];
 
-        // Apply category filter (unless "all")
         if (filter !== 'all') {
-          // The filter value is already lowercase ('rental', 'property', 'lodge')
-          // Compare against the property type from the database (also lowercased)
           result = result.filter(p => {
             const dbType = (p[COLUMNS.TYPE] || '').toLowerCase();
             return dbType === filter;
           });
         }
 
-        // Apply search query (if any)
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
@@ -1264,12 +1318,11 @@
           });
         }
 
-        // Store filtered list and render
         state.filteredProperties = result;
         renderListings(result);
       }
 
-      // ─── Navigation ────────────────────────────────────────────────
+      // ─── Navigation (unchanged) ────────────────────────────────────
       async function navigateToBroker(brokerId) {
         if (!brokerId) return;
         state.currentBrokerId = brokerId;
@@ -1327,7 +1380,7 @@
           const { data: props, error: propsError } = await supabaseClient
             .from('properties')
             .select('*')
-            .eq(COLUMNS.FOREIGN_KEY, brokerId)
+            .eq(COLUMNS.FOREIGN_KEY || 'owner_id', brokerId)
             .order('created_at', { ascending: false });
           if (propsError) throw propsError;
 
@@ -1376,7 +1429,7 @@
           const { data, error } = await supabaseClient
             .from('properties')
             .select('*')
-            .eq(COLUMNS.FOREIGN_KEY, state.currentUser.id)
+            .eq(COLUMNS.FOREIGN_KEY || 'owner_id', state.currentUser.id)
             .order('created_at', { ascending: false });
           if (error) throw error;
           state.myProperties = data || [];
@@ -1385,13 +1438,14 @@
           console.error('Error loading my properties:', err);
           myPropertiesList.innerHTML = `
             <div class="col-span-full text-center py-8 text-slate-500">
-              Could not load your properties. Check RLS policies and column '${COLUMNS.FOREIGN_KEY}'.
+              Could not load your properties. Check RLS policies and column '${COLUMNS.FOREIGN_KEY || 'owner_id'}'.
             </div>
           `;
         }
       }
 
       // ─── Add Property ──────────────────────────────────────────────
+      // (Add property uses COLUMNS.FOREIGN_KEY if available, otherwise uses 'owner_id')
       addPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
@@ -1431,13 +1485,14 @@
         }
 
         const dbType = TYPE_MAP[type] || type;
+        const fkCol = COLUMNS.FOREIGN_KEY || 'owner_id';
         const insertData = {
           [COLUMNS.TITLE]: title,
           [COLUMNS.PRICE]: price,
           [COLUMNS.TYPE]: dbType,
           [COLUMNS.ADDRESS]: address,
           [COLUMNS.IMAGE]: imageUrls,
-          [COLUMNS.FOREIGN_KEY]: state.currentUser.id,
+          [fkCol]: state.currentUser.id,
         };
 
         try {
@@ -1556,7 +1611,7 @@
         }
       }
 
-      // ─── QUIZ FLOW (Hardcoded questions) ──────────────────────────
+      // ─── QUIZ FLOW (Hardcoded) ────────────────────────────────────
       async function openQuizModal(propertyId) {
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');

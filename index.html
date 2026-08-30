@@ -44,13 +44,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Your original styles (unchanged) ── */
+    /* ── Styles (unchanged) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
-    .tier-Platinum { background: linear-gradient(135deg, #e5e4e2, #c0c0c0); color: #1a1a2e; }
-    .tier-Gold { background: linear-gradient(135deg, #f9d976, #f39c12); color: #1a1a2e; }
-    .tier-Bronze { background: linear-gradient(135deg, #e8a87c, #d35400); color: #fff; }
     .hero-gradient { background: linear-gradient(135deg, rgba(15,23,42,0.88) 0%, rgba(30,58,95,0.72) 100%); }
     .filter-pill.active { background: #1e293b; color: #fff; border-color: #1e293b; }
     .filter-pill { transition: all 0.15s ease; cursor: pointer; user-select: none; }
@@ -123,7 +120,6 @@
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
 
-    /* Debug info */
     #debugInfo {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -143,7 +139,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== REVIEW MODAL (unchanged) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -387,7 +383,7 @@
               <div>
                 <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
                 <div class="flex items-center gap-3 mt-1.5">
-                  <span id="brokerTierBadge" class="text-xs font-semibold px-3 py-1 rounded-full tier-Bronze">Bronze</span>
+                  <!-- Tier badge removed -->
                   <span id="brokerPhone" class="text-sm text-slate-500 flex items-center gap-1"><i class="fas fa-phone-alt"></i> <span>—</span></span>
                 </div>
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
@@ -437,7 +433,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW ===== -->
+      <!-- ===== DASHBOARD VIEW (with collapsible profile) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -445,25 +441,33 @@
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- ===== PROFILE SETTINGS ===== -->
+          <!-- ===== PROFILE SETTINGS (collapsible) ===== -->
           <div class="dashboard-card p-6 mb-8">
-            <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
-            <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
-                <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
-                <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
-              </div>
-              <div class="md:col-span-2">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
-                  <i class="fas fa-save mr-2"></i> Update Profile
-                </button>
-              </div>
-            </form>
-            <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-slate-700">⚙️ Profile Settings</h3>
+              <button id="toggleProfileForm" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition">
+                <i class="fas fa-edit mr-1"></i> <span id="profileToggleLabel">Edit Profile</span>
+              </button>
+            </div>
+            <div id="profileFormContainer" class="hidden">
+              <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
+                  <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
+                  <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
+                </div>
+                <div class="md:col-span-2">
+                  <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
+                    <i class="fas fa-save mr-2"></i> Save Profile
+                  </button>
+                  <button type="button" id="cancelProfileEdit" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
+                </div>
+              </form>
+              <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
+            </div>
           </div>
 
           <!-- ===== ADD PROPERTY FORM ===== -->
@@ -577,10 +581,9 @@
     function startApp() {
       'use strict';
 
-      // ─── Column mapping (will be auto-detected) ────────────────────
-      // We'll detect the broker ID column name from the first property
+      // ─── Column mapping ─────────────────────────────────────────────
       let COLUMNS = {
-        FOREIGN_KEY: null, // will be set dynamically
+        FOREIGN_KEY: null,
         IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
@@ -588,9 +591,14 @@
         ADDRESS: 'address',
       };
 
+      const TYPE_MAP = {
+        'Rentals': 'rental',
+        'Properties': 'property',
+        'Lodges': 'lodge',
+      };
+
       console.log('🔧 Using column mapping:', COLUMNS);
 
-      // ─── Supabase Client ────────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // ─── State ──────────────────────────────────────────────────────
@@ -630,7 +638,6 @@
       const debugMessage = $('#debugMessage');
 
       const brokerBusinessName = $('#brokerBusinessName');
-      const brokerTierBadge = $('#brokerTierBadge');
       const brokerPhone = $('#brokerPhone');
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
       const brokerBio = $('#brokerBio');
@@ -692,6 +699,28 @@
       const settingsPhone = $('#settingsPhone');
       const profileStatus = $('#profileStatus');
 
+      // Profile toggle
+      const toggleProfileBtn = $('#toggleProfileForm');
+      const profileFormContainer = $('#profileFormContainer');
+      const profileToggleLabel = $('#profileToggleLabel');
+      const cancelProfileEdit = $('#cancelProfileEdit');
+
+      toggleProfileBtn?.addEventListener('click', function() {
+        const isHidden = profileFormContainer.classList.contains('hidden');
+        if (isHidden) {
+          profileFormContainer.classList.remove('hidden');
+          profileToggleLabel.textContent = 'Hide Profile';
+        } else {
+          profileFormContainer.classList.add('hidden');
+          profileToggleLabel.textContent = 'Edit Profile';
+        }
+      });
+
+      cancelProfileEdit?.addEventListener('click', function() {
+        profileFormContainer.classList.add('hidden');
+        profileToggleLabel.textContent = 'Edit Profile';
+      });
+
       // Quiz modals
       const quizModal = $('#quizModal');
       const closeQuizModal = $('#closeQuizModal');
@@ -715,7 +744,7 @@
       const otpInput = $('#otpInput');
       const otpError = $('#otpError');
 
-      // ─── Helpers (unchanged) ──────────────────────────────────────
+      // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
       function getImageArray(property) {
         const val = property[COLUMNS.IMAGE];
@@ -728,54 +757,6 @@
         const arr = getImageArray(property);
         return arr.length > 0 ? arr[0] : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
       }
-      function getTierClass(tier) {
-        if (!tier) return 'tier-Bronze';
-        const t = tier.toLowerCase();
-        if (t === 'platinum') return 'tier-Platinum';
-        if (t === 'gold') return 'tier-Gold';
-        return 'tier-Bronze';
-      }
-      function getTierLabel(tier) {
-        if (!tier) return 'Bronze';
-        return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase();
-      }
-      function whatsappUrl(phone) {
-        if (!phone) return '#';
-        const cleaned = phone.replace(/\s/g, '').replace(/^0/, '256');
-        return `https://wa.me/${cleaned}`;
-      }
-      function navigateTo(url, replace = false) {
-        if (replace) window.history.replaceState(null, '', url);
-        else window.history.pushState(null, '', url);
-        handleRoute();
-      }
-      function getCurrentPath() { return window.location.pathname + window.location.search; }
-      function showView(view) {
-        [discoveryView, brokerView, authView, dashboardView].forEach(v => {
-          v.classList.remove('view-visible');
-          v.classList.add('view-hidden');
-        });
-        view.classList.remove('view-hidden');
-        view.classList.add('view-visible');
-      }
-      function setAuthMode(signUpModeActive) {
-        state.isSignUpMode = signUpModeActive;
-        if (signUpModeActive) {
-          toggleSignUp.classList.add('active');
-          toggleSignIn.classList.remove('active');
-          signUpFields.classList.remove('hidden');
-          formTitle.innerText = "Create Hub Space";
-          submitAuthBtn.innerText = "Register Business Hub";
-        } else {
-          toggleSignIn.classList.add('active');
-          toggleSignUp.classList.remove('active');
-          signUpFields.classList.add('hidden');
-          formTitle.innerText = "Welcome Back";
-          submitAuthBtn.innerText = "Access Dashboard";
-        }
-      }
-
-      // ─── Render stars ──────────────────────────────────────────────
       function renderStars(rating) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -815,15 +796,13 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card ──────────────────────────────────────
+      // ─── Create property card (no tier badge) ──────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
 
         const imageUrl = getImageUrl(property);
-        const tierLabel = getTierLabel(broker?.tier);
-        const tierClass = getTierClass(broker?.tier);
         const isFav = state.favorites.has(property.id);
         const rating = broker?.average_rating || 0;
         const reviewCount = broker?.review_count || 0;
@@ -848,9 +827,7 @@
             <img src="${imageUrl}" alt="${property[COLUMNS.TITLE] || 'Property'}" 
                  class="w-full h-full object-cover" loading="lazy"
                  onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center'"/>
-            <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md ${tierClass}">
-              ${tierLabel}
-            </span>
+            <!-- tier badge removed -->
             <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
               ${property[COLUMNS.TYPE] || 'Property'}
             </span>
@@ -949,7 +926,7 @@
         });
       }
 
-      // ─── Render my properties ──────────────────────────────────────
+      // ─── Render my properties (same but with edit/delete) ──────────
       function renderMyProperties() {
         myPropertiesList.innerHTML = '';
         if (state.myProperties.length === 0) {
@@ -984,7 +961,7 @@
         } catch (err) { alert('Delete failed: ' + err.message); }
       }
 
-      // ─── Edit property modal ──────────────────────────────────────
+      // ─── Edit property modal (unchanged) ──────────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
@@ -1182,7 +1159,7 @@
         }
       });
 
-      // ─── Fetch all data (robust version) ──────────────────────────
+      // ─── Fetch all data ────────────────────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1192,7 +1169,6 @@
         debugMessage.textContent = 'Fetching properties...';
 
         try {
-          // 1️⃣ Fetch all properties
           const { data: properties, error: propError } = await supabaseClient
             .from('properties')
             .select('*')
@@ -1212,8 +1188,7 @@
 
           debugMessage.textContent = `✅ Found ${properties.length} properties. Fetching broker details...`;
 
-          // 2️⃣ Auto-detect the foreign key column name
-          // Look for common names: owner_id, user_id, broker_id, created_by, etc.
+          // Auto-detect foreign key
           const firstProp = properties[0];
           const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
           let fkColumn = null;
@@ -1223,7 +1198,6 @@
               break;
             }
           }
-          // If none found, just use the first column that ends with '_id' or looks like a UUID
           if (!fkColumn) {
             for (const key of Object.keys(firstProp)) {
               if (key.endsWith('_id') && typeof firstProp[key] === 'string' && firstProp[key].length > 20) {
@@ -1232,7 +1206,6 @@
               }
             }
           }
-          // If still none, we'll just skip broker enrichment
           if (!fkColumn) {
             console.warn('⚠️ Could not detect foreign key column. Broker names will be "Unknown".');
             debugMessage.textContent += ' (no broker ID column)';
@@ -1242,7 +1215,7 @@
             console.log('✅ Detected foreign key column:', fkColumn);
           }
 
-          // 3️⃣ Fetch profiles for those broker IDs (if we have a column)
+          // Fetch profiles
           let profilesMap = {};
           if (fkColumn) {
             const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
@@ -1261,13 +1234,12 @@
           }
           state.profilesMap = profilesMap;
 
-          // 4️⃣ Enrich properties with broker data
+          // Enrich and sort
           const enriched = properties.map(prop => ({
             ...prop,
             broker: fkColumn ? profilesMap[prop[fkColumn]] || null : null,
           }));
 
-          // 5️⃣ Sort by tier (Platinum > Gold > Bronze) then lead score
           const tierOrder = { 'platinum': 3, 'gold': 2, 'bronze': 1 };
           enriched.sort((a, b) => {
             const aTier = tierOrder[(a.broker?.tier || 'bronze').toLowerCase()] || 0;
@@ -1288,7 +1260,6 @@
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
               <p>Failed to load properties.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
-              <p class="text-xs text-slate-400 mt-2">Check your Supabase table and permissions.</p>
             </div>
           `;
         } finally {
@@ -1297,7 +1268,6 @@
         }
       }
 
-      // ─── applyFiltersAndSearch (fixed) ────────────────────────────
       function applyFiltersAndSearch() {
         const filter = state.currentFilter;
         const query = state.searchQuery.trim().toLowerCase();
@@ -1322,7 +1292,7 @@
         renderListings(result);
       }
 
-      // ─── Navigation (unchanged) ────────────────────────────────────
+      // ─── Navigation ────────────────────────────────────────────────
       async function navigateToBroker(brokerId) {
         if (!brokerId) return;
         state.currentBrokerId = brokerId;
@@ -1354,11 +1324,7 @@
           }
 
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
-          const tierLabel = getTierLabel(broker.tier);
-          const tierClass = getTierClass(broker.tier);
-          brokerTierBadge.textContent = tierLabel;
-          brokerTierBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${tierClass}`;
-
+          // tier badge removed
           const phone = broker.phone || '';
           brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
           brokerWhatsAppLink.style.display = 'none';
@@ -1445,7 +1411,6 @@
       }
 
       // ─── Add Property ──────────────────────────────────────────────
-      // (Add property uses COLUMNS.FOREIGN_KEY if available, otherwise uses 'owner_id')
       addPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
@@ -1611,7 +1576,7 @@
         }
       }
 
-      // ─── QUIZ FLOW (Hardcoded) ────────────────────────────────────
+      // ─── QUIZ FLOW ──────────────────────────────────────────────────
       async function openQuizModal(propertyId) {
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');

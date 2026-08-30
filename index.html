@@ -127,7 +127,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== MODALS ===== -->
+  <!-- ===== MODALS (unchanged) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -365,7 +365,6 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
-                <!-- Phone number removed from here -->
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
                   <span class="stars" id="brokerStars"></span>
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
@@ -571,7 +570,6 @@
       const filterPills = $$('.filter-pill');
 
       const brokerBusinessName = $('#brokerBusinessName');
-      // phone element removed – we don't need it anymore
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
       const brokerBio = $('#brokerBio');
       const brokerListingsGrid = $('#brokerListingsGrid');
@@ -796,6 +794,7 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
+                <!-- Connect button – removed login check -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -838,15 +837,11 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
+        // ─── FIX: Remove login requirement ──────────────────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
-          if (!state.currentUser) {
-            alert('Please sign in to connect with a broker.');
-            navigateToAuth();
-            return;
-          }
-          openQuizModal(propertyId);
+          openQuizModal(propertyId); // just open the quiz, no login check
         });
 
         return article;
@@ -1256,7 +1251,7 @@
           }
 
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
-          // Phone number removed – no longer displayed
+          // Phone number removed – no display
           brokerWhatsAppLink.style.display = 'none';
 
           const rating = broker.average_rating || 0;

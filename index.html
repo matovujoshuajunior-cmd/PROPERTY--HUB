@@ -127,7 +127,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== MODALS (unchanged) ===== -->
+  <!-- ===== MODALS ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -198,7 +198,7 @@
     </div>
   </div>
 
-  <!-- ===== QUIZ MODAL (OVERLAY) ===== -->
+  <!-- ===== QUIZ MODAL ===== -->
   <div id="quizModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-lg">
       <div class="flex justify-between items-center mb-4">
@@ -357,7 +357,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (PHONE NUMBER REMOVED) ===== -->
+      <!-- ===== BROKER PROFILE VIEW ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -476,9 +476,9 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – SUPABASE CDN (DIRECT LOAD)
+  JAVASCRIPT – SUPABASE CDN (with cache buster)
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=2">
   </script>
 
   <script>
@@ -794,7 +794,7 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <!-- Connect button – removed login check -->
+                <!-- 🔥 FIX: Connect button – no login check, opens quiz directly -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -837,11 +837,12 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
-        // ─── FIX: Remove login requirement ──────────────────────────
+        // ─── FIX: Directly opens quiz, no login check ──────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
-          openQuizModal(propertyId); // just open the quiz, no login check
+          console.log('🔘 Connect clicked, opening quiz for property:', propertyId);
+          openQuizModal(propertyId);
         });
 
         return article;
@@ -1503,6 +1504,7 @@
 
       // ─── QUIZ FLOW ──────────────────────────────────────────────────
       async function openQuizModal(propertyId) {
+        console.log('📋 Opening quiz for property:', propertyId);
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');
         quizStep2.classList.add('hidden');

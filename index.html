@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Styles (unchanged) ── */
+    /* ── Your original styles (unchanged) ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -568,9 +568,8 @@
       'use strict';
 
       // ─── CONFIGURATION ──────────────────────────────────────────────
-      // 🔥 IMPORTANT: Change 'owner_id' to match your actual foreign key column name
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',
+        FOREIGN_KEY: 'owner_id',   // Change if your column is named differently
         IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
@@ -605,7 +604,7 @@
         brokerProfile: null,
       };
 
-      // ─── DOM refs (complete set) ──────────────────────────────────
+      // ─── DOM refs (complete) ──────────────────────────────────────
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -708,7 +707,7 @@
       const otpInput = $('#otpInput');
       const otpError = $('#otpError');
 
-      // ─── Helpers ────────────────────────────────────────────────────
+      // ─── Helpers (unchanged) ──────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
       function getImageArray(property) {
         const val = property[COLUMNS.IMAGE];
@@ -780,7 +779,7 @@
         return html;
       }
 
-      // ─── Favorites ──────────────────────────────────────────────────
+      // ─── Favorites (unchanged) ─────────────────────────────────────
       async function fetchFavorites() {
         if (!state.currentUser) return;
         try {
@@ -808,7 +807,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card ──────────────────────────────────────
+      // ─── Create property card (unchanged) ──────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -1238,19 +1237,25 @@
         }
       }
 
+      // ─── 🔥 FIXED: applyFiltersAndSearch() – now works correctly ──
       function applyFiltersAndSearch() {
-        const filter = state.currentFilter;
+        const filter = state.currentFilter; // 'all', 'rental', 'property', 'lodge'
         const query = state.searchQuery.trim().toLowerCase();
+
+        // Start with the full list of all properties (already sorted by rank)
         let result = [...state.allProperties];
 
         // Apply category filter (unless "all")
         if (filter !== 'all') {
-          const typeMap = { 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
-          const targetType = typeMap[filter];
-          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === targetType.toLowerCase());
+          // The filter value is already lowercase ('rental', 'property', 'lodge')
+          // Compare against the property type from the database (also lowercased)
+          result = result.filter(p => {
+            const dbType = (p[COLUMNS.TYPE] || '').toLowerCase();
+            return dbType === filter;
+          });
         }
 
-        // Apply search query
+        // Apply search query (if any)
         if (query) {
           result = result.filter(p => {
             const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
@@ -1259,6 +1264,7 @@
           });
         }
 
+        // Store filtered list and render
         state.filteredProperties = result;
         renderListings(result);
       }
@@ -1578,7 +1584,6 @@
         const email = quizEmail.value.trim();
         const whatsapp = quizWhatsapp.value.trim();
 
-        // Get selected answers
         const q1 = document.querySelector('input[name="q1"]:checked');
         const q2 = document.querySelector('input[name="q2"]:checked');
         if (!q1 || !q2) {
@@ -1589,13 +1594,10 @@
         const score1 = parseInt(q1.value);
         const score2 = parseInt(q2.value);
         const totalScore = score1 + score2;
-
-        // Determine lead type
         let leadType = 'cold';
         if (totalScore >= 7) leadType = 'hot';
         else if (totalScore >= 4) leadType = 'warm';
 
-        // Build answers object (for the Edge Function)
         const answers = { q1: score1, q2: score2 };
 
         try {
@@ -1742,7 +1744,6 @@
 
       // ─── Init ────────────────────────────────────────────────────────
       async function init() {
-        // Email verification
         const hash = window.location.hash;
         if (hash && hash.includes('access_token')) {
           const params = new URLSearchParams(hash.substring(1));

@@ -117,6 +117,52 @@
     }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
+
+    /* Wallet styles */
+    .wallet-card {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: white;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .wallet-balance {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    .wallet-balance small {
+      font-size: 0.875rem;
+      font-weight: normal;
+      color: #94a3b8;
+    }
+    .wallet-btn {
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .wallet-btn:hover { background: #059669; }
+    .wallet-btn-outline {
+      background: transparent;
+      border: 1px solid #475569;
+      color: #e2e8f0;
+      padding: 0.5rem 1.5rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .wallet-btn-outline:hover { background: #334155; border-color: #94a3b8; }
   </style>
 </head>
 <body>
@@ -292,6 +338,27 @@
     </div>
   </div>
 
+  <!-- ===== TOP UP MODAL ===== -->
+  <div id="topupModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-sm">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2>
+        <button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <p class="text-slate-500 text-sm mb-4">Enter amount you want to add to your wallet.</p>
+      <form id="topupForm">
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
+          <input type="number" id="topupAmount" required min="1000" step="1000" placeholder="e.g. 10000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-plus-circle mr-2"></i> Deposit
+        </button>
+      </form>
+      <div id="topupStatus" class="mt-3 text-sm text-slate-600"></div>
+    </div>
+  </div>
+
   <div id="app" class="min-h-screen">
 
     <!-- ===== TOP NAV ===== -->
@@ -412,12 +479,39 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW ===== -->
+      <!-- ===== DASHBOARD VIEW (with Wallet) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
+          </div>
+
+          <!-- ===== WALLET CARD ===== -->
+          <div class="dashboard-card p-6 mb-8">
+            <h3 class="text-lg font-semibold text-slate-700 mb-4">💰 Wallet</h3>
+            <div class="wallet-card">
+              <div>
+                <div class="text-sm text-slate-400">Available Balance</div>
+                <div class="wallet-balance">
+                  <span id="walletBalanceDisplay">0</span> <small>UGX</small>
+                </div>
+              </div>
+              <div class="flex gap-3">
+                <button id="topupBtn" class="wallet-btn">
+                  <i class="fas fa-plus mr-1"></i> Top Up
+                </button>
+                <button id="refreshWalletBtn" class="wallet-btn-outline">
+                  <i class="fas fa-sync-alt"></i>
+                </button>
+              </div>
+            </div>
+            <!-- Transaction history -->
+            <div class="mt-4">
+              <h4 class="text-sm font-semibold text-slate-600 mb-2">Recent Transactions</h4>
+              <div id="transactionList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+              <div id="noTransactions" class="text-slate-400 text-sm text-center py-4 hidden">No transactions yet.</div>
+            </div>
           </div>
 
           <!-- ===== PROFILE SETTINGS (collapsible) ===== -->
@@ -478,7 +572,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE CDN (with cache buster)
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=2">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=3">
   </script>
 
   <script>
@@ -550,6 +644,8 @@
         profilesMap: {},
         favorites: new Set(),
         brokerProfile: null,
+        walletBalance: 0,
+        transactions: [],
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -635,6 +731,18 @@
       const profileToggleLabel = $('#profileToggleLabel');
       const cancelProfileEdit = $('#cancelProfileEdit');
 
+      // Wallet refs
+      const walletBalanceDisplay = $('#walletBalanceDisplay');
+      const topupBtn = $('#topupBtn');
+      const refreshWalletBtn = $('#refreshWalletBtn');
+      const transactionList = $('#transactionList');
+      const noTransactions = $('#noTransactions');
+      const topupModal = $('#topupModal');
+      const closeTopupModal = $('#closeTopupModal');
+      const topupForm = $('#topupForm');
+      const topupAmount = $('#topupAmount');
+      const topupStatus = $('#topupStatus');
+
       // Quiz modals
       const quizModal = $('#quizModal');
       const closeQuizModal = $('#closeQuizModal');
@@ -681,8 +789,6 @@
         for (let i = 0; i < empty; i++) html += '<i class="far fa-star empty"></i>';
         return html;
       }
-      function getTierClass(tier) { if (!tier) return 'tier-Bronze'; const t = tier.toLowerCase(); if (t === 'platinum') return 'tier-Platinum'; if (t === 'gold') return 'tier-Gold'; return 'tier-Bronze'; }
-      function getTierLabel(tier) { if (!tier) return 'Bronze'; return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase(); }
       function navigateTo(url, replace = false) { if (replace) window.history.replaceState(null, '', url); else window.history.pushState(null, '', url); handleRoute(); }
       function getCurrentPath() { return window.location.pathname + window.location.search; }
       function showView(view) {
@@ -707,6 +813,72 @@
           signUpFields.classList.add('hidden');
           formTitle.innerText = "Welcome Back";
           submitAuthBtn.innerText = "Access Dashboard";
+        }
+      }
+
+      // ─── Wallet Functions ──────────────────────────────────────────
+      async function loadWallet() {
+        if (!state.currentUser) return;
+        try {
+          // Get balance
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('wallet_balance')
+            .eq('id', state.currentUser.id)
+            .single();
+          if (error) throw error;
+          state.walletBalance = profile?.wallet_balance || 0;
+          walletBalanceDisplay.textContent = state.walletBalance.toLocaleString();
+
+          // Get transactions
+          const { data: txs, error: txError } = await supabase
+            .from('wallet_transactions')
+            .select('*')
+            .eq('profile_id', state.currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(20);
+          if (txError) throw txError;
+          state.transactions = txs || [];
+          renderTransactions();
+        } catch (err) {
+          console.error('Error loading wallet:', err);
+        }
+      }
+
+      function renderTransactions() {
+        transactionList.innerHTML = '';
+        if (state.transactions.length === 0) {
+          noTransactions.classList.remove('hidden');
+          return;
+        }
+        noTransactions.classList.add('hidden');
+        state.transactions.forEach(tx => {
+          const div = document.createElement('div');
+          div.className = 'flex justify-between items-center p-2 bg-slate-50 rounded-lg text-sm';
+          const isCredit = tx.type === 'deposit';
+          const sign = isCredit ? '+' : '-';
+          const color = isCredit ? 'text-emerald-600' : 'text-red-500';
+          div.innerHTML = `
+            <span>${tx.type.replace('_', ' ').toUpperCase()}</span>
+            <span class="font-medium ${color}">${sign}${Math.abs(tx.amount).toLocaleString()} UGX</span>
+            <span class="text-xs text-slate-400">${new Date(tx.created_at).toLocaleDateString()}</span>
+          `;
+          transactionList.appendChild(div);
+        });
+      }
+
+      async function depositWallet(amount) {
+        if (!state.currentUser) return false;
+        try {
+          const { data, error } = await supabase.functions.invoke('deposit-wallet', {
+            body: { amount: amount }
+          });
+          if (error) throw error;
+          await loadWallet();
+          return true;
+        } catch (err) {
+          console.error('Deposit error:', err);
+          return false;
         }
       }
 
@@ -794,7 +966,6 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <!-- 🔥 FIX: Connect button – no login check, opens quiz directly -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -837,11 +1008,9 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
-        // ─── FIX: Directly opens quiz, no login check ──────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
-          console.log('🔘 Connect clicked, opening quiz for property:', propertyId);
           openQuizModal(propertyId);
         });
 
@@ -1106,7 +1275,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // Fetch properties
           const { data: properties, error: propError } = await supabase
             .from('properties')
             .select('*')
@@ -1123,7 +1291,6 @@
             return;
           }
 
-          // Auto-detect foreign key
           const firstProp = properties[0];
           const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
           let fkColumn = null;
@@ -1148,7 +1315,6 @@
             console.warn('⚠️ No foreign key column found');
           }
 
-          // Fetch profiles
           let profilesMap = {};
           if (fkColumn) {
             const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
@@ -1164,7 +1330,6 @@
           }
           state.profilesMap = profilesMap;
 
-          // Enrich and sort
           const enriched = properties.map(prop => ({
             ...prop,
             broker: fkColumn ? profilesMap[prop[fkColumn]] || null : null,
@@ -1252,7 +1417,6 @@
           }
 
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
-          // Phone number removed – no display
           brokerWhatsAppLink.style.display = 'none';
 
           const rating = broker.average_rating || 0;
@@ -1448,6 +1612,7 @@
             await fetchFavorites();
             await loadProfileSettings();
             await loadMyProperties();
+            await loadWallet();
             await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
@@ -1486,6 +1651,7 @@
             if (dashboardView.classList.contains('view-hidden')) {
               showView(dashboardView);
               await loadMyProperties();
+              await loadWallet();
             }
           } else {
             navigateTo('/auth', true);
@@ -1504,7 +1670,6 @@
 
       // ─── QUIZ FLOW ──────────────────────────────────────────────────
       async function openQuizModal(propertyId) {
-        console.log('📋 Opening quiz for property:', propertyId);
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');
         quizStep2.classList.add('hidden');
@@ -1591,6 +1756,8 @@
                 otpRequestId.value = requestId;
                 otpModal.classList.remove('hidden');
                 sendOTP(requestId);
+                // Refresh wallet after approval (deduction happened)
+                if (state.currentUser) loadWallet();
               } else if (newStatus === 'rejected') {
                 waitingStatus.textContent = '❌ Broker declined this request.';
                 setTimeout(() => {
@@ -1647,6 +1814,41 @@
       closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
       quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
 
+      // ─── Wallet Event Listeners ────────────────────────────────────
+      topupBtn.addEventListener('click', () => {
+        topupAmount.value = '';
+        topupStatus.textContent = '';
+        topupModal.classList.remove('hidden');
+      });
+
+      closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
+      topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
+
+      topupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseInt(topupAmount.value);
+        if (!amount || amount < 1000) {
+          topupStatus.textContent = 'Please enter a valid amount (min 1000 UGX).';
+          topupStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+        topupStatus.textContent = 'Processing...';
+        topupStatus.className = 'mt-3 text-sm text-indigo-600';
+        const success = await depositWallet(amount);
+        if (success) {
+          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX successfully!`;
+          topupStatus.className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => topupModal.classList.add('hidden'), 1500);
+        } else {
+          topupStatus.textContent = '❌ Deposit failed. Please try again.';
+          topupStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      refreshWalletBtn.addEventListener('click', () => {
+        loadWallet();
+      });
+
       // ─── Event Binding ─────────────────────────────────────────────
       searchInput.addEventListener('input', (e) => {
         state.searchQuery = e.target.value;
@@ -1677,6 +1879,7 @@
           showView(dashboardView);
           navigateTo('/dashboard');
           loadMyProperties();
+          loadWallet();
         } else {
           navigateToAuth();
         }
@@ -1728,6 +1931,7 @@
                 await fetchFavorites();
                 await loadProfileSettings();
                 await loadMyProperties();
+                await loadWallet();
                 await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
                 return;
@@ -1746,6 +1950,7 @@
             portalBtnLabel.textContent = 'Dashboard';
             await fetchFavorites();
             await loadProfileSettings();
+            await loadWallet();
           }
         } catch (err) {
           console.log('No active session (403 is normal).');
@@ -1754,7 +1959,6 @@
         await handleRoute();
         await fetchAllData();
 
-        // Hide loading overlay
         hideLoading();
       }
 

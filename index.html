@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Styles (unchanged from your original) ── */
+    /* ── Your original styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -132,7 +132,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== REVIEW MODAL (unchanged) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -163,7 +163,7 @@
     </div>
   </div>
 
-  <!-- ===== EDIT PROPERTY MODAL (unchanged) ===== -->
+  <!-- ===== EDIT PROPERTY MODAL ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -213,7 +213,6 @@
       </div>
       <form id="quizForm">
         <input type="hidden" id="quizPropertyId" />
-        <!-- Step 1: Contact Info -->
         <div id="quizStep1">
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label>
@@ -229,8 +228,6 @@
           </div>
           <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
         </div>
-
-        <!-- Step 2: Dynamic Questions -->
         <div id="quizStep2" class="hidden">
           <div id="quizQuestionsContainer" class="space-y-4"></div>
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4">
@@ -241,7 +238,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: WAITING ROOM MODAL ===== -->
+  <!-- ===== NEW: WAITING ROOM ===== -->
   <div id="waitingModal" class="modal-backdrop hidden">
     <div class="modal-content text-center max-w-md">
       <div class="py-8">
@@ -255,7 +252,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: OTP VERIFICATION MODAL ===== -->
+  <!-- ===== NEW: OTP VERIFICATION ===== -->
   <div id="otpModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
@@ -359,7 +356,6 @@
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate Broker
                 </button>
-                <!-- WhatsApp link hidden by default, shown after OTP -->
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
@@ -397,7 +393,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (CLEAN) ===== -->
+      <!-- ===== DASHBOARD VIEW (Clean) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -453,20 +449,84 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – YOUR ORIGINAL CODE WITH FIXES AND ADDITIONS
+  JAVASCRIPT
   ============================================================ -->
 
   <script>
+    // ─── Supabase Config ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
   </script>
 
   <script>
     (function loadSupabase() {
-      // ... (your original loading logic – unchanged) ...
-      // I'll keep it short here; but in the final file you'll have the full script.
-      // For brevity in this answer, I'll assume you already have the loader.
-      // The key changes are inside startApp().
+      const loadingOverlay = document.getElementById('loadingOverlay');
+
+      function loadScript(src, timeout = 8000) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = src;
+          script.crossOrigin = 'anonymous';
+          let resolved = false;
+          const timer = setTimeout(() => {
+            if (!resolved) { resolved = true; reject(new Error(`Timeout loading ${src}`)); }
+          }, timeout);
+          script.onload = () => {
+            clearTimeout(timer);
+            if (!resolved) {
+              resolved = true;
+              if (window.supabase) resolve();
+              else reject(new Error('window.supabase undefined'));
+            }
+          };
+          script.onerror = () => {
+            clearTimeout(timer);
+            if (!resolved) { resolved = true; reject(new Error(`Failed to load ${src}`)); }
+          };
+          document.head.appendChild(script);
+        });
+      }
+
+      const cdnList = [
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js',
+        'https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
+      ];
+
+      async function tryLoadAll() {
+        let lastError = null;
+        for (const src of cdnList) {
+          try {
+            await loadScript(src);
+            console.log('✅ Supabase client loaded from:', src);
+            return true;
+          } catch (err) {
+            console.warn('❌ Failed from', src, err.message);
+            lastError = err;
+          }
+        }
+        throw lastError || new Error('All CDN attempts failed');
+      }
+
+      tryLoadAll()
+        .then(() => {
+          loadingOverlay.classList.add('hidden');
+          startApp();
+        })
+        .catch(err => {
+          console.error('❌ Fatal:', err);
+          document.body.innerHTML = `
+            <div class="flex items-center justify-center min-h-screen bg-red-50 p-4">
+              <div class="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md">
+                <i class="fas fa-wifi text-5xl text-red-400 mb-4"></i>
+                <h2 class="text-xl font-bold text-slate-800">Network Issue</h2>
+                <p class="text-slate-600 mt-2 text-sm">Could not load Supabase client library.</p>
+                <p class="text-slate-400 text-xs mt-1">${err.message}</p>
+                <div class="mt-6"><button onclick="location.reload()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl transition font-medium"><i class="fas fa-redo mr-2"></i> Retry</button></div>
+              </div>
+            </div>
+          `;
+        });
+      setTimeout(() => loadingOverlay.classList.add('hidden'), 5000);
     })();
   </script>
 
@@ -474,9 +534,9 @@
     function startApp() {
       'use strict';
 
-      // ─── CONFIGURATION (unchanged) ──────────────────────────────
+      // ─── CONFIGURATION ──────────────────────────────────────────────
       const COLUMNS = {
-        FOREIGN_KEY: 'owner_id',
+        FOREIGN_KEY: 'owner_id',   // MUST match the column in your properties table that references profiles.id
         IMAGE: 'media_urls',
         TITLE: 'title',
         PRICE: 'price_amount',
@@ -490,6 +550,9 @@
         'Lodges': 'lodge',
       };
 
+      console.log('🔧 Using column mapping:', COLUMNS);
+
+      // ─── Supabase Client ────────────────────────────────────────────
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
       // ─── State ──────────────────────────────────────────────────────
@@ -505,29 +568,315 @@
         myProperties: [],
         profilesMap: {},
         favorites: new Set(),
+        brokerProfile: null,
       };
 
-      // ─── DOM refs (your original ones) ─────────────────────────────
-      // ... (all the DOM refs from your original code) ...
-      // I won't repeat them here for brevity, but they are exactly as you had.
-      // The only additions are:
-      // - quizModal, quizForm, quizPropertyId, quizName, quizEmail, quizWhatsapp,
-      //   quizStep1, quizStep2, quizNextBtn, quizQuestionsContainer
-      // - waitingModal, waitingStatus, cancelWaitBtn
-      // - otpModal, otpForm, otpRequestId, otpInput, otpError
+      // ─── DOM refs ──────────────────────────────────────────────────
+      const $ = (sel) => document.querySelector(sel);
+      const $$ = (sel) => document.querySelectorAll(sel);
 
-      // ─── Helpers (unchanged) ────────────────────────────────────────
-      // ... (your formatPrice, getImageArray, etc. – keep as is)
+      const discoveryView = $('#discoveryView');
+      const brokerView = $('#brokerView');
+      const authView = $('#authView');
+      const dashboardView = $('#dashboardView');
 
-      // ─── Favorites (unchanged) ─────────────────────────────────────
-      // ... (your fetchFavorites and toggleFavorite)
+      const listingsGrid = $('#listingsGrid');
+      const loadingSkeleton = $('#loadingSkeleton');
+      const emptyState = $('#emptyState');
+      const propertyCount = $('#propertyCount');
+      const searchInput = $('#searchInput');
+      const clearSearchBtn = $('#clearSearchBtn');
+      const filterPills = $$('.filter-pill');
 
-      // ─── Create property card (modified) ──────────────────────────
+      const brokerBusinessName = $('#brokerBusinessName');
+      const brokerTierBadge = $('#brokerTierBadge');
+      const brokerPhone = $('#brokerPhone');
+      const brokerWhatsAppLink = $('#brokerWhatsAppLink');
+      const brokerBio = $('#brokerBio');
+      const brokerListingsGrid = $('#brokerListingsGrid');
+      const brokerEmptyState = $('#brokerEmptyState');
+      const backToDiscovery = $('#backToDiscovery');
+      const brokerStars = $('#brokerStars');
+      const brokerReviewCount = $('#brokerReviewCount');
+      const brokerLeadScore = $('#brokerLeadScore');
+      const rateBrokerBtn = $('#rateBrokerBtn');
+
+      const toggleSignIn = $('#toggleSignIn');
+      const toggleSignUp = $('#toggleSignUp');
+      const signUpFields = $('#signUpFields');
+      const formTitle = $('#formTitle');
+      const submitAuthBtn = $('#submitAuthBtn');
+      const authForm = $('#authForm');
+      const backToSearchBtn = $('#backToSearchBtn');
+      const emailInput = $('#emailInput');
+      const passwordInput = $('#passwordInput');
+      const bizNameInput = $('#bizNameInput');
+      const accTypeSelect = $('#accTypeSelect');
+      const phoneInput = $('#phoneInput');
+
+      const addPropertyForm = $('#addPropertyForm');
+      const propTitle = $('#propTitle');
+      const propPrice = $('#propPrice');
+      const propType = $('#propType');
+      const propAddress = $('#propAddress');
+      const propImage = $('#propImage');
+      const uploadStatus = $('#uploadStatus');
+      const myPropertiesList = $('#myPropertiesList');
+      const myPropertiesEmpty = $('#myPropertiesEmpty');
+      const logoutBtn = $('#logoutBtn');
+      const portalBtnLabel = $('#portalBtnLabel');
+      const brokerPortalBtn = $('#brokerPortalBtn');
+
+      const editModal = $('#editModal');
+      const closeEditModal = $('#closeEditModal');
+      const editPropertyForm = $('#editPropertyForm');
+      const editPropertyId = $('#editPropertyId');
+      const editTitle = $('#editTitle');
+      const editPrice = $('#editPrice');
+      const editType = $('#editType');
+      const editAddress = $('#editAddress');
+      const editImageInput = $('#editImageInput');
+      const editImagePreviews = $('#editImagePreviews');
+
+      const reviewModal = $('#reviewModal');
+      const closeReviewModal = $('#closeReviewModal');
+      const reviewForm = $('#reviewForm');
+      const reviewBrokerId = $('#reviewBrokerId');
+      const reviewRating = $('#reviewRating');
+      const reviewText = $('#reviewText');
+      const starSelector = $('#starSelector');
+
+      const profileSettingsForm = $('#profileSettingsForm');
+      const settingsBusinessName = $('#settingsBusinessName');
+      const settingsPhone = $('#settingsPhone');
+      const profileStatus = $('#profileStatus');
+
+      // ─── New DOM refs ──────────────────────────────────────────────
+      const quizModal = $('#quizModal');
+      const closeQuizModal = $('#closeQuizModal');
+      const quizForm = $('#quizForm');
+      const quizPropertyId = $('#quizPropertyId');
+      const quizName = $('#quizName');
+      const quizEmail = $('#quizEmail');
+      const quizWhatsapp = $('#quizWhatsapp');
+      const quizStep1 = $('#quizStep1');
+      const quizStep2 = $('#quizStep2');
+      const quizNextBtn = $('#quizNextBtn');
+      const quizQuestionsContainer = $('#quizQuestionsContainer');
+
+      const waitingModal = $('#waitingModal');
+      const waitingStatus = $('#waitingStatus');
+      const cancelWaitBtn = $('#cancelWaitBtn');
+
+      const otpModal = $('#otpModal');
+      const otpForm = $('#otpForm');
+      const otpRequestId = $('#otpRequestId');
+      const otpInput = $('#otpInput');
+      const otpError = $('#otpError');
+
+      // ─── Helpers ────────────────────────────────────────────────────
+      function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
+      function getImageArray(property) {
+        const val = property[COLUMNS.IMAGE];
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') return [val];
+        return [];
+      }
+      function getImageUrl(property) {
+        const arr = getImageArray(property);
+        return arr.length > 0 ? arr[0] : 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center';
+      }
+      function getTierClass(tier) {
+        if (!tier) return 'tier-Bronze';
+        const t = tier.toLowerCase();
+        if (t === 'platinum') return 'tier-Platinum';
+        if (t === 'gold') return 'tier-Gold';
+        return 'tier-Bronze';
+      }
+      function getTierLabel(tier) {
+        if (!tier) return 'Bronze';
+        return tier.charAt(0).toUpperCase() + tier.slice(1).toLowerCase();
+      }
+      function whatsappUrl(phone) {
+        if (!phone) return '#';
+        const cleaned = phone.replace(/\s/g, '').replace(/^0/, '256');
+        return `https://wa.me/${cleaned}`;
+      }
+      function navigateTo(url, replace = false) {
+        if (replace) window.history.replaceState(null, '', url);
+        else window.history.pushState(null, '', url);
+        handleRoute();
+      }
+      function getCurrentPath() { return window.location.pathname + window.location.search; }
+      function showView(view) {
+        [discoveryView, brokerView, authView, dashboardView].forEach(v => {
+          v.classList.remove('view-visible');
+          v.classList.add('view-hidden');
+        });
+        view.classList.remove('view-hidden');
+        view.classList.add('view-visible');
+      }
+      function setAuthMode(signUpModeActive) {
+        state.isSignUpMode = signUpModeActive;
+        if (signUpModeActive) {
+          toggleSignUp.classList.add('active');
+          toggleSignIn.classList.remove('active');
+          signUpFields.classList.remove('hidden');
+          formTitle.innerText = "Create Hub Space";
+          submitAuthBtn.innerText = "Register Business Hub";
+        } else {
+          toggleSignIn.classList.add('active');
+          toggleSignUp.classList.remove('active');
+          signUpFields.classList.add('hidden');
+          formTitle.innerText = "Welcome Back";
+          submitAuthBtn.innerText = "Access Dashboard";
+        }
+      }
+
+      // ─── Render stars ──────────────────────────────────────────────
+      function renderStars(rating) {
+        const full = Math.floor(rating);
+        const half = rating % 1 >= 0.5 ? 1 : 0;
+        const empty = 5 - full - half;
+        let html = '';
+        for (let i = 0; i < full; i++) html += '<i class="fas fa-star"></i>';
+        if (half) html += '<i class="fas fa-star-half-alt"></i>';
+        for (let i = 0; i < empty; i++) html += '<i class="far fa-star empty"></i>';
+        return html;
+      }
+
+      // ─── Favorites ──────────────────────────────────────────────────
+      async function fetchFavorites() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('favorites')
+            .select('property_id')
+            .eq('user_id', state.currentUser.id);
+          if (error) throw error;
+          state.favorites = new Set(data.map(f => f.property_id));
+        } catch (err) { console.error('Error fetching favorites:', err); }
+      }
+
+      async function toggleFavorite(propertyId) {
+        if (!state.currentUser) { alert('Please sign in to save favorites.'); return; }
+        const isFav = state.favorites.has(propertyId);
+        try {
+          if (isFav) {
+            await supabaseClient.from('favorites').delete().eq('user_id', state.currentUser.id).eq('property_id', propertyId);
+            state.favorites.delete(propertyId);
+          } else {
+            await supabaseClient.from('favorites').insert({ user_id: state.currentUser.id, property_id: propertyId });
+            state.favorites.add(propertyId);
+          }
+          renderListings(state.filteredProperties);
+        } catch (err) { alert('Error updating favorite: ' + err.message); }
+      }
+
+      // ─── Create property card ──────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
-        // ... (your original card HTML) ...
-        // Replace the WhatsApp anchor with:
-        // <button class="connect-btn" data-property-id="${property.id}">Connect</button>
-        // And add the event listener:
+        const article = document.createElement('article');
+        article.className =
+          'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
+
+        const imageUrl = getImageUrl(property);
+        const tierLabel = getTierLabel(broker?.tier);
+        const tierClass = getTierClass(broker?.tier);
+        const isFav = state.favorites.has(property.id);
+        const rating = broker?.average_rating || 0;
+        const reviewCount = broker?.review_count || 0;
+        const leadScore = broker?.lead_score || 0;
+        const isOwner = state.currentUser && broker && state.currentUser.id === broker.id;
+
+        let actionsHtml = '';
+        if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
+
+        let boostHtml = '';
+        if (showEdit && state.currentUser) {
+          boostHtml = `<button class="boost-btn text-xs text-emerald-600 hover:text-emerald-800 font-medium ml-2" data-broker-id="${state.currentUser.id}"><i class="fas fa-rocket mr-1"></i>Boost</button>`;
+        }
+
+        let rateHtml = '';
+        if (state.currentUser && broker && !isOwner) {
+          rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
+        }
+
+        article.innerHTML = `
+          <div class="relative aspect-[4/3] bg-slate-200 overflow-hidden">
+            <img src="${imageUrl}" alt="${property[COLUMNS.TITLE] || 'Property'}" 
+                 class="w-full h-full object-cover" loading="lazy"
+                 onerror="this.src='https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=400&fit=crop&crop=center'"/>
+            <span class="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-md ${tierClass}">
+              ${tierLabel}
+            </span>
+            <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
+              ${property[COLUMNS.TYPE] || 'Property'}
+            </span>
+            ${state.currentUser ? `<button class="favorite-btn absolute top-3 right-3 ${isFav ? 'active' : ''}" data-id="${property.id}"><i class="fas fa-heart"></i></button>` : ''}
+          </div>
+          <div class="p-4 flex flex-col flex-1">
+            <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
+            <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property[COLUMNS.PRICE])}</p>
+            <p class="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
+              <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
+              <span class="line-clamp-1">${property[COLUMNS.ADDRESS] || 'Location not specified'}</span>
+            </p>
+            <div class="mt-2 flex items-center gap-2 text-xs">
+              <span class="stars text-xs">${renderStars(rating)}</span>
+              <span class="text-slate-500">(${reviewCount})</span>
+              <span class="badge-lead">⚡ ${leadScore}</span>
+            </div>
+            <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 flex-wrap">
+              ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
+                <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
+              </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
+              <div class="flex gap-2">
+                ${actionsHtml}
+                ${boostHtml}
+                ${rateHtml}
+                <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
+                  <i class="fas fa-handshake"></i> Connect
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        article.querySelector('.favorite-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          toggleFavorite(property.id);
+        });
+
+        article.querySelector('.edit-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          openEditModal(property.id);
+        });
+
+        article.querySelector('.boost-btn')?.addEventListener('click', async e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          try {
+            const { error } = await supabaseClient.rpc('increment_lead_score', { broker_id: brokerId, amount: 5 });
+            if (error) throw error;
+            alert('✅ Lead score boosted by 5!');
+            await fetchAllData();
+            if (state.currentUser) await loadMyProperties();
+          } catch (err) { alert('Error boosting lead score: ' + err.message); }
+        });
+
+        article.querySelector('.rate-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          openReviewModal(brokerId);
+        });
+
+        article.querySelector('.broker-name-link')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          if (brokerId) navigateToBroker(brokerId);
+        });
+
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
@@ -538,76 +887,910 @@
           }
           openQuizModal(propertyId);
         });
-        // ... rest of card code (edit, boost, rate, broker name link) ...
+
+        return article;
       }
 
-      // ─── Fetch all data (FIXED QUERY) ────────────────────────────
-      async function fetchAllData() {
-        // ... (loading skeleton) ...
-        try {
-          // 🔥 FIX: Use `profiles!owner_id` to specify the foreign key
-          const { data: properties, error } = await supabaseClient
-            .from('properties')
-            .select(`
-              *,
-              profiles!owner_id (
-                business_name,
-                tier,
-                phone,
-                average_rating,
-                review_count,
-                lead_score,
-                verified
-              )
-            `)
-            .order('tier', { foreignTable: 'profiles', ascending: false })
-            .order('verified', { foreignTable: 'profiles', ascending: false })
-            .order('average_rating', { foreignTable: 'profiles', ascending: false })
-            .order('lead_score', { foreignTable: 'profiles', ascending: false })
-            .order('review_count', { foreignTable: 'profiles', ascending: false });
+      // ─── Render listings ──────────────────────────────────────────
+      function renderListings(properties) {
+        listingsGrid.innerHTML = '';
+        if (!properties || properties.length === 0) {
+          emptyState.classList.remove('hidden');
+          propertyCount.textContent = '0 listings';
+          return;
+        }
+        emptyState.classList.add('hidden');
+        propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
+        properties.forEach(prop => {
+          const broker = prop.broker || state.profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null;
+          const card = createPropertyCard(prop, broker, true, false);
+          listingsGrid.appendChild(card);
+        });
+      }
 
+      // ─── Render my properties ──────────────────────────────────────
+      function renderMyProperties() {
+        myPropertiesList.innerHTML = '';
+        if (state.myProperties.length === 0) {
+          myPropertiesEmpty.classList.remove('hidden');
+          return;
+        }
+        myPropertiesEmpty.classList.add('hidden');
+        state.myProperties.forEach(prop => {
+          const broker = state.currentUser;
+          const card = createPropertyCard(prop, broker, false, true);
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'mt-2 text-xs text-red-500 hover:text-red-700 font-medium';
+          deleteBtn.innerHTML = '<i class="fas fa-trash mr-1"></i> Remove';
+          deleteBtn.addEventListener('click', async () => {
+            if (confirm('Delete this property?')) {
+              await deleteProperty(prop.id);
+            }
+          });
+          card.querySelector('.p-4').appendChild(deleteBtn);
+          myPropertiesList.appendChild(card);
+        });
+      }
+
+      // ─── Delete property ──────────────────────────────────────────
+      async function deleteProperty(propId) {
+        try {
+          const { error } = await supabaseClient.from('properties').delete().eq('id', propId);
           if (error) throw error;
-          // ... (rest of your processing) ...
+          state.myProperties = state.myProperties.filter(p => p.id !== propId);
+          renderMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Delete failed: ' + err.message); }
+      }
+
+      // ─── Edit property modal ──────────────────────────────────────
+      async function openEditModal(propertyId) {
+        const prop = state.myProperties.find(p => p.id === propertyId);
+        if (!prop) return;
+        editPropertyId.value = propertyId;
+        editTitle.value = prop[COLUMNS.TITLE] || '';
+        editPrice.value = prop[COLUMNS.PRICE] || '';
+        const dbType = prop[COLUMNS.TYPE] || '';
+        let formType = 'Rentals';
+        if (dbType === 'property') formType = 'Properties';
+        else if (dbType === 'lodge') formType = 'Lodges';
+        else if (dbType === 'rental') formType = 'Rentals';
+        editType.value = formType;
+        editAddress.value = prop[COLUMNS.ADDRESS] || '';
+
+        const images = getImageArray(prop);
+        renderEditImagePreviews(images);
+        editModal._currentImages = images;
+        editModal.classList.remove('hidden');
+      }
+
+      function renderEditImagePreviews(images) {
+        editImagePreviews.innerHTML = '';
+        images.forEach((url, index) => {
+          const div = document.createElement('div');
+          div.className = 'image-thumb';
+          div.innerHTML = `
+            <img src="${url}" alt="Property image" />
+            <button class="remove-img" data-index="${index}">&times;</button>
+          `;
+          div.querySelector('.remove-img').addEventListener('click', () => {
+            const current = editModal._currentImages || [];
+            current.splice(index, 1);
+            renderEditImagePreviews(current);
+            editModal._currentImages = current;
+          });
+          editImagePreviews.appendChild(div);
+        });
+      }
+
+      editPropertyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = editPropertyId.value;
+        if (!id) return;
+        const title = editTitle.value.trim();
+        const price = parseFloat(editPrice.value);
+        const type = editType.value;
+        const address = editAddress.value.trim();
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+        let currentImages = editModal._currentImages || [];
+        const files = editImageInput.files;
+        if (files && files.length > 0) {
+          for (const file of files) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `${state.currentUser.id}/${fileName}`;
+            const { error: uploadError } = await supabaseClient.storage.from('property-media').upload(filePath, file);
+            if (uploadError) {
+              alert('Image upload failed: ' + uploadError.message);
+              return;
+            }
+            const { data: urlData } = supabaseClient.storage.from('property-media').getPublicUrl(filePath);
+            currentImages.push(urlData.publicUrl);
+          }
+          editImageInput.value = '';
+        }
+        const dbType = TYPE_MAP[type] || type;
+        const updateData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: currentImages,
+        };
+        try {
+          const { error } = await supabaseClient.from('properties').update(updateData).eq('id', id);
+          if (error) throw error;
+          alert('✅ Property updated successfully!');
+          editModal.classList.add('hidden');
+          await loadMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Update failed: ' + err.message); }
+      });
+
+      closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
+      editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
+
+      // ─── Review modal ─────────────────────────────────────────────
+      function openReviewModal(brokerId) {
+        reviewBrokerId.value = brokerId;
+        reviewRating.value = 5;
+        reviewText.value = '';
+        updateStarUI(5);
+        reviewModal.classList.remove('hidden');
+      }
+
+      starSelector.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', () => {
+          const val = parseInt(star.dataset.value);
+          reviewRating.value = val;
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseenter', () => {
+          const val = parseInt(star.dataset.value);
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseleave', () => {
+          const current = parseInt(reviewRating.value) || 5;
+          updateStarUI(current);
+        });
+      });
+
+      function updateStarUI(active) {
+        starSelector.querySelectorAll('.star').forEach(el => {
+          const val = parseInt(el.dataset.value);
+          el.classList.toggle('active', val <= active);
+        });
+      }
+
+      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
+      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
+
+      reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brokerId = reviewBrokerId.value;
+        const rating = parseInt(reviewRating.value);
+        const review = reviewText.value.trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          alert('Please select a rating (1-5 stars).');
+          return;
+        }
+
+        try {
+          const { error } = await supabaseClient.from('reviews').insert({
+            broker_id: brokerId,
+            user_id: state.currentUser.id,
+            rating: rating,
+            review_text: review || null,
+          });
+          if (error) throw error;
+          alert('✅ Review submitted! Thank you.');
+          reviewModal.classList.add('hidden');
+          await fetchAllData();
+          if (state.currentBrokerId) {
+            await loadBrokerProfile(state.currentBrokerId);
+          }
         } catch (err) {
-          // ... error handling ...
+          alert('Error submitting review: ' + err.message);
+        }
+      });
+
+      // ─── Profile Settings ──────────────────────────────────────────
+      async function loadProfileSettings() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('business_name, phone')
+            .eq('id', state.currentUser.id)
+            .single();
+          if (error) throw error;
+          settingsBusinessName.value = data.business_name || '';
+          settingsPhone.value = data.phone || '';
+        } catch (err) {
+          console.error('Error loading profile:', err);
         }
       }
 
-      // ─── QUIZ FLOW (new functions) ──────────────────────────────────
+      profileSettingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) return;
+        const businessName = settingsBusinessName.value.trim();
+        const phone = settingsPhone.value.trim();
+
+        try {
+          const { error } = await supabaseClient
+            .from('profiles')
+            .update({ business_name: businessName, phone: phone })
+            .eq('id', state.currentUser.id);
+          if (error) throw error;
+          profileStatus.textContent = '✅ Profile updated successfully!';
+          profileStatus.className = 'mt-3 text-sm text-emerald-600';
+          if (state.currentUser) {
+            state.currentUser.business_name = businessName;
+            state.currentUser.phone = phone;
+          }
+          await fetchAllData();
+          if (state.currentUser) await loadMyProperties();
+        } catch (err) {
+          profileStatus.textContent = '❌ Update failed: ' + err.message;
+          profileStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Fetch all data (FIXED: two-step fetch) ──────────────────
+      async function fetchAllData() {
+        state.isLoading = true;
+        loadingSkeleton.style.display = 'grid';
+        listingsGrid.innerHTML = '';
+        emptyState.classList.add('hidden');
+
+        try {
+          // 1️⃣ Fetch all properties
+          const { data: properties, error: propError } = await supabaseClient
+            .from('properties')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (propError) throw propError;
+
+          // 2️⃣ Fetch all profiles for the brokers
+          const brokerIds = [...new Set(properties.map(p => p[COLUMNS.FOREIGN_KEY]).filter(id => id))];
+          let profilesMap = {};
+          if (brokerIds.length > 0) {
+            const { data: profiles, error: profError } = await supabaseClient
+              .from('profiles')
+              .select('*')
+              .in('id', brokerIds);
+            if (profError) throw profError;
+            profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+          }
+          state.profilesMap = profilesMap;
+
+          // 3️⃣ Enrich properties with broker data
+          const enriched = (properties || []).map(prop => ({
+            ...prop,
+            broker: profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null,
+          }));
+
+          // 4️⃣ Sort by tier (Platinum > Gold > Bronze) and then by rating/score
+          const tierOrder = { 'platinum': 3, 'gold': 2, 'bronze': 1 };
+          enriched.sort((a, b) => {
+            const aTier = tierOrder[(a.broker?.tier || 'bronze').toLowerCase()] || 0;
+            const bTier = tierOrder[(b.broker?.tier || 'bronze').toLowerCase()] || 0;
+            if (aTier !== bTier) return bTier - aTier;
+            // Then by lead score
+            return (b.broker?.lead_score || 0) - (a.broker?.lead_score || 0);
+          });
+
+          state.allProperties = enriched;
+          state.filteredProperties = [...enriched];
+          applyFiltersAndSearch();
+        } catch (err) {
+          console.error('❌ Error fetching data:', err);
+          listingsGrid.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500">
+              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
+              <p>Failed to load properties.</p>
+              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+              <p class="text-xs text-slate-400 mt-2">Check that your 'properties' table has an 'owner_id' column referencing 'profiles(id)'.</p>
+            </div>
+          `;
+        } finally {
+          state.isLoading = false;
+          loadingSkeleton.style.display = 'none';
+        }
+      }
+
+      function applyFiltersAndSearch() {
+        const filter = state.currentFilter;
+        const query = state.searchQuery.trim().toLowerCase();
+        let result = [...state.allProperties];
+
+        const filterMap = { 'all': 'all', 'rental': 'Rentals', 'property': 'Properties', 'lodge': 'Lodges' };
+        const mappedFilter = filterMap[filter] || filter;
+        if (mappedFilter !== 'all') {
+          result = result.filter(p => (p[COLUMNS.TYPE] || '').toLowerCase() === mappedFilter.toLowerCase());
+        }
+
+        if (query) {
+          result = result.filter(p => {
+            const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
+            const title = (p[COLUMNS.TITLE] || '').toLowerCase();
+            return address.includes(query) || title.includes(query);
+          });
+        }
+
+        state.filteredProperties = result;
+        renderListings(result);
+      }
+
+      // ─── Navigation ────────────────────────────────────────────────
+      async function navigateToBroker(brokerId) {
+        if (!brokerId) return;
+        state.currentBrokerId = brokerId;
+        showView(brokerView);
+        navigateTo(`/broker/${brokerId}`);
+        await loadBrokerProfile(brokerId);
+      }
+
+      async function loadBrokerProfile(brokerId) {
+        brokerListingsGrid.innerHTML = `
+          <div class="col-span-full flex justify-center py-12">
+            <div class="text-slate-400 flex items-center gap-3">
+              <i class="fas fa-spinner fa-spin text-xl"></i> Loading broker profile…
+            </div>
+          </div>
+        `;
+        brokerEmptyState.classList.add('hidden');
+
+        try {
+          const { data: broker, error: brokerError } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', brokerId)
+            .single();
+          if (brokerError) throw brokerError;
+          if (!broker) {
+            brokerListingsGrid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Broker not found.</div>`;
+            return;
+          }
+
+          brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
+          const tierLabel = getTierLabel(broker.tier);
+          const tierClass = getTierClass(broker.tier);
+          brokerTierBadge.textContent = tierLabel;
+          brokerTierBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${tierClass}`;
+
+          const phone = broker.phone || '';
+          brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
+          brokerWhatsAppLink.style.display = 'none';
+
+          const rating = broker.average_rating || 0;
+          const reviewCount = broker.review_count || 0;
+          const leadScore = broker.lead_score || 0;
+          brokerStars.innerHTML = renderStars(rating);
+          brokerReviewCount.textContent = `(${reviewCount} reviews)`;
+          brokerLeadScore.textContent = `⚡ ${leadScore}`;
+
+          if (state.currentUser && state.currentUser.id !== brokerId) {
+            rateBrokerBtn.classList.remove('hidden');
+            rateBrokerBtn.onclick = () => openReviewModal(brokerId);
+          } else {
+            rateBrokerBtn.classList.add('hidden');
+          }
+
+          const { data: props, error: propsError } = await supabaseClient
+            .from('properties')
+            .select('*')
+            .eq(COLUMNS.FOREIGN_KEY, brokerId)
+            .order('created_at', { ascending: false });
+          if (propsError) throw propsError;
+
+          if (!props || props.length === 0) {
+            brokerListingsGrid.innerHTML = '';
+            brokerEmptyState.classList.remove('hidden');
+            return;
+          }
+
+          brokerEmptyState.classList.add('hidden');
+          brokerListingsGrid.innerHTML = '';
+          props.forEach(prop => {
+            const card = createPropertyCard(prop, broker, false, false);
+            brokerListingsGrid.appendChild(card);
+          });
+        } catch (err) {
+          console.error('❌ Error loading broker profile:', err);
+          brokerListingsGrid.innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500">
+              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
+              <p>Could not load broker profile.</p>
+              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function navigateToAuth() {
+        showView(authView);
+        navigateTo('/auth');
+        setAuthMode(false);
+        authForm.reset();
+      }
+
+      function goToDiscovery() {
+        showView(discoveryView);
+        state.currentBrokerId = null;
+        navigateTo('/');
+        applyFiltersAndSearch();
+      }
+
+      // ─── Dashboard ──────────────────────────────────────────────────
+      async function loadMyProperties() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient
+            .from('properties')
+            .select('*')
+            .eq(COLUMNS.FOREIGN_KEY, state.currentUser.id)
+            .order('created_at', { ascending: false });
+          if (error) throw error;
+          state.myProperties = data || [];
+          renderMyProperties();
+        } catch (err) {
+          console.error('Error loading my properties:', err);
+          myPropertiesList.innerHTML = `
+            <div class="col-span-full text-center py-8 text-slate-500">
+              Could not load your properties. Check RLS policies and column '${COLUMNS.FOREIGN_KEY}'.
+            </div>
+          `;
+        }
+      }
+
+      // ─── Add Property ──────────────────────────────────────────────
+      addPropertyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in first.');
+          return;
+        }
+
+        const title = propTitle.value.trim();
+        const price = parseFloat(propPrice.value);
+        const type = propType.value;
+        const address = propAddress.value.trim();
+        const imageFiles = propImage.files;
+
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+
+        uploadStatus.textContent = 'Uploading images...';
+        uploadStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        const imageUrls = [];
+        if (imageFiles && imageFiles.length > 0) {
+          for (const file of imageFiles) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `${state.currentUser.id}/${fileName}`;
+            const { error: uploadError } = await supabaseClient.storage.from('property-media').upload(filePath, file);
+            if (uploadError) {
+              uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
+              uploadStatus.className = 'mt-3 text-sm text-red-600';
+              return;
+            }
+            const { data: urlData } = supabaseClient.storage.from('property-media').getPublicUrl(filePath);
+            imageUrls.push(urlData.publicUrl);
+          }
+        }
+
+        const dbType = TYPE_MAP[type] || type;
+        const insertData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: imageUrls,
+          [COLUMNS.FOREIGN_KEY]: state.currentUser.id,
+        };
+
+        try {
+          const { error } = await supabaseClient.from('properties').insert(insertData);
+          if (error) throw error;
+          uploadStatus.textContent = '✅ Property added successfully!';
+          uploadStatus.className = 'mt-3 text-sm text-emerald-600';
+          addPropertyForm.reset();
+          propImage.value = '';
+          await loadMyProperties();
+          await fetchAllData();
+        } catch (err) {
+          uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
+          uploadStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Auth Handlers ─────────────────────────────────────────────
+      async function handleAuthSubmit(e) {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (state.isSignUpMode) {
+          const businessName = bizNameInput.value.trim();
+          const accountType = accTypeSelect.value;
+          const phone = phoneInput.value.trim();
+
+          if (!businessName) {
+            alert('Please enter your Business / Brand Name.');
+            return;
+          }
+
+          try {
+            const { data, error } = await supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                data: {
+                  business_name: businessName,
+                  account_type: accountType,
+                  phone: phone,
+                }
+              }
+            });
+            if (error) throw error;
+            alert('✅ Account created! Please check your email to verify your account.');
+            setAuthMode(false);
+            authForm.reset();
+          } catch (err) {
+            alert('❌ Registration failed: ' + err.message);
+          }
+        } else {
+          try {
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            state.currentUser = data.user;
+            alert('✅ Signed in successfully!');
+            showView(dashboardView);
+            navigateTo('/dashboard');
+            portalBtnLabel.textContent = 'Dashboard';
+            await fetchFavorites();
+            await loadProfileSettings();
+            await loadMyProperties();
+            await fetchAllData();
+          } catch (err) {
+            alert('❌ Sign in failed: ' + err.message);
+          }
+        }
+      }
+
+      // ─── Logout ──────────────────────────────────────────────────────
+      async function handleLogout() {
+        await supabaseClient.auth.signOut();
+        state.currentUser = null;
+        state.favorites = new Set();
+        portalBtnLabel.textContent = 'Broker Portal';
+        goToDiscovery();
+      }
+
+      // ─── Route Handler ──────────────────────────────────────────────
+      async function handleRoute() {
+        const path = getCurrentPath();
+        if (path.startsWith('/broker/')) {
+          const brokerId = path.split('/')[2];
+          if (brokerId && brokerId !== state.currentBrokerId) {
+            if (brokerView.classList.contains('view-hidden')) {
+              showView(brokerView);
+              await loadBrokerProfile(brokerId);
+            }
+          }
+        } else if (path === '/auth') {
+          if (authView.classList.contains('view-hidden')) {
+            showView(authView);
+            setAuthMode(false);
+            authForm.reset();
+          }
+        } else if (path === '/dashboard') {
+          if (state.currentUser) {
+            if (dashboardView.classList.contains('view-hidden')) {
+              showView(dashboardView);
+              await loadMyProperties();
+            }
+          } else {
+            navigateTo('/auth', true);
+            handleRoute();
+          }
+        } else if (path === '/') {
+          if (!discoveryView.classList.contains('view-visible')) {
+            showView(discoveryView);
+            applyFiltersAndSearch();
+          }
+        } else {
+          navigateTo('/', true);
+          handleRoute();
+        }
+      }
+
+      // ─── QUIZ FLOW ──────────────────────────────────────────────────
       async function openQuizModal(propertyId) {
-        // ... (show modal, load questions) ...
+        quizPropertyId.value = propertyId;
+        quizStep1.classList.remove('hidden');
+        quizStep2.classList.add('hidden');
+        quizForm.reset();
+        quizModal.classList.remove('hidden');
+        await loadQuizQuestions();
       }
 
       async function loadQuizQuestions() {
-        // ... (fetch from quiz_questions table) ...
+        try {
+          const { data, error } = await supabaseClient
+            .from('quiz_questions')
+            .select('*, quiz_options(*)')
+            .order('display_order');
+          if (error) throw error;
+          window._quizQuestions = data || [];
+        } catch (err) {
+          console.error('Error loading quiz:', err);
+          window._quizQuestions = [];
+        }
       }
 
+      quizNextBtn.addEventListener('click', function() {
+        const name = quizName.value.trim();
+        const email = quizEmail.value.trim();
+        const whatsapp = quizWhatsapp.value.trim();
+        if (!name || !email || !whatsapp) {
+          alert('Please fill in all contact fields.');
+          return;
+        }
+        quizStep1.classList.add('hidden');
+        quizStep2.classList.remove('hidden');
+        renderQuizQuestions();
+      });
+
       function renderQuizQuestions() {
-        // ... (render dynamic radio buttons) ...
+        const container = quizQuestionsContainer;
+        container.innerHTML = '';
+        const questions = window._quizQuestions || [];
+        if (questions.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No quiz questions configured.</p>';
+          return;
+        }
+        questions.forEach((q, idx) => {
+          const div = document.createElement('div');
+          div.className = 'mb-4';
+          let optionsHtml = q.quiz_options.map(opt => `
+            <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+              <input type="radio" name="q_${q.id}" value="${opt.score_value}" data-question="${q.id}" required />
+              ${opt.option_text}
+            </label>
+          `).join('');
+          div.innerHTML = `
+            <p class="font-medium text-slate-700 text-sm mb-1">${idx+1}. ${q.question_text}</p>
+            <div class="flex flex-wrap gap-2">${optionsHtml}</div>
+          `;
+          container.appendChild(div);
+        });
       }
 
       quizForm.addEventListener('submit', async function(e) {
-        // ... (collect answers, invoke 'request-lead' Edge Function) ...
+        e.preventDefault();
+        const propertyId = quizPropertyId.value;
+        const name = quizName.value.trim();
+        const email = quizEmail.value.trim();
+        const whatsapp = quizWhatsapp.value.trim();
+
+        const radioGroups = document.querySelectorAll('#quizQuestionsContainer input[type="radio"]:checked');
+        if (radioGroups.length === 0) {
+          alert('Please answer all quiz questions.');
+          return;
+        }
+        const answers = {};
+        let totalScore = 0;
+        radioGroups.forEach(radio => {
+          const qId = radio.dataset.question;
+          const score = parseInt(radio.value);
+          answers[qId] = score;
+          totalScore += score;
+        });
+
+        let leadType = 'cold';
+        if (totalScore >= 7) leadType = 'hot';
+        else if (totalScore >= 4) leadType = 'warm';
+
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('request-lead', {
+            body: {
+              property_id: propertyId,
+              visitor_name: name,
+              visitor_email: email,
+              visitor_whatsapp: whatsapp,
+              quiz_answers: answers,
+              total_score: totalScore,
+              lead_type: leadType
+            }
+          });
+          if (error) throw error;
+
+          quizModal.classList.add('hidden');
+          waitingModal.classList.remove('hidden');
+          waitingStatus.textContent = 'Request sent. Waiting for broker...';
+
+          const requestId = data.request_id;
+          subscribeToLeadRequest(requestId);
+        } catch (err) {
+          alert('Error submitting request: ' + err.message);
+        }
       });
 
       function subscribeToLeadRequest(requestId) {
-        // ... (Realtime subscription to lead_requests) ...
+        const channel = supabaseClient
+          .channel(`lead-request-${requestId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'lead_requests',
+              filter: `id=eq.${requestId}`
+            },
+            (payload) => {
+              const newStatus = payload.new.status;
+              if (newStatus === 'approved') {
+                waitingStatus.textContent = '✅ Broker approved! Verifying your identity...';
+                waitingModal.classList.add('hidden');
+                otpRequestId.value = requestId;
+                otpModal.classList.remove('hidden');
+                sendOTP(requestId);
+              } else if (newStatus === 'rejected') {
+                waitingStatus.textContent = '❌ Broker declined this request.';
+                setTimeout(() => {
+                  waitingModal.classList.add('hidden');
+                }, 3000);
+              } else if (newStatus === 'expired') {
+                waitingStatus.textContent = '⏰ Request expired.';
+                setTimeout(() => {
+                  waitingModal.classList.add('hidden');
+                }, 3000);
+              }
+            }
+          )
+          .subscribe();
       }
 
       async function sendOTP(requestId) {
-        // ... (invoke 'send-otp' Edge Function) ...
+        try {
+          await supabaseClient.functions.invoke('send-otp', { body: { request_id: requestId } });
+        } catch (err) {
+          console.error('OTP send error:', err);
+        }
       }
 
       otpForm.addEventListener('submit', async function(e) {
-        // ... (verify OTP via 'verify-otp' Edge Function) ...
+        e.preventDefault();
+        const requestId = otpRequestId.value;
+        const otp = otpInput.value.trim();
+        if (!otp || otp.length < 4) {
+          alert('Please enter the full OTP.');
+          return;
+        }
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('verify-otp', {
+            body: { request_id: requestId, otp: otp }
+          });
+          if (error) throw error;
+          otpModal.classList.add('hidden');
+          const waLink = `https://wa.me/${data.broker_whatsapp}`;
+          alert(`✅ Verified! Click OK to chat with the broker on WhatsApp.`);
+          window.open(waLink, '_blank');
+        } catch (err) {
+          otpError.classList.remove('hidden');
+          otpError.textContent = 'Invalid OTP. Please try again.';
+        }
       });
 
-      // ─── Rest of your original code (Dashboard, Auth, Route, Init) ──
-      // ... (unchanged) ...
+      cancelWaitBtn.addEventListener('click', function() {
+        if (confirm('Cancel this request?')) {
+          waitingModal.classList.add('hidden');
+        }
+      });
+
+      closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
+      quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
+
+      // ─── Event Binding ─────────────────────────────────────────────
+      searchInput.addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        applyFiltersAndSearch();
+      });
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        state.searchQuery = '';
+        applyFiltersAndSearch();
+        searchInput.focus();
+      });
+
+      filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          filterPills.forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+          state.currentFilter = pill.dataset.filter;
+          applyFiltersAndSearch();
+        });
+      });
+
+      backToDiscovery.addEventListener('click', goToDiscovery);
+      backToSearchBtn.addEventListener('click', goToDiscovery);
+      logoutBtn.addEventListener('click', handleLogout);
+
+      brokerPortalBtn.addEventListener('click', () => {
+        if (state.currentUser) {
+          showView(dashboardView);
+          navigateTo('/dashboard');
+          loadMyProperties();
+        } else {
+          navigateToAuth();
+        }
+      });
+
+      toggleSignIn.addEventListener('click', () => setAuthMode(false));
+      toggleSignUp.addEventListener('click', () => setAuthMode(true));
+
+      authForm.addEventListener('submit', handleAuthSubmit);
+
+      window.addEventListener('popstate', handleRoute);
 
       // ─── Init ────────────────────────────────────────────────────────
       async function init() {
-        // ... (your original init with email verification, session restore) ...
+        // Email verification
+        const hash = window.location.hash;
+        if (hash && hash.includes('access_token')) {
+          const params = new URLSearchParams(hash.substring(1));
+          const accessToken = params.get('access_token');
+          const refreshToken = params.get('refresh_token');
+          if (accessToken && refreshToken) {
+            try {
+              const { data, error } = await supabaseClient.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              if (error) throw error;
+              if (data.user) {
+                state.currentUser = data.user;
+                portalBtnLabel.textContent = 'Dashboard';
+                window.history.replaceState(null, '', '/');
+                showView(dashboardView);
+                navigateTo('/dashboard');
+                await fetchFavorites();
+                await loadProfileSettings();
+                await loadMyProperties();
+                await fetchAllData();
+                alert('✅ Email verified! Welcome to your dashboard.');
+                return;
+              }
+            } catch (err) {
+              console.error('Session set error:', err);
+              alert('❌ Verification failed: ' + err.message);
+            }
+          }
+        }
+
+        try {
+          const { data: { user } } = await supabaseClient.auth.getUser();
+          if (user) {
+            state.currentUser = user;
+            portalBtnLabel.textContent = 'Dashboard';
+            await fetchFavorites();
+            await loadProfileSettings();
+          }
+        } catch (err) {
+          console.log('No active session (403 is normal).');
+        }
+
         await handleRoute();
         await fetchAllData();
       }

@@ -117,19 +117,6 @@
     }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
-
-    #statusBar {
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.75rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.875rem;
-      color: #475569;
-      display: none;
-    }
-    #statusBar.error { background: #fef2f2; border-color: #fca5a5; color: #991b1b; }
-    #statusBar.success { background: #f0fdf4; border-color: #86efac; color: #166534; }
   </style>
 </head>
 <body>
@@ -140,7 +127,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== MODALS (unchanged) ===== -->
+  <!-- ===== MODALS ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -357,7 +344,6 @@
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="lodge"><i class="fas fa-bed mr-1.5"></i> Lodges</button>
             <span class="text-xs text-slate-400 ml-2 hidden sm:inline"><i class="fas fa-arrow-right mr-1"></i> Premium first</span>
           </div>
-          <div id="statusBar" class="hidden"></div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
           <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -516,17 +502,6 @@
       });
     }
 
-    // ─── Set status ──────────────────────────────────────────────────
-    function setStatus(msg, type = 'info') {
-      const bar = document.getElementById('statusBar');
-      if (bar) {
-        bar.textContent = msg;
-        bar.style.display = 'block';
-        bar.className = type;
-      }
-      console.log('📊', msg);
-    }
-
     // ─── Hide loading ────────────────────────────────────────────────
     function hideLoading() {
       const overlay = document.getElementById('loadingOverlay');
@@ -541,11 +516,10 @@
       await waitForSupabase();
       if (!window.supabase) {
         hideLoading();
-        setStatus('❌ Failed to load Supabase. Please refresh.', 'error');
+        alert('Failed to load Supabase. Please refresh.');
         return;
       }
 
-      console.log('✅ Supabase loaded');
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✅ Supabase client created');
 
@@ -1136,7 +1110,6 @@
         loadingSkeleton.style.display = 'grid';
         listingsGrid.innerHTML = '';
         emptyState.classList.add('hidden');
-        setStatus('Loading properties...', 'info');
 
         try {
           // Fetch properties
@@ -1148,7 +1121,6 @@
           if (propError) throw propError;
 
           if (!properties || properties.length === 0) {
-            setStatus('No properties found. Add your first property!', 'info');
             loadingSkeleton.style.display = 'none';
             state.allProperties = [];
             state.filteredProperties = [];
@@ -1156,8 +1128,6 @@
             state.isLoading = false;
             return;
           }
-
-          setStatus(`Found ${properties.length} properties. Loading broker details...`, 'info');
 
           // Auto-detect foreign key
           const firstProp = properties[0];
@@ -1195,7 +1165,6 @@
                 .in('id', brokerIds);
               if (!profError && profiles) {
                 profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
-                setStatus(`Loaded ${Object.keys(profilesMap).length} broker profiles.`, 'success');
               }
             }
           }
@@ -1217,17 +1186,14 @@
 
           state.allProperties = enriched;
           state.filteredProperties = [...enriched];
-          setStatus(`✅ Showing ${enriched.length} properties`, 'success');
           applyFiltersAndSearch();
         } catch (err) {
           console.error('❌ Error fetching data:', err);
-          setStatus('❌ Error: ' + err.message, 'error');
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
               <p>Failed to load properties.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
-              <p class="text-xs text-slate-400 mt-2">Check your Supabase table and RLS policies.</p>
             </div>
           `;
         } finally {
@@ -1796,7 +1762,6 @@
 
         // Hide loading overlay
         hideLoading();
-        setStatus('✅ Ready', 'success');
       }
 
       init();

@@ -198,7 +198,7 @@
     </div>
   </div>
 
-  <!-- ===== QUIZ MODAL ===== -->
+  <!-- ===== QUIZ MODAL (OVERLAY) ===== -->
   <div id="quizModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-lg">
       <div class="flex justify-between items-center mb-4">
@@ -357,7 +357,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW ===== -->
+      <!-- ===== BROKER PROFILE VIEW (PHONE NUMBER REMOVED) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -365,9 +365,7 @@
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
-                <div class="flex items-center gap-3 mt-1.5">
-                  <span id="brokerPhone" class="text-sm text-slate-500 flex items-center gap-1"><i class="fas fa-phone-alt"></i> <span>—</span></span>
-                </div>
+                <!-- Phone number removed from here -->
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
                   <span class="stars" id="brokerStars"></span>
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
@@ -573,7 +571,7 @@
       const filterPills = $$('.filter-pill');
 
       const brokerBusinessName = $('#brokerBusinessName');
-      const brokerPhone = $('#brokerPhone');
+      // phone element removed – we don't need it anymore
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
       const brokerBio = $('#brokerBio');
       const brokerListingsGrid = $('#brokerListingsGrid');
@@ -1258,8 +1256,7 @@
           }
 
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
-          const phone = broker.phone || '';
-          brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
+          // Phone number removed – no longer displayed
           brokerWhatsAppLink.style.display = 'none';
 
           const rating = broker.average_rating || 0;

@@ -122,14 +122,6 @@
     }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
-
-    /* NEW: wallet balance badge */
-    .wallet-badge {
-      background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
-      padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;
-      font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;
-    }
-    .wallet-badge i { color: #16a34a; }
   </style>
 </head>
 <body>
@@ -140,7 +132,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== REVIEW MODAL (unchanged) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -171,7 +163,7 @@
     </div>
   </div>
 
-  <!-- ===== EDIT PROPERTY MODAL (unchanged) ===== -->
+  <!-- ===== EDIT PROPERTY MODAL ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -212,7 +204,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: QUIZ MODAL ===== -->
+  <!-- ===== QUIZ MODAL (Visitor facing) ===== -->
   <div id="quizModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-lg">
       <div class="flex justify-between items-center mb-4">
@@ -249,7 +241,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: WAITING ROOM MODAL ===== -->
+  <!-- ===== WAITING ROOM MODAL ===== -->
   <div id="waitingModal" class="modal-backdrop hidden">
     <div class="modal-content text-center max-w-md">
       <div class="py-8">
@@ -263,7 +255,7 @@
     </div>
   </div>
 
-  <!-- ===== NEW: OTP VERIFICATION MODAL ===== -->
+  <!-- ===== OTP VERIFICATION MODAL ===== -->
   <div id="otpModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
@@ -291,10 +283,6 @@
             <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">UGX</span>
           </div>
           <div class="flex items-center gap-4">
-            <!-- NEW: wallet balance badge (visible when logged in) -->
-            <span id="walletBadge" class="wallet-badge hidden">
-              <i class="fas fa-wallet"></i> <span id="walletBalance">0</span> UGX
-            </span>
             <span id="propertyCount" class="bg-slate-100 px-3 py-1 rounded-full text-slate-700 font-medium text-xs">0 listings</span>
             <button id="brokerPortalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow flex items-center gap-2">
               <i class="fas fa-user-tie"></i> <span id="portalBtnLabel">Broker Portal</span>
@@ -305,7 +293,7 @@
     </header>
 
     <main>
-      <!-- ===== DISCOVERY VIEW (unchanged) ===== -->
+      <!-- ===== DISCOVERY VIEW ===== -->
       <section id="discoveryView" class="view view-visible">
         <div class="relative bg-slate-900 text-white overflow-hidden">
           <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1400&q=80')] bg-cover bg-center opacity-30"></div>
@@ -349,7 +337,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (unchanged) ===== -->
+      <!-- ===== BROKER PROFILE VIEW ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -371,7 +359,7 @@
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate Broker
                 </button>
-                <!-- WhatsApp link will be shown only after OTP; we keep it but it will be hidden initially -->
+                <!-- WhatsApp link hidden by default, shown after OTP -->
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
@@ -387,7 +375,7 @@
         </div>
       </section>
 
-      <!-- ===== AUTH VIEW (unchanged) ===== -->
+      <!-- ===== AUTH VIEW ===== -->
       <section id="authView" class="view view-hidden max-w-md mx-auto my-12 px-4">
         <div class="auth-card p-8">
           <div class="flex rounded-xl bg-slate-100 p-1 mb-8 border border-slate-200/50">
@@ -409,7 +397,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (modified) ===== -->
+      <!-- ===== DASHBOARD VIEW (CLEAN: Only Profile + Properties) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -417,7 +405,7 @@
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- ===== PROFILE SETTINGS (unchanged) ===== -->
+          <!-- ===== PROFILE SETTINGS ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -438,14 +426,7 @@
             <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== NEW: PENDING LEAD REQUESTS ===== -->
-          <div class="dashboard-card p-6 mb-8">
-            <h3 class="text-lg font-semibold text-slate-700 mb-4">📨 Pending Lead Requests</h3>
-            <div id="pendingLeadsList" class="space-y-3"></div>
-            <div id="noPendingLeads" class="text-slate-400 text-sm text-center py-4 hidden">No pending requests.</div>
-          </div>
-
-          <!-- ===== ADD PROPERTY FORM (unchanged) ===== -->
+          <!-- ===== ADD PROPERTY FORM ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -463,7 +444,7 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== MY PROPERTIES LIST (unchanged) ===== -->
+          <!-- ===== MY PROPERTIES LIST ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
         </div>
@@ -590,7 +571,6 @@
         profilesMap: {},
         favorites: new Set(),
         brokerProfile: null,
-        walletBalance: 0,
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -649,7 +629,6 @@
       const portalBtnLabel = $('#portalBtnLabel');
       const brokerPortalBtn = $('#brokerPortalBtn');
 
-      // Edit property modal
       const editModal = $('#editModal');
       const closeEditModal = $('#closeEditModal');
       const editPropertyForm = $('#editPropertyForm');
@@ -661,7 +640,6 @@
       const editImageInput = $('#editImageInput');
       const editImagePreviews = $('#editImagePreviews');
 
-      // Review modal
       const reviewModal = $('#reviewModal');
       const closeReviewModal = $('#closeReviewModal');
       const reviewForm = $('#reviewForm');
@@ -670,17 +648,12 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      // Profile settings
       const profileSettingsForm = $('#profileSettingsForm');
       const settingsBusinessName = $('#settingsBusinessName');
       const settingsPhone = $('#settingsPhone');
       const profileStatus = $('#profileStatus');
 
-      // NEW: wallet badge
-      const walletBadge = $('#walletBadge');
-      const walletBalanceSpan = $('#walletBalance');
-
-      // NEW: quiz modals
+      // Quiz modals
       const quizModal = $('#quizModal');
       const closeQuizModal = $('#closeQuizModal');
       const quizForm = $('#quizForm');
@@ -702,10 +675,6 @@
       const otpRequestId = $('#otpRequestId');
       const otpInput = $('#otpInput');
       const otpError = $('#otpError');
-
-      // NEW: pending leads
-      const pendingLeadsList = $('#pendingLeadsList');
-      const noPendingLeads = $('#noPendingLeads');
 
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
@@ -807,7 +776,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card (modified) ──────────────────────────
+      // ─── Create property card ──────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -868,7 +837,6 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <!-- REPLACED WhatsApp link with Connect button -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -877,7 +845,6 @@
           </div>
         `;
 
-        // Event listeners
         article.querySelector('.favorite-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           toggleFavorite(property.id);
@@ -912,7 +879,6 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
-        // NEW: Connect button opens quiz
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
@@ -979,7 +945,7 @@
         } catch (err) { alert('Delete failed: ' + err.message); }
       }
 
-      // ─── Edit property modal (unchanged) ──────────────────────────
+      // ─── Edit property modal ──────────────────────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
@@ -1069,7 +1035,7 @@
       closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
       editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
 
-      // ─── Review modal (unchanged) ─────────────────────────────────
+      // ─── Review modal ─────────────────────────────────────────────
       function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
@@ -1134,31 +1100,20 @@
         }
       });
 
-      // ─── Profile Settings (unchanged) ──────────────────────────────
+      // ─── Profile Settings ──────────────────────────────────────────
       async function loadProfileSettings() {
         if (!state.currentUser) return;
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
-            .select('business_name, phone, wallet_balance')
+            .select('business_name, phone')
             .eq('id', state.currentUser.id)
             .single();
           if (error) throw error;
           settingsBusinessName.value = data.business_name || '';
           settingsPhone.value = data.phone || '';
-          state.walletBalance = data.wallet_balance || 0;
-          updateWalletDisplay();
         } catch (err) {
           console.error('Error loading profile:', err);
-        }
-      }
-
-      function updateWalletDisplay() {
-        if (state.currentUser) {
-          walletBadge.classList.remove('hidden');
-          walletBalanceSpan.textContent = state.walletBalance.toLocaleString();
-        } else {
-          walletBadge.classList.add('hidden');
         }
       }
 
@@ -1188,7 +1143,7 @@
         }
       });
 
-      // ─── Fetch all data with ranking algorithm ────────────────────
+      // ─── Fetch all data (FIXED QUERY) ────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1196,11 +1151,12 @@
         emptyState.classList.add('hidden');
 
         try {
+          // 🔥 FIX: Explicitly use `profiles!owner_id` to tell Supabase which foreign key to join on
           const { data: properties, error } = await supabaseClient
             .from('properties')
             .select(`
               *,
-              profiles!inner (
+              profiles!owner_id (
                 business_name,
                 tier,
                 phone,
@@ -1210,13 +1166,16 @@
                 verified
               )
             `)
-            .order('tier', { foreignTable: 'profiles', ascending: false })  // Platinum first
+            .order('tier', { foreignTable: 'profiles', ascending: false })
             .order('verified', { foreignTable: 'profiles', ascending: false })
             .order('average_rating', { foreignTable: 'profiles', ascending: false })
             .order('lead_score', { foreignTable: 'profiles', ascending: false })
             .order('review_count', { foreignTable: 'profiles', ascending: false });
 
-          if (error) throw error;
+          if (error) {
+            console.error('❌ Supabase query error:', error);
+            throw error;
+          }
 
           const enriched = (properties || []).map(prop => ({
             ...prop,
@@ -1235,8 +1194,9 @@
           listingsGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
-              <p>Failed to load data. Check your database schema.</p>
+              <p>Failed to load properties.</p>
               <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+              <p class="text-xs text-slate-400 mt-2">Check that your 'properties' table has an 'owner_id' column referencing 'profiles(id)'.</p>
             </div>
           `;
         } finally {
@@ -1307,7 +1267,6 @@
 
           const phone = broker.phone || '';
           brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
-          // Hide WhatsApp link initially (will be shown via OTP)
           brokerWhatsAppLink.style.display = 'none';
 
           const rating = broker.average_rating || 0;
@@ -1391,7 +1350,7 @@
         }
       }
 
-      // ─── Add Property (unchanged) ──────────────────────────────────
+      // ─── Add Property ──────────────────────────────────────────────
       addPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
@@ -1480,9 +1439,6 @@
                   business_name: businessName,
                   account_type: accountType,
                   phone: phone,
-                  wallet_balance: 0,
-                  tier: 'bronze',
-                  verified: false,
                 }
               }
             });
@@ -1505,7 +1461,6 @@
             await fetchFavorites();
             await loadProfileSettings();
             await loadMyProperties();
-            await loadPendingLeads(); // NEW
             await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
@@ -1519,7 +1474,6 @@
         state.currentUser = null;
         state.favorites = new Set();
         portalBtnLabel.textContent = 'Broker Portal';
-        walletBadge.classList.add('hidden');
         goToDiscovery();
       }
 
@@ -1545,7 +1499,6 @@
             if (dashboardView.classList.contains('view-hidden')) {
               showView(dashboardView);
               await loadMyProperties();
-              await loadPendingLeads();
             }
           } else {
             navigateTo('/auth', true);
@@ -1562,7 +1515,7 @@
         }
       }
 
-      // ─── NEW: Quiz Functions ────────────────────────────────────────
+      // ─── QUIZ FLOW (Visitor side) ──────────────────────────────────
       async function openQuizModal(propertyId) {
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');
@@ -1644,7 +1597,6 @@
         if (totalScore >= 7) leadType = 'hot';
         else if (totalScore >= 4) leadType = 'warm';
 
-        // Call Edge Function
         try {
           const { data, error } = await supabaseClient.functions.invoke('request-lead', {
             body: {
@@ -1745,70 +1697,6 @@
       closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
       quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
 
-      // ─── NEW: Pending Leads for Broker ────────────────────────────
-      async function loadPendingLeads() {
-        if (!state.currentUser) return;
-        const { data, error } = await supabaseClient
-          .from('lead_requests')
-          .select('*, properties(title, address)')
-          .eq('broker_id', state.currentUser.id)
-          .eq('status', 'pending')
-          .order('created_at', { ascending: false });
-
-        if (error) { console.error(error); return; }
-
-        const container = pendingLeadsList;
-        const empty = noPendingLeads;
-        if (!data || data.length === 0) {
-          container.innerHTML = '';
-          empty.classList.remove('hidden');
-          return;
-        }
-        empty.classList.add('hidden');
-        container.innerHTML = data.map(lead => `
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
-            <div>
-              <p class="font-semibold text-slate-800">${lead.properties?.title || 'Property'}</p>
-              <p class="text-xs text-slate-500">${lead.properties?.address || ''}</p>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-xs font-medium px-2 py-0.5 rounded-full ${lead.lead_type === 'hot' ? 'bg-red-100 text-red-700' : lead.lead_type === 'warm' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}">${lead.lead_type.toUpperCase()}</span>
-                <span class="text-xs text-slate-600">Score: ${lead.lead_score}</span>
-                <span class="text-xs text-slate-600">Cost: ${lead.calculated_cost} UGX</span>
-              </div>
-              <div class="text-xs text-slate-400 mt-0.5">
-                <i class="fas fa-user mr-1"></i> ${lead.visitor_name} · ${lead.visitor_whatsapp}
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <button class="approve-lead-btn bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-full" data-lead="${lead.id}">Approve</button>
-              <button class="reject-lead-btn bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-full" data-lead="${lead.id}">Reject</button>
-            </div>
-          </div>
-        `).join('');
-
-        container.querySelectorAll('.approve-lead-btn').forEach(btn => {
-          btn.addEventListener('click', () => handleLeadDecision(btn.dataset.lead, 'approve'));
-        });
-        container.querySelectorAll('.reject-lead-btn').forEach(btn => {
-          btn.addEventListener('click', () => handleLeadDecision(btn.dataset.lead, 'reject'));
-        });
-      }
-
-      async function handleLeadDecision(requestId, decision) {
-        if (!state.currentUser) return;
-        try {
-          const { data, error } = await supabaseClient.functions.invoke('handle-lead-decision', {
-            body: { request_id: requestId, decision: decision }
-          });
-          if (error) throw error;
-          alert(`✅ Lead ${decision}d successfully.`);
-          await loadPendingLeads();
-          await loadProfileSettings(); // refresh wallet
-        } catch (err) {
-          alert('Error: ' + err.message);
-        }
-      }
-
       // ─── Event Binding ─────────────────────────────────────────────
       searchInput.addEventListener('input', (e) => {
         state.searchQuery = e.target.value;
@@ -1839,7 +1727,6 @@
           showView(dashboardView);
           navigateTo('/dashboard');
           loadMyProperties();
-          loadPendingLeads();
         } else {
           navigateToAuth();
         }
@@ -1876,7 +1763,6 @@
                 await fetchFavorites();
                 await loadProfileSettings();
                 await loadMyProperties();
-                await loadPendingLeads();
                 await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
                 return;
@@ -1902,9 +1788,6 @@
 
         await handleRoute();
         await fetchAllData();
-        if (state.currentUser) {
-          await loadPendingLeads();
-        }
       }
 
       init();

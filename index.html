@@ -44,6 +44,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
+    /* ── Base styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -118,51 +119,86 @@
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
 
-    /* Wallet styles */
-    .wallet-card {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      color: white;
-      border-radius: 1.5rem;
-      padding: 1.5rem;
+    /* ── Dashboard new styles ── */
+    .dashboard-toolbar {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
       flex-wrap: wrap;
-      gap: 1rem;
+      gap: 0.75rem;
+      align-items: center;
+      background: white;
+      padding: 1rem 1.25rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+      margin-bottom: 1.5rem;
     }
-    .wallet-balance {
-      font-size: 2rem;
-      font-weight: bold;
-    }
-    .wallet-balance small {
-      font-size: 0.875rem;
-      font-weight: normal;
-      color: #94a3b8;
-    }
-    .wallet-btn {
-      background: #10b981;
+    .dashboard-toolbar .wallet-pill {
+      background: #1e293b;
       color: white;
-      padding: 0.5rem 1.5rem;
+      padding: 0.4rem 1rem;
       border-radius: 9999px;
       font-size: 0.875rem;
       font-weight: 600;
-      transition: background 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .dashboard-toolbar .wallet-pill .balance {
+      color: #4ade80;
+    }
+    .dashboard-toolbar .toolbar-btn {
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
       border: none;
       cursor: pointer;
-    }
-    .wallet-btn:hover { background: #059669; }
-    .wallet-btn-outline {
-      background: transparent;
-      border: 1px solid #475569;
-      color: #e2e8f0;
-      padding: 0.5rem 1.5rem;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 600;
       transition: all 0.2s;
-      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f1f5f9;
+      color: #1e293b;
     }
-    .wallet-btn-outline:hover { background: #334155; border-color: #94a3b8; }
+    .dashboard-toolbar .toolbar-btn:hover { background: #e2e8f0; }
+    .dashboard-toolbar .toolbar-btn.primary { background: #4f46e5; color: white; }
+    .dashboard-toolbar .toolbar-btn.primary:hover { background: #4338ca; }
+    .dashboard-toolbar .toolbar-btn.green { background: #10b981; color: white; }
+    .dashboard-toolbar .toolbar-btn.green:hover { background: #059669; }
+
+    .profile-form-container {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+      display: none;
+    }
+    .profile-form-container.visible { display: block; }
+
+    .add-property-container {
+      background: white;
+      border-radius: 1.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+      display: none;
+    }
+    .add-property-container.visible { display: block; }
+
+    @media (max-width: 640px) {
+      .dashboard-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0.75rem;
+      }
+      .dashboard-toolbar .wallet-pill {
+        justify-content: center;
+      }
+      .dashboard-toolbar .toolbar-btn {
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -173,7 +209,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== MODALS ===== -->
+  <!-- ===== MODALS (unchanged) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -479,73 +515,60 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (with Wallet) ===== -->
+      <!-- ===== DASHBOARD VIEW (NEW CLEAN DESIGN) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-bold text-slate-800">📋 My Property Listings</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-slate-800">📋 My Properties</h2>
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- ===== WALLET CARD ===== -->
-          <div class="dashboard-card p-6 mb-8">
-            <h3 class="text-lg font-semibold text-slate-700 mb-4">💰 Wallet</h3>
-            <div class="wallet-card">
-              <div>
-                <div class="text-sm text-slate-400">Available Balance</div>
-                <div class="wallet-balance">
-                  <span id="walletBalanceDisplay">0</span> <small>UGX</small>
-                </div>
-              </div>
-              <div class="flex gap-3">
-                <button id="topupBtn" class="wallet-btn">
-                  <i class="fas fa-plus mr-1"></i> Top Up
-                </button>
-                <button id="refreshWalletBtn" class="wallet-btn-outline">
-                  <i class="fas fa-sync-alt"></i>
-                </button>
-              </div>
-            </div>
-            <!-- Transaction history -->
-            <div class="mt-4">
-              <h4 class="text-sm font-semibold text-slate-600 mb-2">Recent Transactions</h4>
-              <div id="transactionList" class="space-y-2 max-h-60 overflow-y-auto"></div>
-              <div id="noTransactions" class="text-slate-400 text-sm text-center py-4 hidden">No transactions yet.</div>
-            </div>
-          </div>
-
-          <!-- ===== PROFILE SETTINGS (collapsible) ===== -->
-          <div class="dashboard-card p-6 mb-8">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-slate-700">⚙️ Profile Settings</h3>
-              <button id="toggleProfileForm" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition">
-                <i class="fas fa-edit mr-1"></i> <span id="profileToggleLabel">Edit Profile</span>
+          <!-- ===== TOOLBAR ===== -->
+          <div class="dashboard-toolbar">
+            <!-- Wallet -->
+            <div class="wallet-pill">
+              <i class="fas fa-wallet"></i>
+              Balance: <span class="balance" id="walletBalanceDisplay">0</span> UGX
+              <button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button>
+              <button id="refreshWalletBtn" class="text-xs bg-slate-600 hover:bg-slate-700 text-white px-2 py-0.5 rounded-full transition">
+                <i class="fas fa-sync-alt"></i>
               </button>
             </div>
-            <div id="profileFormContainer" class="hidden">
-              <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
-                  <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
-                  <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
-                </div>
-                <div class="md:col-span-2">
-                  <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
-                    <i class="fas fa-save mr-2"></i> Save Profile
-                  </button>
-                  <button type="button" id="cancelProfileEdit" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
-                </div>
-              </form>
-              <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
-            </div>
+
+            <!-- Toolbar buttons -->
+            <button id="toggleProfileBtn" class="toolbar-btn">
+              <i class="fas fa-user-edit"></i> Edit Profile
+            </button>
+            <button id="toggleAddPropertyBtn" class="toolbar-btn primary">
+              <i class="fas fa-plus-circle"></i> Add Property
+            </button>
           </div>
 
-          <!-- ===== ADD PROPERTY FORM ===== -->
-          <div class="dashboard-card p-6 mb-8">
-            <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
+          <!-- ===== PROFILE FORM (hidden by default) ===== -->
+          <div id="profileFormContainer" class="profile-form-container">
+            <h4 class="font-semibold text-slate-700 mb-3">⚙️ Edit Profile</h4>
+            <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
+                <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
+                <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
+              </div>
+              <div class="md:col-span-2">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
+                  <i class="fas fa-save mr-2"></i> Save Profile
+                </button>
+                <button type="button" id="cancelProfileEdit" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
+              </div>
+            </form>
+            <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
+          </div>
+
+          <!-- ===== ADD PROPERTY FORM (hidden by default) ===== -->
+          <div id="addPropertyContainer" class="add-property-container">
+            <h4 class="font-semibold text-slate-700 mb-3">➕ Add New Property</h4>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="propTitle" required placeholder="e.g. Modern 3-Bedroom Villa" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="propPrice" required placeholder="e.g. 250000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
@@ -562,17 +585,21 @@
           </div>
 
           <!-- ===== MY PROPERTIES LIST ===== -->
-          <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-          <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
+          <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+          <div id="myPropertiesEmpty" class="text-center py-16 text-slate-400 hidden">
+            <i class="fas fa-home text-4xl mb-3 text-slate-300"></i>
+            <p class="text-lg font-medium text-slate-500">No properties yet</p>
+            <p class="text-sm text-slate-400">Click "Add Property" to list your first property.</p>
+          </div>
         </div>
       </section>
     </main>
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – SUPABASE CDN (with cache buster)
+  JAVASCRIPT
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=3">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=4">
   </script>
 
   <script>
@@ -603,7 +630,6 @@
     async function startApp() {
       console.log('🚀 Starting Property Hub...');
 
-      // Wait for Supabase
       await waitForSupabase();
       if (!window.supabase) {
         hideLoading();
@@ -689,6 +715,18 @@
       const accTypeSelect = $('#accTypeSelect');
       const phoneInput = $('#phoneInput');
 
+      // Dashboard new refs
+      const toggleProfileBtn = $('#toggleProfileBtn');
+      const toggleAddPropertyBtn = $('#toggleAddPropertyBtn');
+      const profileFormContainer = $('#profileFormContainer');
+      const addPropertyContainer = $('#addPropertyContainer');
+      const cancelProfileEdit = $('#cancelProfileEdit');
+
+      const profileSettingsForm = $('#profileSettingsForm');
+      const settingsBusinessName = $('#settingsBusinessName');
+      const settingsPhone = $('#settingsPhone');
+      const profileStatus = $('#profileStatus');
+
       const addPropertyForm = $('#addPropertyForm');
       const propTitle = $('#propTitle');
       const propPrice = $('#propPrice');
@@ -721,22 +759,10 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      const profileSettingsForm = $('#profileSettingsForm');
-      const settingsBusinessName = $('#settingsBusinessName');
-      const settingsPhone = $('#settingsPhone');
-      const profileStatus = $('#profileStatus');
-
-      const toggleProfileBtn = $('#toggleProfileForm');
-      const profileFormContainer = $('#profileFormContainer');
-      const profileToggleLabel = $('#profileToggleLabel');
-      const cancelProfileEdit = $('#cancelProfileEdit');
-
       // Wallet refs
       const walletBalanceDisplay = $('#walletBalanceDisplay');
       const topupBtn = $('#topupBtn');
       const refreshWalletBtn = $('#refreshWalletBtn');
-      const transactionList = $('#transactionList');
-      const noTransactions = $('#noTransactions');
       const topupModal = $('#topupModal');
       const closeTopupModal = $('#closeTopupModal');
       const topupForm = $('#topupForm');
@@ -820,7 +846,6 @@
       async function loadWallet() {
         if (!state.currentUser) return;
         try {
-          // Get balance
           const { data: profile, error } = await supabase
             .from('profiles')
             .select('wallet_balance')
@@ -829,42 +854,9 @@
           if (error) throw error;
           state.walletBalance = profile?.wallet_balance || 0;
           walletBalanceDisplay.textContent = state.walletBalance.toLocaleString();
-
-          // Get transactions
-          const { data: txs, error: txError } = await supabase
-            .from('wallet_transactions')
-            .select('*')
-            .eq('profile_id', state.currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(20);
-          if (txError) throw txError;
-          state.transactions = txs || [];
-          renderTransactions();
         } catch (err) {
           console.error('Error loading wallet:', err);
         }
-      }
-
-      function renderTransactions() {
-        transactionList.innerHTML = '';
-        if (state.transactions.length === 0) {
-          noTransactions.classList.remove('hidden');
-          return;
-        }
-        noTransactions.classList.add('hidden');
-        state.transactions.forEach(tx => {
-          const div = document.createElement('div');
-          div.className = 'flex justify-between items-center p-2 bg-slate-50 rounded-lg text-sm';
-          const isCredit = tx.type === 'deposit';
-          const sign = isCredit ? '+' : '-';
-          const color = isCredit ? 'text-emerald-600' : 'text-red-500';
-          div.innerHTML = `
-            <span>${tx.type.replace('_', ' ').toUpperCase()}</span>
-            <span class="font-medium ${color}">${sign}${Math.abs(tx.amount).toLocaleString()} UGX</span>
-            <span class="text-xs text-slate-400">${new Date(tx.created_at).toLocaleDateString()}</span>
-          `;
-          transactionList.appendChild(div);
-        });
       }
 
       async function depositWallet(amount) {
@@ -1034,7 +1026,7 @@
         });
       }
 
-      // ─── Render my properties ──────────────────────────────────────
+      // ─── Render my properties (dashboard) ──────────────────────────
       function renderMyProperties() {
         myPropertiesList.innerHTML = '';
         if (state.myProperties.length === 0) {
@@ -1265,6 +1257,33 @@
           profileStatus.textContent = '❌ Update failed: ' + err.message;
           profileStatus.className = 'mt-3 text-sm text-red-600';
         }
+      });
+
+      // ─── Dashboard toggle functions ───────────────────────────────
+      function toggleProfileForm() {
+        const isVisible = profileFormContainer.classList.contains('visible');
+        if (isVisible) {
+          profileFormContainer.classList.remove('visible');
+        } else {
+          profileFormContainer.classList.add('visible');
+          addPropertyContainer.classList.remove('visible');
+        }
+      }
+
+      function toggleAddPropertyForm() {
+        const isVisible = addPropertyContainer.classList.contains('visible');
+        if (isVisible) {
+          addPropertyContainer.classList.remove('visible');
+        } else {
+          addPropertyContainer.classList.add('visible');
+          profileFormContainer.classList.remove('visible');
+        }
+      }
+
+      toggleProfileBtn?.addEventListener('click', toggleProfileForm);
+      toggleAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
+      cancelProfileEdit?.addEventListener('click', () => {
+        profileFormContainer.classList.remove('visible');
       });
 
       // ─── Fetch all data ────────────────────────────────────────────
@@ -1559,6 +1578,8 @@
           propImage.value = '';
           await loadMyProperties();
           await fetchAllData();
+          // Close the add property form
+          addPropertyContainer.classList.remove('visible');
         } catch (err) {
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
           uploadStatus.className = 'mt-3 text-sm text-red-600';
@@ -1756,7 +1777,6 @@
                 otpRequestId.value = requestId;
                 otpModal.classList.remove('hidden');
                 sendOTP(requestId);
-                // Refresh wallet after approval (deduction happened)
                 if (state.currentUser) loadWallet();
               } else if (newStatus === 'rejected') {
                 waitingStatus.textContent = '❌ Broker declined this request.';
@@ -1889,22 +1909,6 @@
       toggleSignUp.addEventListener('click', () => setAuthMode(true));
 
       authForm.addEventListener('submit', handleAuthSubmit);
-
-      toggleProfileBtn?.addEventListener('click', function() {
-        const isHidden = profileFormContainer.classList.contains('hidden');
-        if (isHidden) {
-          profileFormContainer.classList.remove('hidden');
-          profileToggleLabel.textContent = 'Hide Profile';
-        } else {
-          profileFormContainer.classList.add('hidden');
-          profileToggleLabel.textContent = 'Edit Profile';
-        }
-      });
-
-      cancelProfileEdit?.addEventListener('click', function() {
-        profileFormContainer.classList.add('hidden');
-        profileToggleLabel.textContent = 'Edit Profile';
-      });
 
       window.addEventListener('popstate', handleRoute);
 

@@ -122,6 +122,14 @@
     }
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
+
+    /* NEW: wallet balance badge */
+    .wallet-badge {
+      background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534;
+      padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem;
+      font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;
+    }
+    .wallet-badge i { color: #16a34a; }
   </style>
 </head>
 <body>
@@ -132,7 +140,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== REVIEW MODAL ===== -->
+  <!-- ===== REVIEW MODAL (unchanged) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -163,7 +171,7 @@
     </div>
   </div>
 
-  <!-- ===== EDIT PROPERTY MODAL ===== -->
+  <!-- ===== EDIT PROPERTY MODAL (unchanged) ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -204,6 +212,74 @@
     </div>
   </div>
 
+  <!-- ===== NEW: QUIZ MODAL ===== -->
+  <div id="quizModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">📞 Connect with Broker</h2>
+        <button id="closeQuizModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <form id="quizForm">
+        <input type="hidden" id="quizPropertyId" />
+        <!-- Step 1: Contact Info -->
+        <div id="quizStep1">
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label>
+            <input type="text" id="quizName" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+          </div>
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address *</label>
+            <input type="email" id="quizEmail" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+          </div>
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Number *</label>
+            <input type="text" id="quizWhatsapp" required placeholder="e.g. 256700123456" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+          </div>
+          <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
+        </div>
+
+        <!-- Step 2: Dynamic Questions -->
+        <div id="quizStep2" class="hidden">
+          <div id="quizQuestionsContainer" class="space-y-4"></div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4">
+            <i class="fas fa-paper-plane mr-2"></i> Submit Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== NEW: WAITING ROOM MODAL ===== -->
+  <div id="waitingModal" class="modal-backdrop hidden">
+    <div class="modal-content text-center max-w-md">
+      <div class="py-8">
+        <i class="fas fa-hourglass-half text-5xl text-indigo-400 mb-4 animate-pulse"></i>
+        <h3 class="text-xl font-bold text-slate-800">⏳ Waiting for Broker</h3>
+        <p class="text-slate-500 text-sm mt-2">Your request has been sent. The broker will review it shortly.</p>
+        <p class="text-xs text-slate-400 mt-1">You'll be notified here once they respond.</p>
+        <div id="waitingStatus" class="mt-4 text-sm text-slate-600"></div>
+        <button id="cancelWaitBtn" class="mt-6 text-sm text-red-500 hover:text-red-700">Cancel Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NEW: OTP VERIFICATION MODAL ===== -->
+  <div id="otpModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-sm">
+      <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
+      <p class="text-slate-500 text-sm">We've sent a one‑time password to your email and WhatsApp. Enter it below to reveal the broker's contact.</p>
+      <form id="otpForm" class="mt-4">
+        <input type="hidden" id="otpRequestId" />
+        <div class="mb-3">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">OTP Code</label>
+          <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-center" />
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Verify & Reveal WhatsApp</button>
+      </form>
+      <p id="otpError" class="text-red-500 text-xs mt-2 hidden"></p>
+    </div>
+  </div>
+
   <div id="app" class="min-h-screen">
 
     <!-- ===== TOP NAV ===== -->
@@ -215,6 +291,10 @@
             <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">UGX</span>
           </div>
           <div class="flex items-center gap-4">
+            <!-- NEW: wallet balance badge (visible when logged in) -->
+            <span id="walletBadge" class="wallet-badge hidden">
+              <i class="fas fa-wallet"></i> <span id="walletBalance">0</span> UGX
+            </span>
             <span id="propertyCount" class="bg-slate-100 px-3 py-1 rounded-full text-slate-700 font-medium text-xs">0 listings</span>
             <button id="brokerPortalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow flex items-center gap-2">
               <i class="fas fa-user-tie"></i> <span id="portalBtnLabel">Broker Portal</span>
@@ -225,7 +305,7 @@
     </header>
 
     <main>
-      <!-- ===== DISCOVERY VIEW ===== -->
+      <!-- ===== DISCOVERY VIEW (unchanged) ===== -->
       <section id="discoveryView" class="view view-visible">
         <div class="relative bg-slate-900 text-white overflow-hidden">
           <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1400&q=80')] bg-cover bg-center opacity-30"></div>
@@ -269,7 +349,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE ===== -->
+      <!-- ===== BROKER PROFILE VIEW (unchanged) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -281,7 +361,6 @@
                   <span id="brokerTierBadge" class="text-xs font-semibold px-3 py-1 rounded-full tier-Bronze">Bronze</span>
                   <span id="brokerPhone" class="text-sm text-slate-500 flex items-center gap-1"><i class="fas fa-phone-alt"></i> <span>—</span></span>
                 </div>
-                <!-- rating & review count display -->
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
                   <span class="stars" id="brokerStars"></span>
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
@@ -292,7 +371,8 @@
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate Broker
                 </button>
-                <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition">
+                <!-- WhatsApp link will be shown only after OTP; we keep it but it will be hidden initially -->
+                <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
               </div>
@@ -307,7 +387,7 @@
         </div>
       </section>
 
-      <!-- ===== AUTH ===== -->
+      <!-- ===== AUTH VIEW (unchanged) ===== -->
       <section id="authView" class="view view-hidden max-w-md mx-auto my-12 px-4">
         <div class="auth-card p-8">
           <div class="flex rounded-xl bg-slate-100 p-1 mb-8 border border-slate-200/50">
@@ -329,7 +409,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD ===== -->
+      <!-- ===== DASHBOARD VIEW (modified) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -337,7 +417,7 @@
             <button id="logoutBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition"><i class="fas fa-sign-out-alt mr-1"></i> Sign Out</button>
           </div>
 
-          <!-- ===== PROFILE SETTINGS (no bio) ===== -->
+          <!-- ===== PROFILE SETTINGS (unchanged) ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">⚙️ Profile Settings</h3>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -358,7 +438,14 @@
             <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== ADD PROPERTY FORM ===== -->
+          <!-- ===== NEW: PENDING LEAD REQUESTS ===== -->
+          <div class="dashboard-card p-6 mb-8">
+            <h3 class="text-lg font-semibold text-slate-700 mb-4">📨 Pending Lead Requests</h3>
+            <div id="pendingLeadsList" class="space-y-3"></div>
+            <div id="noPendingLeads" class="text-slate-400 text-sm text-center py-4 hidden">No pending requests.</div>
+          </div>
+
+          <!-- ===== ADD PROPERTY FORM (unchanged) ===== -->
           <div class="dashboard-card p-6 mb-8">
             <h3 class="text-lg font-semibold text-slate-700 mb-4">➕ Add New Property</h3>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -376,7 +463,7 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== MY PROPERTIES LIST ===== -->
+          <!-- ===== MY PROPERTIES LIST (unchanged) ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-10 text-slate-400 hidden"><i class="fas fa-home text-3xl mb-2"></i><p>You haven't added any properties yet.</p></div>
         </div>
@@ -503,6 +590,7 @@
         profilesMap: {},
         favorites: new Set(),
         brokerProfile: null,
+        walletBalance: 0,
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -588,6 +676,37 @@
       const settingsPhone = $('#settingsPhone');
       const profileStatus = $('#profileStatus');
 
+      // NEW: wallet badge
+      const walletBadge = $('#walletBadge');
+      const walletBalanceSpan = $('#walletBalance');
+
+      // NEW: quiz modals
+      const quizModal = $('#quizModal');
+      const closeQuizModal = $('#closeQuizModal');
+      const quizForm = $('#quizForm');
+      const quizPropertyId = $('#quizPropertyId');
+      const quizName = $('#quizName');
+      const quizEmail = $('#quizEmail');
+      const quizWhatsapp = $('#quizWhatsapp');
+      const quizStep1 = $('#quizStep1');
+      const quizStep2 = $('#quizStep2');
+      const quizNextBtn = $('#quizNextBtn');
+      const quizQuestionsContainer = $('#quizQuestionsContainer');
+
+      const waitingModal = $('#waitingModal');
+      const waitingStatus = $('#waitingStatus');
+      const cancelWaitBtn = $('#cancelWaitBtn');
+
+      const otpModal = $('#otpModal');
+      const otpForm = $('#otpForm');
+      const otpRequestId = $('#otpRequestId');
+      const otpInput = $('#otpInput');
+      const otpError = $('#otpError');
+
+      // NEW: pending leads
+      const pendingLeadsList = $('#pendingLeadsList');
+      const noPendingLeads = $('#noPendingLeads');
+
       // ─── Helpers ────────────────────────────────────────────────────
       function formatPrice(amount) { return Number(amount).toLocaleString('en-UG') + ' UGX'; }
       function getImageArray(property) {
@@ -648,7 +767,7 @@
         }
       }
 
-      // ─── Render stars (for display) ──────────────────────────────
+      // ─── Render stars ──────────────────────────────────────────────
       function renderStars(rating) {
         const full = Math.floor(rating);
         const half = rating % 1 >= 0.5 ? 1 : 0;
@@ -688,7 +807,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card ──────────────────────────────────────
+      // ─── Create property card (modified) ──────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -749,10 +868,10 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <a href="${whatsappUrl(broker?.phone)}" target="_blank" 
-                   class="btn-whatsapp text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition">
-                  <i class="fab fa-whatsapp text-sm"></i> Chat
-                </a>
+                <!-- REPLACED WhatsApp link with Connect button -->
+                <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
+                  <i class="fas fa-handshake"></i> Connect
+                </button>
               </div>
             </div>
           </div>
@@ -791,6 +910,18 @@
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
+        });
+
+        // NEW: Connect button opens quiz
+        article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const propertyId = this.dataset.propertyId;
+          if (!state.currentUser) {
+            alert('Please sign in to connect with a broker.');
+            navigateToAuth();
+            return;
+          }
+          openQuizModal(propertyId);
         });
 
         return article;
@@ -848,7 +979,7 @@
         } catch (err) { alert('Delete failed: ' + err.message); }
       }
 
-      // ─── Edit property modal ──────────────────────────────────────
+      // ─── Edit property modal (unchanged) ──────────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
@@ -938,7 +1069,7 @@
       closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
       editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
 
-      // ─── Review modal ─────────────────────────────────────────────
+      // ─── Review modal (unchanged) ─────────────────────────────────
       function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
@@ -1003,20 +1134,31 @@
         }
       });
 
-      // ─── Profile Settings ──────────────────────────────────────────
+      // ─── Profile Settings (unchanged) ──────────────────────────────
       async function loadProfileSettings() {
         if (!state.currentUser) return;
         try {
           const { data, error } = await supabaseClient
             .from('profiles')
-            .select('business_name, phone')
+            .select('business_name, phone, wallet_balance')
             .eq('id', state.currentUser.id)
             .single();
           if (error) throw error;
           settingsBusinessName.value = data.business_name || '';
           settingsPhone.value = data.phone || '';
+          state.walletBalance = data.wallet_balance || 0;
+          updateWalletDisplay();
         } catch (err) {
           console.error('Error loading profile:', err);
+        }
+      }
+
+      function updateWalletDisplay() {
+        if (state.currentUser) {
+          walletBadge.classList.remove('hidden');
+          walletBalanceSpan.textContent = state.walletBalance.toLocaleString();
+        } else {
+          walletBadge.classList.add('hidden');
         }
       }
 
@@ -1054,7 +1196,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // ✅ REMOVED `bio` from the query
           const { data: properties, error } = await supabaseClient
             .from('properties')
             .select(`
@@ -1065,13 +1206,15 @@
                 phone,
                 average_rating,
                 review_count,
-                lead_score
+                lead_score,
+                verified
               )
             `)
+            .order('tier', { foreignTable: 'profiles', ascending: false })  // Platinum first
+            .order('verified', { foreignTable: 'profiles', ascending: false })
             .order('average_rating', { foreignTable: 'profiles', ascending: false })
             .order('lead_score', { foreignTable: 'profiles', ascending: false })
-            .order('review_count', { foreignTable: 'profiles', ascending: false })
-            .order('created_at', { ascending: false });
+            .order('review_count', { foreignTable: 'profiles', ascending: false });
 
           if (error) throw error;
 
@@ -1164,10 +1307,9 @@
 
           const phone = broker.phone || '';
           brokerPhone.innerHTML = `<i class="fas fa-phone-alt"></i> <span>${phone || 'No phone'}</span>`;
-          brokerWhatsAppLink.href = whatsappUrl(phone);
-          brokerWhatsAppLink.style.display = phone ? 'inline-flex' : 'none';
+          // Hide WhatsApp link initially (will be shown via OTP)
+          brokerWhatsAppLink.style.display = 'none';
 
-          // Display rating, reviews, lead score
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
           const leadScore = broker.lead_score || 0;
@@ -1175,7 +1317,6 @@
           brokerReviewCount.textContent = `(${reviewCount} reviews)`;
           brokerLeadScore.textContent = `⚡ ${leadScore}`;
 
-          // Show rate button if logged in and not the broker themselves
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
@@ -1250,7 +1391,7 @@
         }
       }
 
-      // ─── Add Property ──────────────────────────────────────────────
+      // ─── Add Property (unchanged) ──────────────────────────────────
       addPropertyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
@@ -1338,7 +1479,10 @@
                 data: {
                   business_name: businessName,
                   account_type: accountType,
-                  phone: phone
+                  phone: phone,
+                  wallet_balance: 0,
+                  tier: 'bronze',
+                  verified: false,
                 }
               }
             });
@@ -1361,6 +1505,7 @@
             await fetchFavorites();
             await loadProfileSettings();
             await loadMyProperties();
+            await loadPendingLeads(); // NEW
             await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
@@ -1374,6 +1519,7 @@
         state.currentUser = null;
         state.favorites = new Set();
         portalBtnLabel.textContent = 'Broker Portal';
+        walletBadge.classList.add('hidden');
         goToDiscovery();
       }
 
@@ -1399,6 +1545,7 @@
             if (dashboardView.classList.contains('view-hidden')) {
               showView(dashboardView);
               await loadMyProperties();
+              await loadPendingLeads();
             }
           } else {
             navigateTo('/auth', true);
@@ -1412,6 +1559,253 @@
         } else {
           navigateTo('/', true);
           handleRoute();
+        }
+      }
+
+      // ─── NEW: Quiz Functions ────────────────────────────────────────
+      async function openQuizModal(propertyId) {
+        quizPropertyId.value = propertyId;
+        quizStep1.classList.remove('hidden');
+        quizStep2.classList.add('hidden');
+        quizForm.reset();
+        quizModal.classList.remove('hidden');
+        await loadQuizQuestions();
+      }
+
+      async function loadQuizQuestions() {
+        const { data, error } = await supabaseClient
+          .from('quiz_questions')
+          .select('*, quiz_options(*)')
+          .order('display_order');
+        if (error) { console.error(error); return; }
+        window._quizQuestions = data || [];
+      }
+
+      quizNextBtn.addEventListener('click', function() {
+        const name = quizName.value.trim();
+        const email = quizEmail.value.trim();
+        const whatsapp = quizWhatsapp.value.trim();
+        if (!name || !email || !whatsapp) {
+          alert('Please fill in all contact fields.');
+          return;
+        }
+        quizStep1.classList.add('hidden');
+        quizStep2.classList.remove('hidden');
+        renderQuizQuestions();
+      });
+
+      function renderQuizQuestions() {
+        const container = quizQuestionsContainer;
+        container.innerHTML = '';
+        const questions = window._quizQuestions || [];
+        if (questions.length === 0) {
+          container.innerHTML = '<p class="text-slate-500">No quiz questions configured.</p>';
+          return;
+        }
+        questions.forEach((q, idx) => {
+          const div = document.createElement('div');
+          div.className = 'mb-4';
+          let optionsHtml = q.quiz_options.map(opt => `
+            <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
+              <input type="radio" name="q_${q.id}" value="${opt.score_value}" data-question="${q.id}" required />
+              ${opt.option_text}
+            </label>
+          `).join('');
+          div.innerHTML = `
+            <p class="font-medium text-slate-700 text-sm mb-1">${idx+1}. ${q.question_text}</p>
+            <div class="flex flex-wrap gap-2">${optionsHtml}</div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      quizForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const propertyId = quizPropertyId.value;
+        const name = quizName.value.trim();
+        const email = quizEmail.value.trim();
+        const whatsapp = quizWhatsapp.value.trim();
+
+        const radioGroups = document.querySelectorAll('#quizQuestionsContainer input[type="radio"]:checked');
+        if (radioGroups.length === 0) {
+          alert('Please answer all quiz questions.');
+          return;
+        }
+        const answers = {};
+        let totalScore = 0;
+        radioGroups.forEach(radio => {
+          const qId = radio.dataset.question;
+          const score = parseInt(radio.value);
+          answers[qId] = score;
+          totalScore += score;
+        });
+
+        let leadType = 'cold';
+        if (totalScore >= 7) leadType = 'hot';
+        else if (totalScore >= 4) leadType = 'warm';
+
+        // Call Edge Function
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('request-lead', {
+            body: {
+              property_id: propertyId,
+              visitor_name: name,
+              visitor_email: email,
+              visitor_whatsapp: whatsapp,
+              quiz_answers: answers,
+              total_score: totalScore,
+              lead_type: leadType
+            }
+          });
+          if (error) throw error;
+
+          quizModal.classList.add('hidden');
+          waitingModal.classList.remove('hidden');
+          waitingStatus.textContent = 'Request sent. Waiting for broker...';
+
+          const requestId = data.request_id;
+          subscribeToLeadRequest(requestId);
+        } catch (err) {
+          alert('Error submitting request: ' + err.message);
+        }
+      });
+
+      function subscribeToLeadRequest(requestId) {
+        const channel = supabaseClient
+          .channel(`lead-request-${requestId}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'lead_requests',
+              filter: `id=eq.${requestId}`
+            },
+            (payload) => {
+              const newStatus = payload.new.status;
+              if (newStatus === 'approved') {
+                waitingStatus.textContent = '✅ Broker approved! Verifying your identity...';
+                waitingModal.classList.add('hidden');
+                otpRequestId.value = requestId;
+                otpModal.classList.remove('hidden');
+                sendOTP(requestId);
+              } else if (newStatus === 'rejected') {
+                waitingStatus.textContent = '❌ Broker declined this request.';
+                setTimeout(() => {
+                  waitingModal.classList.add('hidden');
+                }, 3000);
+              } else if (newStatus === 'expired') {
+                waitingStatus.textContent = '⏰ Request expired.';
+                setTimeout(() => {
+                  waitingModal.classList.add('hidden');
+                }, 3000);
+              }
+            }
+          )
+          .subscribe();
+      }
+
+      async function sendOTP(requestId) {
+        try {
+          await supabaseClient.functions.invoke('send-otp', { body: { request_id: requestId } });
+        } catch (err) {
+          console.error('OTP send error:', err);
+        }
+      }
+
+      otpForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const requestId = otpRequestId.value;
+        const otp = otpInput.value.trim();
+        if (!otp || otp.length < 4) {
+          alert('Please enter the full OTP.');
+          return;
+        }
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('verify-otp', {
+            body: { request_id: requestId, otp: otp }
+          });
+          if (error) throw error;
+          otpModal.classList.add('hidden');
+          const waLink = `https://wa.me/${data.broker_whatsapp}`;
+          alert(`✅ Verified! Click OK to chat with the broker on WhatsApp.`);
+          window.open(waLink, '_blank');
+        } catch (err) {
+          otpError.classList.remove('hidden');
+          otpError.textContent = 'Invalid OTP. Please try again.';
+        }
+      });
+
+      cancelWaitBtn.addEventListener('click', function() {
+        if (confirm('Cancel this request?')) {
+          waitingModal.classList.add('hidden');
+        }
+      });
+
+      closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
+      quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
+
+      // ─── NEW: Pending Leads for Broker ────────────────────────────
+      async function loadPendingLeads() {
+        if (!state.currentUser) return;
+        const { data, error } = await supabaseClient
+          .from('lead_requests')
+          .select('*, properties(title, address)')
+          .eq('broker_id', state.currentUser.id)
+          .eq('status', 'pending')
+          .order('created_at', { ascending: false });
+
+        if (error) { console.error(error); return; }
+
+        const container = pendingLeadsList;
+        const empty = noPendingLeads;
+        if (!data || data.length === 0) {
+          container.innerHTML = '';
+          empty.classList.remove('hidden');
+          return;
+        }
+        empty.classList.add('hidden');
+        container.innerHTML = data.map(lead => `
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <div>
+              <p class="font-semibold text-slate-800">${lead.properties?.title || 'Property'}</p>
+              <p class="text-xs text-slate-500">${lead.properties?.address || ''}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs font-medium px-2 py-0.5 rounded-full ${lead.lead_type === 'hot' ? 'bg-red-100 text-red-700' : lead.lead_type === 'warm' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}">${lead.lead_type.toUpperCase()}</span>
+                <span class="text-xs text-slate-600">Score: ${lead.lead_score}</span>
+                <span class="text-xs text-slate-600">Cost: ${lead.calculated_cost} UGX</span>
+              </div>
+              <div class="text-xs text-slate-400 mt-0.5">
+                <i class="fas fa-user mr-1"></i> ${lead.visitor_name} · ${lead.visitor_whatsapp}
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button class="approve-lead-btn bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-full" data-lead="${lead.id}">Approve</button>
+              <button class="reject-lead-btn bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-4 py-2 rounded-full" data-lead="${lead.id}">Reject</button>
+            </div>
+          </div>
+        `).join('');
+
+        container.querySelectorAll('.approve-lead-btn').forEach(btn => {
+          btn.addEventListener('click', () => handleLeadDecision(btn.dataset.lead, 'approve'));
+        });
+        container.querySelectorAll('.reject-lead-btn').forEach(btn => {
+          btn.addEventListener('click', () => handleLeadDecision(btn.dataset.lead, 'reject'));
+        });
+      }
+
+      async function handleLeadDecision(requestId, decision) {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabaseClient.functions.invoke('handle-lead-decision', {
+            body: { request_id: requestId, decision: decision }
+          });
+          if (error) throw error;
+          alert(`✅ Lead ${decision}d successfully.`);
+          await loadPendingLeads();
+          await loadProfileSettings(); // refresh wallet
+        } catch (err) {
+          alert('Error: ' + err.message);
         }
       }
 
@@ -1445,6 +1839,7 @@
           showView(dashboardView);
           navigateTo('/dashboard');
           loadMyProperties();
+          loadPendingLeads();
         } else {
           navigateToAuth();
         }
@@ -1481,6 +1876,7 @@
                 await fetchFavorites();
                 await loadProfileSettings();
                 await loadMyProperties();
+                await loadPendingLeads();
                 await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
                 return;
@@ -1506,6 +1902,9 @@
 
         await handleRoute();
         await fetchAllData();
+        if (state.currentUser) {
+          await loadPendingLeads();
+        }
       }
 
       init();

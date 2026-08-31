@@ -102,12 +102,6 @@
       font-size: 12px; cursor: pointer; border: none;
     }
     .image-thumb .remove-img:hover { background: #dc2626; }
-    .favorite-btn {
-      cursor: pointer; transition: transform 0.15s; background: none; border: none;
-      font-size: 1.5rem; color: #94a3b8;
-    }
-    .favorite-btn.active { color: #ef4444; }
-    .favorite-btn:hover { transform: scale(1.2); }
 
     .stars { color: #f59e0b; letter-spacing: 2px; }
     .stars .empty { color: #d1d5db; }
@@ -142,12 +136,7 @@
       flex-wrap: wrap;
     }
     .wallet-pill .balance {
-      color: #fbbf24;
-    }
-    .wallet-pill .ugx-equivalent {
-      color: #94a3b8;
-      font-weight: 400;
-      font-size: 0.7rem;
+      color: #34d399;
     }
     .wallet-pill .wallet-label {
       color: #94a3b8;
@@ -156,9 +145,6 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .wallet-pill.app-wallet .balance { color: #34d399; }
-    .wallet-pill.nusu-wallet .balance { color: #fbbf24; }
-    .wallet-pill.revenue-wallet .balance { color: #f472b6; }
 
     .dashboard-toolbar .toolbar-btn {
       padding: 0.4rem 1rem;
@@ -182,7 +168,7 @@
     .dashboard-toolbar .toolbar-btn.amber { background: #f59e0b; color: white; }
     .dashboard-toolbar .toolbar-btn.amber:hover { background: #d97706; }
 
-    .profile-form-container, .add-property-container {
+    .profile-form-container, .add-property-container, .verification-form-container {
       background: white;
       border-radius: 1.5rem;
       padding: 1.25rem;
@@ -190,7 +176,29 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.05);
       display: none;
     }
-    .profile-form-container.visible, .add-property-container.visible { display: block; }
+    .profile-form-container.visible, .add-property-container.visible, .verification-form-container.visible { display: block; }
+
+    .verified-badge {
+      background: #10b981;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .safety-banner {
+      background: #fffbeb;
+      border: 1px solid #fcd34d;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
 
     @media (max-width: 640px) {
       .dashboard-toolbar {
@@ -385,10 +393,10 @@
   <div id="topupModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">💰 Top Up App Wallet</h2>
+        <h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2>
         <button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <p class="text-slate-500 text-sm mb-4">Deposit real money (UGX) into your App Wallet.</p>
+      <p class="text-slate-500 text-sm mb-4">Deposit real money (UGX) into your wallet.</p>
       <form id="topupForm">
         <div class="mb-4">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
@@ -402,28 +410,66 @@
     </div>
   </div>
 
-  <!-- ===== BUY NUSU MODAL ===== -->
-  <div id="buyNusuModal" class="modal-backdrop hidden">
+  <!-- ===== REPORT MODAL ===== -->
+  <div id="reportModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">🪙 Buy Nusu Coins</h2>
-        <button id="closeBuyNusuModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        <h2 class="text-xl font-bold text-slate-800">🚨 Report Broker</h2>
+        <button id="closeReportModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <p class="text-slate-500 text-sm mb-2">1 Nusu = <strong>500 UGX</strong></p>
-      <p class="text-slate-500 text-sm mb-4">Enter amount in UGX to convert to Nusu coins.</p>
-      <form id="buyNusuForm">
+      <p class="text-slate-500 text-sm mb-4">Report suspicious behavior or fraudulent activity.</p>
+      <form id="reportForm">
+        <input type="hidden" id="reportBrokerId" />
+        <input type="hidden" id="reportPropertyId" />
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
-          <input type="number" id="buyNusuAmount" required min="500" step="500" placeholder="e.g. 5000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Reason *</label>
+          <select id="reportReason" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
+            <option value="">Select a reason</option>
+            <option value="fraud">Fraud / Scam</option>
+            <option value="fake_listing">Fake Listing</option>
+            <option value="harassment">Harassment</option>
+            <option value="spam">Spam</option>
+            <option value="other">Other</option>
+          </select>
         </div>
-        <div id="nusuPreview" class="text-sm text-slate-600 mb-3 hidden">
-          You'll receive: <span id="nusuPreviewCount">0</span> Nusu coins
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description *</label>
+          <textarea id="reportDescription" rows="3" required placeholder="Describe what happened..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
         </div>
-        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-          <i class="fas fa-coins mr-2"></i> Buy Nusu
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-flag mr-2"></i> Submit Report
         </button>
       </form>
-      <div id="buyNusuStatus" class="mt-3 text-sm text-slate-600"></div>
+      <div id="reportStatus" class="mt-3 text-sm text-slate-600"></div>
+    </div>
+  </div>
+
+  <!-- ===== TERMS OF SERVICE MODAL ===== -->
+  <div id="termsModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">📜 Terms of Service</h2>
+        <button id="closeTermsModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <div class="max-h-96 overflow-y-auto text-sm text-slate-600 space-y-3">
+        <h3 class="font-bold text-slate-800">1. Platform Use</h3>
+        <p>Property Hub Uganda is a marketplace connecting property seekers with brokers. We do not own or manage any properties listed on this platform.</p>
+        <h3 class="font-bold text-slate-800">2. Visitor Safety</h3>
+        <p>Always verify properties in person before making any payments. Never send money to a broker without viewing the property first. Report suspicious activity immediately.</p>
+        <h3 class="font-bold text-slate-800">3. Broker Responsibilities</h3>
+        <p>Brokers must provide accurate property information. Misleading or fraudulent listings will result in account termination and legal action.</p>
+        <h3 class="font-bold text-slate-800">4. Liability</h3>
+        <p>Property Hub Uganda is not liable for any disputes between visitors and brokers. We provide a platform for connection – all transactions are between the visitor and the broker.</p>
+        <h3 class="font-bold text-slate-800">5. Reporting Fraud</h3>
+        <p>If you suspect fraud, report the broker immediately using the "Report Broker" button on their profile. We will investigate and take appropriate action.</p>
+        <h3 class="font-bold text-slate-800">6. Account Termination</h3>
+        <p>We reserve the right to terminate accounts that violate our terms of service or engage in fraudulent activity.</p>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button id="acceptTermsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition">
+          <i class="fas fa-check mr-2"></i> I Agree
+        </button>
+      </div>
     </div>
   </div>
 
@@ -471,7 +517,18 @@
           </div>
         </div>
 
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Safety Banner -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
+          <div class="safety-banner">
+            <i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i>
+            <div>
+              <p class="text-sm font-semibold text-amber-800">🔒 Safety First</p>
+              <p class="text-xs text-amber-700">Always verify properties in person. Never send money without viewing. Report suspicious brokers immediately.</p>
+            </div>
+          </div>
+        </div>
+
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
             <button class="filter-pill active px-5 py-2 rounded-full border border-slate-200 bg-slate-900 text-white text-sm font-medium whitespace-nowrap" data-filter="all"><i class="fas fa-th-large mr-1.5"></i> All</button>
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="rental"><i class="fas fa-key mr-1.5"></i> Rentals</button>
@@ -499,7 +556,12 @@
           <div id="brokerHeader" class="broker-header rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
+                <div class="flex items-center gap-3">
+                  <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
+                  <span id="brokerVerifiedBadge" class="hidden verified-badge">
+                    <i class="fas fa-check-circle"></i> Verified
+                  </span>
+                </div>
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
                   <span class="stars" id="brokerStars"></span>
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
@@ -510,6 +572,9 @@
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate Broker
                 </button>
+                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
+                  <i class="fas fa-flag"></i> Report
+                </button>
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
@@ -519,6 +584,11 @@
               <i class="fas fa-store mr-1.5 text-slate-400"></i>
               <span class="italic">Browse all properties listed by this broker.</span>
             </p>
+            <div id="brokerSafetyNotice" class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700 hidden">
+              <i class="fas fa-info-circle mr-1"></i>
+              <span class="font-medium">⚠️ Unverified Broker</span>
+              <span> - We recommend verifying the broker's identity before any transactions.</span>
+            </div>
           </div>
           <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="brokerEmptyState" class="hidden text-center py-20"><i class="fas fa-box-open text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">This broker has no listings yet.</p></div>
@@ -557,41 +627,26 @@
 
           <!-- ===== TOOLBAR ===== -->
           <div class="dashboard-toolbar">
-            <!-- App Wallet (UGX) -->
-            <div class="wallet-pill app-wallet">
-              <span class="wallet-label">App Wallet</span>
+            <!-- Wallet -->
+            <div class="wallet-pill">
+              <span class="wallet-label">Wallet</span>
               <i class="fas fa-wallet"></i>
-              <span class="balance" id="appWalletDisplay">0</span> UGX
+              <span class="balance" id="walletBalanceDisplay">0</span> UGX
               <button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button>
             </div>
 
-            <!-- Nusu Wallet (Coins) -->
-            <div class="wallet-pill nusu-wallet">
-              <span class="wallet-label">Nusu</span>
-              <i class="fas fa-coins"></i>
-              <span class="balance" id="nusuBalanceDisplay">0</span> Nusu
-              <span class="ugx-equivalent">≈ UGX <span id="nusuUgxDisplay">0</span></span>
-              <button id="buyNusuBtn" class="ml-1 text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-0.5 rounded-full transition">+ Buy</button>
-            </div>
-
-            <!-- Revenue Wallet (Only visible to you) -->
-            <div class="wallet-pill revenue-wallet" id="revenueWallet" style="display:none;">
-              <span class="wallet-label">Revenue</span>
-              <i class="fas fa-chart-line"></i>
-              <span class="balance" id="revenueDisplay">0</span> UGX
-            </div>
-
-            <!-- Refresh -->
             <button id="refreshWalletBtn" class="toolbar-btn" style="background:#334155;color:white;">
               <i class="fas fa-sync-alt"></i>
             </button>
 
-            <!-- Toolbar buttons -->
             <button id="dashboardEditProfileBtn" class="toolbar-btn">
               <i class="fas fa-user-edit"></i> Edit Profile
             </button>
             <button id="dashboardAddPropertyBtn" class="toolbar-btn primary">
               <i class="fas fa-plus-circle"></i> Add Property
+            </button>
+            <button id="dashboardVerificationBtn" class="toolbar-btn amber">
+              <i class="fas fa-shield-alt"></i> Verification
             </button>
           </div>
 
@@ -635,6 +690,60 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
+          <!-- ===== VERIFICATION SECTION ===== -->
+          <div id="verificationContainer" class="verification-form-container">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-semibold text-slate-700">🛡️ Verification Status</h4>
+              <span id="verificationStatusBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Unverified</span>
+            </div>
+            
+            <div id="alreadyVerified" class="hidden">
+              <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
+                <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                <div>
+                  <p class="font-semibold text-green-700">✅ Verified Broker</p>
+                  <p class="text-sm text-green-600">You have been verified. Your properties show a verified badge.</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="verificationPending" class="hidden">
+              <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+                <i class="fas fa-clock text-amber-500 text-2xl"></i>
+                <div>
+                  <p class="font-semibold text-amber-700">⏳ Verification Pending</p>
+                  <p class="text-sm text-amber-600">Your verification request is being reviewed. You'll be notified once approved.</p>
+                </div>
+              </div>
+            </div>
+
+            <div id="verificationForm" class="space-y-4">
+              <p class="text-sm text-slate-600">Get verified to build trust with potential clients. Verified brokers get a badge on their listings and profiles.</p>
+              <form id="verificationApplyForm" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Registration Number *</label>
+                  <input type="text" id="businessRegNumber" required placeholder="e.g. 1234567890" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Address *</label>
+                  <input type="text" id="businessAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Upload ID (Passport/National ID)</label>
+                  <input type="file" id="idDocument" accept="image/*,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Upload Business Registration Certificate</label>
+                  <input type="file" id="businessDocument" accept="image/*,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                </div>
+                <button type="submit" id="submitVerificationBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
+                  <i class="fas fa-paper-plane mr-2"></i> Submit Verification Request
+                </button>
+              </form>
+              <div id="verificationStatus" class="mt-3 text-sm text-slate-600"></div>
+            </div>
+          </div>
+
           <!-- ===== MY PROPERTIES LIST ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
           <div id="myPropertiesEmpty" class="text-center py-16 text-slate-400 hidden">
@@ -648,17 +757,15 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT
+  JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=10">
   </script>
 
   <script>
     // ─── Supabase Config ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
-
-    const EXCHANGE_RATE = 500;
 
     // ─── Wait for Supabase ──────────────────────────────────────────
     function waitForSupabase() {
@@ -720,10 +827,7 @@
         isSignUpMode: false,
         myProperties: [],
         profilesMap: {},
-        favorites: new Set(),
-        appBalance: 0,
-        nusuBalance: 0,
-        revenueBalance: 0,
+        walletBalance: 0,
         isAdmin: false,
       };
 
@@ -745,6 +849,8 @@
       const filterPills = $$('.filter-pill');
 
       const brokerBusinessName = $('#brokerBusinessName');
+      const brokerVerifiedBadge = $('#brokerVerifiedBadge');
+      const brokerSafetyNotice = $('#brokerSafetyNotice');
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
       const brokerListingsGrid = $('#brokerListingsGrid');
       const brokerEmptyState = $('#brokerEmptyState');
@@ -753,6 +859,7 @@
       const brokerReviewCount = $('#brokerReviewCount');
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
+      const reportBrokerBtn = $('#reportBrokerBtn');
 
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
@@ -769,8 +876,10 @@
 
       const dashboardEditProfileBtn = $('#dashboardEditProfileBtn');
       const dashboardAddPropertyBtn = $('#dashboardAddPropertyBtn');
+      const dashboardVerificationBtn = $('#dashboardVerificationBtn');
       const profileFormContainer = $('#profileFormContainer');
       const addPropertyContainer = $('#addPropertyContainer');
+      const verificationContainer = $('#verificationContainer');
       const cancelProfileEditBtn = $('#cancelProfileEditBtn');
 
       const profileSettingsForm = $('#profileSettingsForm');
@@ -810,29 +919,43 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      // Wallet
-      const appWalletDisplay = $('#appWalletDisplay');
-      const nusuBalanceDisplay = $('#nusuBalanceDisplay');
-      const nusuUgxDisplay = $('#nusuUgxDisplay');
-      const revenueDisplay = $('#revenueDisplay');
-      const revenueWallet = $('#revenueWallet');
-      const topupBtn = $('#topupBtn');
-      const buyNusuBtn = $('#buyNusuBtn');
-      const refreshWalletBtn = $('#refreshWalletBtn');
+      // Report Modal
+      const reportModal = $('#reportModal');
+      const closeReportModal = $('#closeReportModal');
+      const reportForm = $('#reportForm');
+      const reportBrokerIdInput = $('#reportBrokerId');
+      const reportPropertyIdInput = $('#reportPropertyId');
+      const reportReason = $('#reportReason');
+      const reportDescription = $('#reportDescription');
+      const reportStatus = $('#reportStatus');
 
+      // Terms Modal
+      const termsModal = $('#termsModal');
+      const closeTermsModal = $('#closeTermsModal');
+      const acceptTermsBtn = $('#acceptTermsBtn');
+
+      // Wallet
+      const walletBalanceDisplay = $('#walletBalanceDisplay');
+      const topupBtn = $('#topupBtn');
+      const refreshWalletBtn = $('#refreshWalletBtn');
       const topupModal = $('#topupModal');
       const closeTopupModal = $('#closeTopupModal');
       const topupForm = $('#topupForm');
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
 
-      const buyNusuModal = $('#buyNusuModal');
-      const closeBuyNusuModal = $('#closeBuyNusuModal');
-      const buyNusuForm = $('#buyNusuForm');
-      const buyNusuAmount = $('#buyNusuAmount');
-      const buyNusuStatus = $('#buyNusuStatus');
-      const nusuPreview = $('#nusuPreview');
-      const nusuPreviewCount = $('#nusuPreviewCount');
+      // Verification
+      const verificationStatusBadge = $('#verificationStatusBadge');
+      const alreadyVerified = $('#alreadyVerified');
+      const verificationPending = $('#verificationPending');
+      const verificationForm = $('#verificationForm');
+      const verificationApplyForm = $('#verificationApplyForm');
+      const businessRegNumber = $('#businessRegNumber');
+      const businessAddress = $('#businessAddress');
+      const idDocument = $('#idDocument');
+      const businessDocument = $('#businessDocument');
+      const verificationStatus = $('#verificationStatus');
+      const submitVerificationBtn = $('#submitVerificationBtn');
 
       // Quiz modals
       const quizModal = $('#quizModal');
@@ -913,33 +1036,17 @@
         try {
           const { data: profile, error } = await supabase
             .from('profiles')
-            .select('app_wallet_balance, nusu_balance, revenue_balance')
+            .select('wallet_balance')
             .eq('id', state.currentUser.id)
             .single();
-
           if (error) throw error;
-
-          state.appBalance = profile?.app_wallet_balance || 0;
-          state.nusuBalance = profile?.nusu_balance || 0;
-          state.revenueBalance = profile?.revenue_balance || 0;
-
-          appWalletDisplay.textContent = state.appBalance.toLocaleString();
-          nusuBalanceDisplay.textContent = state.nusuBalance.toLocaleString();
-          nusuUgxDisplay.textContent = (state.nusuBalance * EXCHANGE_RATE).toLocaleString();
-
-          // Show revenue wallet only if user has revenue balance (admin or broker with earnings)
-          if (state.revenueBalance > 0) {
-            revenueWallet.style.display = 'inline-flex';
-            revenueDisplay.textContent = state.revenueBalance.toLocaleString();
-          } else {
-            revenueWallet.style.display = 'none';
-          }
+          state.walletBalance = profile?.wallet_balance || 0;
+          walletBalanceDisplay.textContent = state.walletBalance.toLocaleString();
         } catch (err) {
           console.error('Error loading wallet:', err);
         }
       }
 
-      // ─── Top Up (Deposit UGX) ──────────────────────────────────────
       async function depositWallet(amount) {
         if (!state.currentUser) return false;
         try {
@@ -951,22 +1058,6 @@
           return true;
         } catch (err) {
           console.error('Deposit error:', err);
-          return false;
-        }
-      }
-
-      // ─── Buy Nusu ──────────────────────────────────────────────────
-      async function buyNusu(ugxAmount) {
-        if (!state.currentUser) return false;
-        try {
-          const { data, error } = await supabase.functions.invoke('buy-nusu', {
-            body: { ugx_amount: ugxAmount }
-          });
-          if (error) throw error;
-          await loadWallet();
-          return true;
-        } catch (err) {
-          console.error('Buy Nusu error:', err);
           return false;
         }
       }
@@ -984,7 +1075,7 @@
         topupStatus.className = 'mt-3 text-sm text-indigo-600';
         const success = await depositWallet(amount);
         if (success) {
-          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX to App Wallet!`;
+          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX!`;
           topupStatus.className = 'mt-3 text-sm text-emerald-600';
           setTimeout(() => topupModal.classList.add('hidden'), 1500);
         } else {
@@ -1001,80 +1092,155 @@
 
       closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
-
-      // ─── Buy Nusu form ────────────────────────────────────────────
-      buyNusuAmount.addEventListener('input', function() {
-        const val = parseInt(this.value);
-        if (val && val >= 500) {
-          const nusu = Math.floor(val / EXCHANGE_RATE);
-          nusuPreview.classList.remove('hidden');
-          nusuPreviewCount.textContent = nusu;
-        } else {
-          nusuPreview.classList.add('hidden');
-        }
-      });
-
-      buyNusuForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const amount = parseInt(buyNusuAmount.value);
-        if (!amount || amount < 500) {
-          buyNusuStatus.textContent = 'Please enter a valid amount (min 500 UGX).';
-          buyNusuStatus.className = 'mt-3 text-sm text-red-600';
-          return;
-        }
-        buyNusuStatus.textContent = 'Processing...';
-        buyNusuStatus.className = 'mt-3 text-sm text-indigo-600';
-        const success = await buyNusu(amount);
-        if (success) {
-          const nusu = Math.floor(amount / EXCHANGE_RATE);
-          buyNusuStatus.textContent = `✅ Bought ${nusu} Nusu coins (${amount.toLocaleString()} UGX)!`;
-          buyNusuStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => buyNusuModal.classList.add('hidden'), 1500);
-        } else {
-          buyNusuStatus.textContent = '❌ Purchase failed. Check your App Wallet balance.';
-          buyNusuStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
-
-      buyNusuBtn.addEventListener('click', () => {
-        buyNusuAmount.value = '';
-        buyNusuStatus.textContent = '';
-        nusuPreview.classList.add('hidden');
-        buyNusuModal.classList.remove('hidden');
-      });
-
-      closeBuyNusuModal.addEventListener('click', () => buyNusuModal.classList.add('hidden'));
-      buyNusuModal.addEventListener('click', (e) => { if (e.target === buyNusuModal) buyNusuModal.classList.add('hidden'); });
-
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Favorites ──────────────────────────────────────────────────
-      async function fetchFavorites() {
-        if (!state.currentUser) return;
-        try {
-          const { data, error } = await supabase
-            .from('favorites')
-            .select('property_id')
-            .eq('user_id', state.currentUser.id);
-          if (error) throw error;
-          state.favorites = new Set(data.map(f => f.property_id));
-        } catch (err) { console.error('Error fetching favorites:', err); }
+      // ─── Reviews ────────────────────────────────────────────────────
+      function openReviewModal(brokerId) {
+        reviewBrokerId.value = brokerId;
+        reviewRating.value = 5;
+        reviewText.value = '';
+        updateStarUI(5);
+        reviewModal.classList.remove('hidden');
       }
 
-      async function toggleFavorite(propertyId) {
-        if (!state.currentUser) { alert('Please sign in to save favorites.'); return; }
-        const isFav = state.favorites.has(propertyId);
-        try {
-          if (isFav) {
-            await supabase.from('favorites').delete().eq('user_id', state.currentUser.id).eq('property_id', propertyId);
-            state.favorites.delete(propertyId);
-          } else {
-            await supabase.from('favorites').insert({ user_id: state.currentUser.id, property_id: propertyId });
-            state.favorites.add(propertyId);
-          }
-          renderListings(state.filteredProperties);
-        } catch (err) { alert('Error updating favorite: ' + err.message); }
+      starSelector.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', () => {
+          const val = parseInt(star.dataset.value);
+          reviewRating.value = val;
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseenter', () => {
+          const val = parseInt(star.dataset.value);
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseleave', () => {
+          const current = parseInt(reviewRating.value) || 5;
+          updateStarUI(current);
+        });
+      });
+
+      function updateStarUI(active) {
+        starSelector.querySelectorAll('.star').forEach(el => {
+          const val = parseInt(el.dataset.value);
+          el.classList.toggle('active', val <= active);
+        });
       }
+
+      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
+      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
+
+      reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brokerId = reviewBrokerId.value;
+        const rating = parseInt(reviewRating.value);
+        const review = reviewText.value.trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          alert('Please select a rating (1-5 stars).');
+          return;
+        }
+
+        if (!state.currentUser) {
+          alert('Please sign in to leave a review.');
+          return;
+        }
+
+        try {
+          const { error } = await supabase.from('reviews').insert({
+            broker_id: brokerId,
+            user_id: state.currentUser.id,
+            rating: rating,
+            review_text: review || null,
+          });
+          if (error) throw error;
+          alert('✅ Review submitted! Thank you.');
+          reviewModal.classList.add('hidden');
+          await fetchAllData();
+          if (state.currentBrokerId) {
+            await loadBrokerProfile(state.currentBrokerId);
+          }
+        } catch (err) {
+          alert('Error submitting review: ' + err.message);
+        }
+      });
+
+      // ─── Report ─────────────────────────────────────────────────────
+      function openReportModal(brokerId, propertyId) {
+        reportBrokerIdInput.value = brokerId;
+        reportPropertyIdInput.value = propertyId || '';
+        reportReason.value = '';
+        reportDescription.value = '';
+        reportStatus.textContent = '';
+        reportModal.classList.remove('hidden');
+      }
+
+      closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
+      reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
+
+      reportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in to report a broker.');
+          return;
+        }
+        const brokerId = reportBrokerIdInput.value;
+        const propertyId = reportPropertyIdInput.value || null;
+        const reason = reportReason.value;
+        const description = reportDescription.value.trim();
+
+        if (!reason || !description) {
+          reportStatus.textContent = 'Please fill in all fields.';
+          reportStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+
+        reportStatus.textContent = 'Submitting report...';
+        reportStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        try {
+          const { data, error } = await supabase
+            .from('reports')
+            .insert({
+              reporter_id: state.currentUser.id,
+              broker_id: brokerId,
+              property_id: propertyId,
+              reason: reason,
+              description: description,
+              status: 'pending',
+            });
+          if (error) throw error;
+          reportStatus.textContent = '✅ Report submitted! We will investigate.';
+          reportStatus.className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => reportModal.classList.add('hidden'), 2000);
+        } catch (err) {
+          reportStatus.textContent = '❌ Failed to submit report: ' + err.message;
+          reportStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Terms Modal ────────────────────────────────────────────────
+      closeTermsModal.addEventListener('click', () => termsModal.classList.add('hidden'));
+      termsModal.addEventListener('click', (e) => { if (e.target === termsModal) termsModal.classList.add('hidden'); });
+
+      acceptTermsBtn.addEventListener('click', async () => {
+        if (!state.currentUser) {
+          alert('Please sign in first.');
+          return;
+        }
+        try {
+          await supabase
+            .from('profiles')
+            .update({
+              terms_agreed: true,
+              terms_agreed_at: new Date().toISOString(),
+            })
+            .eq('id', state.currentUser.id);
+          termsModal.classList.add('hidden');
+          alert('✅ Thank you for accepting the Terms of Service.');
+        } catch (err) {
+          alert('Error: ' + err.message);
+        }
+      });
 
       // ─── Property card ─────────────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
@@ -1083,10 +1249,10 @@
           'property-card bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/70 flex flex-col';
 
         const imageUrl = getImageUrl(property);
-        const isFav = state.favorites.has(property.id);
         const rating = broker?.average_rating || 0;
         const reviewCount = broker?.review_count || 0;
         const leadScore = broker?.lead_score || 0;
+        const isVerified = broker?.is_verified || false;
         const isOwner = state.currentUser && broker && state.currentUser.id === broker.id;
 
         let actionsHtml = '';
@@ -1110,10 +1276,12 @@
             <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
               ${property[COLUMNS.TYPE] || 'Property'}
             </span>
-            ${state.currentUser ? `<button class="favorite-btn absolute top-3 right-3 ${isFav ? 'active' : ''}" data-id="${property.id}"><i class="fas fa-heart"></i></button>` : ''}
           </div>
           <div class="p-4 flex flex-col flex-1">
-            <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
+              ${isVerified ? `<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>` : ''}
+            </div>
             <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property[COLUMNS.PRICE])}</p>
             <p class="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
               <i class="fas fa-map-pin text-slate-400 text-[10px]"></i>
@@ -1127,11 +1295,13 @@
             <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 flex-wrap">
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
                 <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
+                ${isVerified ? `<span class="text-[10px] text-emerald-600 ml-1"><i class="fas fa-check-circle"></i></span>` : ''}
               </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
               <div class="flex gap-2">
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
+                ${!isOwner ? `<button class="report-btn text-xs text-red-500 hover:text-red-700 font-medium" data-broker-id="${broker?.id || ''}" data-property-id="${property.id}"><i class="fas fa-flag mr-1"></i>Report</button>` : ''}
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -1139,11 +1309,6 @@
             </div>
           </div>
         `;
-
-        article.querySelector('.favorite-btn')?.addEventListener('click', e => {
-          e.stopPropagation();
-          toggleFavorite(property.id);
-        });
 
         article.querySelector('.edit-btn')?.addEventListener('click', e => {
           e.stopPropagation();
@@ -1172,6 +1337,13 @@
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
+        });
+
+        article.querySelector('.report-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          const propertyId = e.currentTarget.dataset.propertyId;
+          openReportModal(brokerId, propertyId);
         });
 
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
@@ -1222,6 +1394,169 @@
           myPropertiesList.appendChild(card);
         });
       }
+
+      // ─── Verification Functions ────────────────────────────────────
+      async function loadVerificationStatus() {
+        if (!state.currentUser) return;
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_verified, verification_badge')
+            .eq('id', state.currentUser.id)
+            .single();
+
+          if (profile?.is_verified) {
+            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-green-500 text-white';
+            verificationStatusBadge.textContent = '✅ Verified';
+            alreadyVerified.classList.remove('hidden');
+            verificationPending.classList.add('hidden');
+            verificationForm.classList.add('hidden');
+            return;
+          }
+
+          const { data, error } = await supabase
+            .from('verification_requests')
+            .select('status')
+            .eq('broker_id', state.currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (data && data.status === 'pending') {
+            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-amber-500 text-white';
+            verificationStatusBadge.textContent = '⏳ Pending';
+            alreadyVerified.classList.add('hidden');
+            verificationPending.classList.remove('hidden');
+            verificationForm.classList.add('hidden');
+          } else {
+            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600';
+            verificationStatusBadge.textContent = 'Unverified';
+            alreadyVerified.classList.add('hidden');
+            verificationPending.classList.add('hidden');
+            verificationForm.classList.remove('hidden');
+          }
+        } catch (err) {
+          console.error('Error loading verification status:', err);
+        }
+      }
+
+      // ─── Submit Verification Request ──────────────────────────────
+      verificationApplyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in first.');
+          return;
+        }
+
+        const regNumber = businessRegNumber.value.trim();
+        const address = businessAddress.value.trim();
+        const idFile = idDocument.files[0];
+        const businessFile = businessDocument.files[0];
+
+        if (!regNumber || !address) {
+          verificationStatus.textContent = 'Please fill in all required fields.';
+          verificationStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+
+        verificationStatus.textContent = 'Uploading documents...';
+        verificationStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        let idDocumentUrl = null;
+        let businessDocumentUrl = null;
+
+        if (idFile) {
+          const fileExt = idFile.name.split('.').pop();
+          const fileName = `${state.currentUser.id}/id_${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage.from('verification-docs').upload(fileName, idFile);
+          if (uploadError) {
+            verificationStatus.textContent = '❌ ID upload failed: ' + uploadError.message;
+            verificationStatus.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+          const { data: urlData } = supabase.storage.from('verification-docs').getPublicUrl(fileName);
+          idDocumentUrl = urlData.publicUrl;
+        }
+
+        if (businessFile) {
+          const fileExt = businessFile.name.split('.').pop();
+          const fileName = `${state.currentUser.id}/business_${Date.now()}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage.from('verification-docs').upload(fileName, businessFile);
+          if (uploadError) {
+            verificationStatus.textContent = '❌ Business document upload failed: ' + uploadError.message;
+            verificationStatus.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+          const { data: urlData } = supabase.storage.from('verification-docs').getPublicUrl(fileName);
+          businessDocumentUrl = urlData.publicUrl;
+        }
+
+        verificationStatus.textContent = 'Submitting request...';
+        verificationStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        try {
+          const { data, error } = await supabase.functions.invoke('request-verification', {
+            body: {
+              business_reg_number: regNumber,
+              business_address: address,
+              id_document_url: idDocumentUrl,
+              business_document_url: businessDocumentUrl,
+            }
+          });
+          if (error) throw error;
+          verificationStatus.textContent = '✅ Request submitted! You will be notified once approved.';
+          verificationStatus.className = 'mt-3 text-sm text-emerald-600';
+          verificationApplyForm.reset();
+          await loadVerificationStatus();
+        } catch (err) {
+          verificationStatus.textContent = '❌ Submission failed: ' + err.message;
+          verificationStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Dashboard toggles ────────────────────────────────────────
+      function toggleProfileForm() {
+        const isVisible = profileFormContainer.classList.contains('visible');
+        if (isVisible) {
+          profileFormContainer.classList.remove('visible');
+        } else {
+          profileFormContainer.classList.add('visible');
+          addPropertyContainer.classList.remove('visible');
+          verificationContainer.classList.remove('visible');
+        }
+      }
+
+      function toggleAddPropertyForm() {
+        const isVisible = addPropertyContainer.classList.contains('visible');
+        if (isVisible) {
+          addPropertyContainer.classList.remove('visible');
+        } else {
+          addPropertyContainer.classList.add('visible');
+          profileFormContainer.classList.remove('visible');
+          verificationContainer.classList.remove('visible');
+        }
+      }
+
+      function toggleVerificationForm() {
+        const isVisible = verificationContainer.classList.contains('visible');
+        if (isVisible) {
+          verificationContainer.classList.remove('visible');
+        } else {
+          verificationContainer.classList.add('visible');
+          profileFormContainer.classList.remove('visible');
+          addPropertyContainer.classList.remove('visible');
+          loadVerificationStatus();
+        }
+      }
+
+      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
+      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
+      dashboardVerificationBtn?.addEventListener('click', toggleVerificationForm);
+      cancelProfileEditBtn?.addEventListener('click', () => {
+        profileFormContainer.classList.remove('visible');
+      });
 
       // ─── CRUD ──────────────────────────────────────────────────────
       async function deleteProperty(propId) {
@@ -1323,71 +1658,6 @@
       closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
       editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
 
-      // ─── Review ────────────────────────────────────────────────────
-      function openReviewModal(brokerId) {
-        reviewBrokerId.value = brokerId;
-        reviewRating.value = 5;
-        reviewText.value = '';
-        updateStarUI(5);
-        reviewModal.classList.remove('hidden');
-      }
-
-      starSelector.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', () => {
-          const val = parseInt(star.dataset.value);
-          reviewRating.value = val;
-          updateStarUI(val);
-        });
-        star.addEventListener('mouseenter', () => {
-          const val = parseInt(star.dataset.value);
-          updateStarUI(val);
-        });
-        star.addEventListener('mouseleave', () => {
-          const current = parseInt(reviewRating.value) || 5;
-          updateStarUI(current);
-        });
-      });
-
-      function updateStarUI(active) {
-        starSelector.querySelectorAll('.star').forEach(el => {
-          const val = parseInt(el.dataset.value);
-          el.classList.toggle('active', val <= active);
-        });
-      }
-
-      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
-      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
-
-      reviewForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const brokerId = reviewBrokerId.value;
-        const rating = parseInt(reviewRating.value);
-        const review = reviewText.value.trim();
-
-        if (!rating || rating < 1 || rating > 5) {
-          alert('Please select a rating (1-5 stars).');
-          return;
-        }
-
-        try {
-          const { error } = await supabase.from('reviews').insert({
-            broker_id: brokerId,
-            user_id: state.currentUser.id,
-            rating: rating,
-            review_text: review || null,
-          });
-          if (error) throw error;
-          alert('✅ Review submitted! Thank you.');
-          reviewModal.classList.add('hidden');
-          await fetchAllData();
-          if (state.currentBrokerId) {
-            await loadBrokerProfile(state.currentBrokerId);
-          }
-        } catch (err) {
-          alert('Error submitting review: ' + err.message);
-        }
-      });
-
       // ─── Profile ────────────────────────────────────────────────────
       async function loadProfileSettings() {
         if (!state.currentUser) return;
@@ -1429,33 +1699,6 @@
           profileStatus.textContent = '❌ Update failed: ' + err.message;
           profileStatus.className = 'mt-3 text-sm text-red-600';
         }
-      });
-
-      // ─── Dashboard toggles ────────────────────────────────────────
-      function toggleProfileForm() {
-        const isVisible = profileFormContainer.classList.contains('visible');
-        if (isVisible) {
-          profileFormContainer.classList.remove('visible');
-        } else {
-          profileFormContainer.classList.add('visible');
-          addPropertyContainer.classList.remove('visible');
-        }
-      }
-
-      function toggleAddPropertyForm() {
-        const isVisible = addPropertyContainer.classList.contains('visible');
-        if (isVisible) {
-          addPropertyContainer.classList.remove('visible');
-        } else {
-          addPropertyContainer.classList.add('visible');
-          profileFormContainer.classList.remove('visible');
-        }
-      }
-
-      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
-      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
-      cancelProfileEditBtn?.addEventListener('click', () => {
-        profileFormContainer.classList.remove('visible');
       });
 
       // ─── Fetch all data ────────────────────────────────────────────
@@ -1610,6 +1853,14 @@
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
           brokerWhatsAppLink.style.display = 'none';
 
+          if (broker.is_verified) {
+            brokerVerifiedBadge.classList.remove('hidden');
+            brokerSafetyNotice.classList.add('hidden');
+          } else {
+            brokerVerifiedBadge.classList.add('hidden');
+            brokerSafetyNotice.classList.remove('hidden');
+          }
+
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
           const leadScore = broker.lead_score || 0;
@@ -1620,8 +1871,11 @@
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
+            reportBrokerBtn.classList.remove('hidden');
+            reportBrokerBtn.onclick = () => openReportModal(brokerId, null);
           } else {
             rateBrokerBtn.classList.add('hidden');
+            reportBrokerBtn.classList.add('hidden');
           }
 
           const { data: props, error: propsError } = await supabase
@@ -1801,10 +2055,10 @@
             showView(dashboardView);
             navigateTo('/dashboard');
             portalBtnLabel.textContent = 'Dashboard';
-            await fetchFavorites();
             await loadProfileSettings();
             await loadMyProperties();
             await loadWallet();
+            await loadVerificationStatus();
             await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
@@ -1815,7 +2069,6 @@
       async function handleLogout() {
         await supabase.auth.signOut();
         state.currentUser = null;
-        state.favorites = new Set();
         portalBtnLabel.textContent = 'Broker Portal';
         goToDiscovery();
       }
@@ -1843,6 +2096,7 @@
               showView(dashboardView);
               await loadMyProperties();
               await loadWallet();
+              await loadVerificationStatus();
             }
           } else {
             navigateTo('/auth', true);
@@ -2035,6 +2289,7 @@
           navigateTo('/dashboard');
           loadMyProperties();
           loadWallet();
+          loadVerificationStatus();
         } else {
           navigateToAuth();
         }
@@ -2067,10 +2322,10 @@
                 window.history.replaceState(null, '', '/');
                 showView(dashboardView);
                 navigateTo('/dashboard');
-                await fetchFavorites();
                 await loadProfileSettings();
                 await loadMyProperties();
                 await loadWallet();
+                await loadVerificationStatus();
                 await fetchAllData();
                 alert('✅ Email verified! Welcome to your dashboard.');
                 return;
@@ -2087,9 +2342,9 @@
           if (user) {
             state.currentUser = user;
             portalBtnLabel.textContent = 'Dashboard';
-            await fetchFavorites();
             await loadProfileSettings();
             await loadWallet();
+            await loadVerificationStatus();
           }
         } catch (err) {
           console.log('No active session (403 is normal).');

@@ -44,7 +44,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* ── Base styles ── */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -119,7 +118,6 @@
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
 
-    /* ── Dashboard new styles ── */
     .dashboard-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -144,7 +142,12 @@
       flex-wrap: wrap;
     }
     .dashboard-toolbar .wallet-pill .balance {
-      color: #4ade80;
+      color: #fbbf24;
+    }
+    .dashboard-toolbar .wallet-pill .ugx-equivalent {
+      color: #94a3b8;
+      font-weight: 400;
+      font-size: 0.7rem;
     }
     .dashboard-toolbar .toolbar-btn {
       padding: 0.4rem 1rem;
@@ -166,7 +169,7 @@
     .dashboard-toolbar .toolbar-btn.green { background: #10b981; color: white; }
     .dashboard-toolbar .toolbar-btn.green:hover { background: #059669; }
 
-    .profile-form-container {
+    .profile-form-container, .add-property-container {
       background: white;
       border-radius: 1.5rem;
       padding: 1.25rem;
@@ -174,17 +177,7 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.05);
       display: none;
     }
-    .profile-form-container.visible { display: block; }
-
-    .add-property-container {
-      background: white;
-      border-radius: 1.5rem;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
-      display: none;
-    }
-    .add-property-container.visible { display: block; }
+    .profile-form-container.visible, .add-property-container.visible { display: block; }
 
     @media (max-width: 640px) {
       .dashboard-toolbar {
@@ -209,7 +202,7 @@
     <p class="text-slate-600 text-sm">Loading Property Hub…</p>
   </div>
 
-  <!-- ===== MODALS (unchanged) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -240,6 +233,7 @@
     </div>
   </div>
 
+  <!-- ===== EDIT PROPERTY MODAL ===== -->
   <div id="editModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -357,7 +351,7 @@
     </div>
   </div>
 
-  <!-- ===== OTP VERIFICATION ===== -->
+  <!-- ===== OTP MODAL ===== -->
   <div id="otpModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
@@ -374,18 +368,22 @@
     </div>
   </div>
 
-  <!-- ===== TOP UP MODAL ===== -->
+  <!-- ===== TOP-UP MODAL ===== -->
   <div id="topupModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2>
         <button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <p class="text-slate-500 text-sm mb-4">Enter amount you want to add to your wallet.</p>
+      <p class="text-slate-500 text-sm mb-2">1 coin = <strong>500 UGX</strong></p>
+      <p class="text-slate-500 text-sm mb-4">Enter amount in UGX – it will be converted to coins.</p>
       <form id="topupForm">
         <div class="mb-4">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
           <input type="number" id="topupAmount" required min="1000" step="1000" placeholder="e.g. 10000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div id="coinPreview" class="text-sm text-slate-600 mb-3 hidden">
+          You'll receive: <span id="coinPreviewCount">0</span> coins
         </div>
         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
           <i class="fas fa-plus-circle mr-2"></i> Deposit
@@ -515,7 +513,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (NEW CLEAN DESIGN) ===== -->
+      <!-- ===== DASHBOARD VIEW ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -525,10 +523,11 @@
 
           <!-- ===== TOOLBAR ===== -->
           <div class="dashboard-toolbar">
-            <!-- Wallet -->
+            <!-- Wallet (Coins) -->
             <div class="wallet-pill">
-              <i class="fas fa-wallet"></i>
-              Balance: <span class="balance" id="walletBalanceDisplay">0</span> UGX
+              <i class="fas fa-coins"></i>
+              Balance: <span class="balance" id="walletBalanceDisplay">0</span> coins
+              <span class="ugx-equivalent">≈ UGX <span id="walletUgxDisplay">0</span></span>
               <button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button>
               <button id="refreshWalletBtn" class="text-xs bg-slate-600 hover:bg-slate-700 text-white px-2 py-0.5 rounded-full transition">
                 <i class="fas fa-sync-alt"></i>
@@ -536,15 +535,15 @@
             </div>
 
             <!-- Toolbar buttons -->
-            <button id="toggleProfileBtn" class="toolbar-btn">
+            <button id="dashboardEditProfileBtn" class="toolbar-btn">
               <i class="fas fa-user-edit"></i> Edit Profile
             </button>
-            <button id="toggleAddPropertyBtn" class="toolbar-btn primary">
+            <button id="dashboardAddPropertyBtn" class="toolbar-btn primary">
               <i class="fas fa-plus-circle"></i> Add Property
             </button>
           </div>
 
-          <!-- ===== PROFILE FORM (hidden by default) ===== -->
+          <!-- ===== PROFILE FORM ===== -->
           <div id="profileFormContainer" class="profile-form-container">
             <h4 class="font-semibold text-slate-700 mb-3">⚙️ Edit Profile</h4>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -560,13 +559,13 @@
                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
                   <i class="fas fa-save mr-2"></i> Save Profile
                 </button>
-                <button type="button" id="cancelProfileEdit" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
+                <button type="button" id="cancelProfileEditBtn" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
               </div>
             </form>
             <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== ADD PROPERTY FORM (hidden by default) ===== -->
+          <!-- ===== ADD PROPERTY FORM ===== -->
           <div id="addPropertyContainer" class="add-property-container">
             <h4 class="font-semibold text-slate-700 mb-3">➕ Add New Property</h4>
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -597,15 +596,17 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT
+  JAVASCRIPT – Supabase & Full App
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=4">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=7">
   </script>
 
   <script>
     // ─── Supabase Config ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
+
+    const EXCHANGE_RATE = 500;
 
     // ─── Wait for Supabase ──────────────────────────────────────────
     function waitForSupabase() {
@@ -620,13 +621,12 @@
       });
     }
 
-    // ─── Hide loading ────────────────────────────────────────────────
     function hideLoading() {
       const overlay = document.getElementById('loadingOverlay');
       if (overlay) overlay.classList.add('hidden');
     }
 
-    // ─── START APP ────────────────────────────────────────────────────
+    // ─── Start App ──────────────────────────────────────────────────
     async function startApp() {
       console.log('🚀 Starting Property Hub...');
 
@@ -640,7 +640,7 @@
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✅ Supabase client created');
 
-      // ─── Column mapping ────────────────────────────────────────────
+      // ─── Column mapping (will be auto-detected) ──────────────────
       const COLUMNS = {
         FOREIGN_KEY: null,
         IMAGE: 'media_urls',
@@ -669,9 +669,7 @@
         myProperties: [],
         profilesMap: {},
         favorites: new Set(),
-        brokerProfile: null,
         walletBalance: 0,
-        transactions: [],
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -693,7 +691,6 @@
 
       const brokerBusinessName = $('#brokerBusinessName');
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
-      const brokerBio = $('#brokerBio');
       const brokerListingsGrid = $('#brokerListingsGrid');
       const brokerEmptyState = $('#brokerEmptyState');
       const backToDiscovery = $('#backToDiscovery');
@@ -715,12 +712,11 @@
       const accTypeSelect = $('#accTypeSelect');
       const phoneInput = $('#phoneInput');
 
-      // Dashboard new refs
-      const toggleProfileBtn = $('#toggleProfileBtn');
-      const toggleAddPropertyBtn = $('#toggleAddPropertyBtn');
+      const dashboardEditProfileBtn = $('#dashboardEditProfileBtn');
+      const dashboardAddPropertyBtn = $('#dashboardAddPropertyBtn');
       const profileFormContainer = $('#profileFormContainer');
       const addPropertyContainer = $('#addPropertyContainer');
-      const cancelProfileEdit = $('#cancelProfileEdit');
+      const cancelProfileEditBtn = $('#cancelProfileEditBtn');
 
       const profileSettingsForm = $('#profileSettingsForm');
       const settingsBusinessName = $('#settingsBusinessName');
@@ -759,8 +755,9 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      // Wallet refs
+      // Wallet
       const walletBalanceDisplay = $('#walletBalanceDisplay');
+      const walletUgxDisplay = $('#walletUgxDisplay');
       const topupBtn = $('#topupBtn');
       const refreshWalletBtn = $('#refreshWalletBtn');
       const topupModal = $('#topupModal');
@@ -768,6 +765,8 @@
       const topupForm = $('#topupForm');
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
+      const coinPreview = $('#coinPreview');
+      const coinPreviewCount = $('#coinPreviewCount');
 
       // Quiz modals
       const quizModal = $('#quizModal');
@@ -842,7 +841,7 @@
         }
       }
 
-      // ─── Wallet Functions ──────────────────────────────────────────
+      // ─── Wallet ─────────────────────────────────────────────────────
       async function loadWallet() {
         if (!state.currentUser) return;
         try {
@@ -853,7 +852,10 @@
             .single();
           if (error) throw error;
           state.walletBalance = profile?.wallet_balance || 0;
-          walletBalanceDisplay.textContent = state.walletBalance.toLocaleString();
+          const coins = state.walletBalance;
+          const ugx = coins * EXCHANGE_RATE;
+          walletBalanceDisplay.textContent = coins.toLocaleString();
+          walletUgxDisplay.textContent = ugx.toLocaleString();
         } catch (err) {
           console.error('Error loading wallet:', err);
         }
@@ -873,6 +875,52 @@
           return false;
         }
       }
+
+      // ─── Coin preview ──────────────────────────────────────────────
+      topupAmount.addEventListener('input', function() {
+        const val = parseInt(this.value);
+        if (val && val >= 500) {
+          const coins = Math.floor(val / EXCHANGE_RATE);
+          coinPreview.classList.remove('hidden');
+          coinPreviewCount.textContent = coins;
+        } else {
+          coinPreview.classList.add('hidden');
+        }
+      });
+
+      // ─── Top-up form ───────────────────────────────────────────────
+      topupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseInt(topupAmount.value);
+        if (!amount || amount < 1000) {
+          topupStatus.textContent = 'Please enter a valid amount (min 1000 UGX).';
+          topupStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+        topupStatus.textContent = 'Processing...';
+        topupStatus.className = 'mt-3 text-sm text-indigo-600';
+        const success = await depositWallet(amount);
+        if (success) {
+          const coins = Math.floor(amount / EXCHANGE_RATE);
+          topupStatus.textContent = `✅ Deposited ${coins} coins (${amount.toLocaleString()} UGX)!`;
+          topupStatus.className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => topupModal.classList.add('hidden'), 2000);
+        } else {
+          topupStatus.textContent = '❌ Deposit failed. Please try again.';
+          topupStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      topupBtn.addEventListener('click', () => {
+        topupAmount.value = '';
+        topupStatus.textContent = '';
+        coinPreview.classList.add('hidden');
+        topupModal.classList.remove('hidden');
+      });
+
+      closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
+      topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
+      refreshWalletBtn.addEventListener('click', loadWallet);
 
       // ─── Favorites ──────────────────────────────────────────────────
       async function fetchFavorites() {
@@ -902,7 +950,7 @@
         } catch (err) { alert('Error updating favorite: ' + err.message); }
       }
 
-      // ─── Create property card ──────────────────────────────────────
+      // ─── Property card ─────────────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -1009,7 +1057,7 @@
         return article;
       }
 
-      // ─── Render listings ──────────────────────────────────────────
+      // ─── Render functions ─────────────────────────────────────────
       function renderListings(properties) {
         listingsGrid.innerHTML = '';
         if (!properties || properties.length === 0) {
@@ -1026,7 +1074,6 @@
         });
       }
 
-      // ─── Render my properties (dashboard) ──────────────────────────
       function renderMyProperties() {
         myPropertiesList.innerHTML = '';
         if (state.myProperties.length === 0) {
@@ -1050,7 +1097,7 @@
         });
       }
 
-      // ─── Delete property ──────────────────────────────────────────
+      // ─── CRUD ──────────────────────────────────────────────────────
       async function deleteProperty(propId) {
         try {
           const { error } = await supabase.from('properties').delete().eq('id', propId);
@@ -1061,7 +1108,6 @@
         } catch (err) { alert('Delete failed: ' + err.message); }
       }
 
-      // ─── Edit property modal ──────────────────────────────────────
       async function openEditModal(propertyId) {
         const prop = state.myProperties.find(p => p.id === propertyId);
         if (!prop) return;
@@ -1151,7 +1197,7 @@
       closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
       editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
 
-      // ─── Review modal ─────────────────────────────────────────────
+      // ─── Review ────────────────────────────────────────────────────
       function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
@@ -1216,7 +1262,7 @@
         }
       });
 
-      // ─── Profile Settings ──────────────────────────────────────────
+      // ─── Profile ────────────────────────────────────────────────────
       async function loadProfileSettings() {
         if (!state.currentUser) return;
         try {
@@ -1259,7 +1305,7 @@
         }
       });
 
-      // ─── Dashboard toggle functions ───────────────────────────────
+      // ─── Dashboard toggles ────────────────────────────────────────
       function toggleProfileForm() {
         const isVisible = profileFormContainer.classList.contains('visible');
         if (isVisible) {
@@ -1280,9 +1326,9 @@
         }
       }
 
-      toggleProfileBtn?.addEventListener('click', toggleProfileForm);
-      toggleAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
-      cancelProfileEdit?.addEventListener('click', () => {
+      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
+      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
+      cancelProfileEditBtn?.addEventListener('click', () => {
         profileFormContainer.classList.remove('visible');
       });
 
@@ -1578,7 +1624,6 @@
           propImage.value = '';
           await loadMyProperties();
           await fetchAllData();
-          // Close the add property form
           addPropertyContainer.classList.remove('visible');
         } catch (err) {
           uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
@@ -1586,7 +1631,7 @@
         }
       });
 
-      // ─── Auth Handlers ─────────────────────────────────────────────
+      // ─── Auth ──────────────────────────────────────────────────────
       async function handleAuthSubmit(e) {
         e.preventDefault();
         const email = emailInput.value.trim();
@@ -1641,7 +1686,6 @@
         }
       }
 
-      // ─── Logout ──────────────────────────────────────────────────────
       async function handleLogout() {
         await supabase.auth.signOut();
         state.currentUser = null;
@@ -1650,7 +1694,7 @@
         goToDiscovery();
       }
 
-      // ─── Route Handler ──────────────────────────────────────────────
+      // ─── Route ──────────────────────────────────────────────────────
       async function handleRoute() {
         const path = getCurrentPath();
         if (path.startsWith('/broker/')) {
@@ -1689,7 +1733,7 @@
         }
       }
 
-      // ─── QUIZ FLOW ──────────────────────────────────────────────────
+      // ─── Quiz ──────────────────────────────────────────────────────
       async function openQuizModal(propertyId) {
         quizPropertyId.value = propertyId;
         quizStep1.classList.remove('hidden');
@@ -1833,41 +1877,6 @@
 
       closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
       quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
-
-      // ─── Wallet Event Listeners ────────────────────────────────────
-      topupBtn.addEventListener('click', () => {
-        topupAmount.value = '';
-        topupStatus.textContent = '';
-        topupModal.classList.remove('hidden');
-      });
-
-      closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
-      topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
-
-      topupForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const amount = parseInt(topupAmount.value);
-        if (!amount || amount < 1000) {
-          topupStatus.textContent = 'Please enter a valid amount (min 1000 UGX).';
-          topupStatus.className = 'mt-3 text-sm text-red-600';
-          return;
-        }
-        topupStatus.textContent = 'Processing...';
-        topupStatus.className = 'mt-3 text-sm text-indigo-600';
-        const success = await depositWallet(amount);
-        if (success) {
-          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX successfully!`;
-          topupStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => topupModal.classList.add('hidden'), 1500);
-        } else {
-          topupStatus.textContent = '❌ Deposit failed. Please try again.';
-          topupStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
-
-      refreshWalletBtn.addEventListener('click', () => {
-        loadWallet();
-      });
 
       // ─── Event Binding ─────────────────────────────────────────────
       searchInput.addEventListener('input', (e) => {

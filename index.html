@@ -129,7 +129,7 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.05);
       margin-bottom: 1.5rem;
     }
-    .dashboard-toolbar .wallet-pill {
+    .wallet-pill {
       background: #1e293b;
       color: white;
       padding: 0.4rem 1rem;
@@ -141,14 +141,25 @@
       gap: 0.5rem;
       flex-wrap: wrap;
     }
-    .dashboard-toolbar .wallet-pill .balance {
+    .wallet-pill .balance {
       color: #fbbf24;
     }
-    .dashboard-toolbar .wallet-pill .ugx-equivalent {
+    .wallet-pill .ugx-equivalent {
       color: #94a3b8;
       font-weight: 400;
       font-size: 0.7rem;
     }
+    .wallet-pill .wallet-label {
+      color: #94a3b8;
+      font-weight: 400;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .wallet-pill.app-wallet .balance { color: #34d399; }
+    .wallet-pill.nusu-wallet .balance { color: #fbbf24; }
+    .wallet-pill.revenue-wallet .balance { color: #f472b6; }
+
     .dashboard-toolbar .toolbar-btn {
       padding: 0.4rem 1rem;
       border-radius: 9999px;
@@ -168,6 +179,8 @@
     .dashboard-toolbar .toolbar-btn.primary:hover { background: #4338ca; }
     .dashboard-toolbar .toolbar-btn.green { background: #10b981; color: white; }
     .dashboard-toolbar .toolbar-btn.green:hover { background: #059669; }
+    .dashboard-toolbar .toolbar-btn.amber { background: #f59e0b; color: white; }
+    .dashboard-toolbar .toolbar-btn.amber:hover { background: #d97706; }
 
     .profile-form-container, .add-property-container {
       background: white;
@@ -372,24 +385,45 @@
   <div id="topupModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2>
+        <h2 class="text-xl font-bold text-slate-800">💰 Top Up App Wallet</h2>
         <button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <p class="text-slate-500 text-sm mb-2">1 coin = <strong>500 UGX</strong></p>
-      <p class="text-slate-500 text-sm mb-4">Enter amount in UGX – it will be converted to coins.</p>
+      <p class="text-slate-500 text-sm mb-4">Deposit real money (UGX) into your App Wallet.</p>
       <form id="topupForm">
         <div class="mb-4">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
           <input type="number" id="topupAmount" required min="1000" step="1000" placeholder="e.g. 10000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
-        <div id="coinPreview" class="text-sm text-slate-600 mb-3 hidden">
-          You'll receive: <span id="coinPreviewCount">0</span> coins
         </div>
         <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
           <i class="fas fa-plus-circle mr-2"></i> Deposit
         </button>
       </form>
       <div id="topupStatus" class="mt-3 text-sm text-slate-600"></div>
+    </div>
+  </div>
+
+  <!-- ===== BUY NUSU MODAL ===== -->
+  <div id="buyNusuModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-sm">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">🪙 Buy Nusu Coins</h2>
+        <button id="closeBuyNusuModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <p class="text-slate-500 text-sm mb-2">1 Nusu = <strong>500 UGX</strong></p>
+      <p class="text-slate-500 text-sm mb-4">Enter amount in UGX to convert to Nusu coins.</p>
+      <form id="buyNusuForm">
+        <div class="mb-4">
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
+          <input type="number" id="buyNusuAmount" required min="500" step="500" placeholder="e.g. 5000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+        </div>
+        <div id="nusuPreview" class="text-sm text-slate-600 mb-3 hidden">
+          You'll receive: <span id="nusuPreviewCount">0</span> Nusu coins
+        </div>
+        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-coins mr-2"></i> Buy Nusu
+        </button>
+      </form>
+      <div id="buyNusuStatus" class="mt-3 text-sm text-slate-600"></div>
     </div>
   </div>
 
@@ -523,16 +557,34 @@
 
           <!-- ===== TOOLBAR ===== -->
           <div class="dashboard-toolbar">
-            <!-- Wallet (Coins) -->
-            <div class="wallet-pill">
-              <i class="fas fa-coins"></i>
-              Balance: <span class="balance" id="walletBalanceDisplay">0</span> coins
-              <span class="ugx-equivalent">≈ UGX <span id="walletUgxDisplay">0</span></span>
+            <!-- App Wallet (UGX) -->
+            <div class="wallet-pill app-wallet">
+              <span class="wallet-label">App Wallet</span>
+              <i class="fas fa-wallet"></i>
+              <span class="balance" id="appWalletDisplay">0</span> UGX
               <button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button>
-              <button id="refreshWalletBtn" class="text-xs bg-slate-600 hover:bg-slate-700 text-white px-2 py-0.5 rounded-full transition">
-                <i class="fas fa-sync-alt"></i>
-              </button>
             </div>
+
+            <!-- Nusu Wallet (Coins) -->
+            <div class="wallet-pill nusu-wallet">
+              <span class="wallet-label">Nusu</span>
+              <i class="fas fa-coins"></i>
+              <span class="balance" id="nusuBalanceDisplay">0</span> Nusu
+              <span class="ugx-equivalent">≈ UGX <span id="nusuUgxDisplay">0</span></span>
+              <button id="buyNusuBtn" class="ml-1 text-xs bg-amber-500 hover:bg-amber-600 text-white px-3 py-0.5 rounded-full transition">+ Buy</button>
+            </div>
+
+            <!-- Revenue Wallet (Only visible to you) -->
+            <div class="wallet-pill revenue-wallet" id="revenueWallet" style="display:none;">
+              <span class="wallet-label">Revenue</span>
+              <i class="fas fa-chart-line"></i>
+              <span class="balance" id="revenueDisplay">0</span> UGX
+            </div>
+
+            <!-- Refresh -->
+            <button id="refreshWalletBtn" class="toolbar-btn" style="background:#334155;color:white;">
+              <i class="fas fa-sync-alt"></i>
+            </button>
 
             <!-- Toolbar buttons -->
             <button id="dashboardEditProfileBtn" class="toolbar-btn">
@@ -596,9 +648,9 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – Supabase & Full App
+  JAVASCRIPT
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=7">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=8">
   </script>
 
   <script>
@@ -640,7 +692,7 @@
       const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✅ Supabase client created');
 
-      // ─── Column mapping (will be auto-detected) ──────────────────
+      // ─── Column mapping ──────────────────────────────────────────
       const COLUMNS = {
         FOREIGN_KEY: null,
         IMAGE: 'media_urls',
@@ -669,7 +721,10 @@
         myProperties: [],
         profilesMap: {},
         favorites: new Set(),
-        walletBalance: 0,
+        appBalance: 0,
+        nusuBalance: 0,
+        revenueBalance: 0,
+        isAdmin: false,
       };
 
       // ─── DOM refs ──────────────────────────────────────────────────
@@ -756,17 +811,28 @@
       const starSelector = $('#starSelector');
 
       // Wallet
-      const walletBalanceDisplay = $('#walletBalanceDisplay');
-      const walletUgxDisplay = $('#walletUgxDisplay');
+      const appWalletDisplay = $('#appWalletDisplay');
+      const nusuBalanceDisplay = $('#nusuBalanceDisplay');
+      const nusuUgxDisplay = $('#nusuUgxDisplay');
+      const revenueDisplay = $('#revenueDisplay');
+      const revenueWallet = $('#revenueWallet');
       const topupBtn = $('#topupBtn');
+      const buyNusuBtn = $('#buyNusuBtn');
       const refreshWalletBtn = $('#refreshWalletBtn');
+
       const topupModal = $('#topupModal');
       const closeTopupModal = $('#closeTopupModal');
       const topupForm = $('#topupForm');
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
-      const coinPreview = $('#coinPreview');
-      const coinPreviewCount = $('#coinPreviewCount');
+
+      const buyNusuModal = $('#buyNusuModal');
+      const closeBuyNusuModal = $('#closeBuyNusuModal');
+      const buyNusuForm = $('#buyNusuForm');
+      const buyNusuAmount = $('#buyNusuAmount');
+      const buyNusuStatus = $('#buyNusuStatus');
+      const nusuPreview = $('#nusuPreview');
+      const nusuPreviewCount = $('#nusuPreviewCount');
 
       // Quiz modals
       const quizModal = $('#quizModal');
@@ -847,20 +913,33 @@
         try {
           const { data: profile, error } = await supabase
             .from('profiles')
-            .select('wallet_balance')
+            .select('app_wallet_balance, nusu_balance, revenue_balance')
             .eq('id', state.currentUser.id)
             .single();
+
           if (error) throw error;
-          state.walletBalance = profile?.wallet_balance || 0;
-          const coins = state.walletBalance;
-          const ugx = coins * EXCHANGE_RATE;
-          walletBalanceDisplay.textContent = coins.toLocaleString();
-          walletUgxDisplay.textContent = ugx.toLocaleString();
+
+          state.appBalance = profile?.app_wallet_balance || 0;
+          state.nusuBalance = profile?.nusu_balance || 0;
+          state.revenueBalance = profile?.revenue_balance || 0;
+
+          appWalletDisplay.textContent = state.appBalance.toLocaleString();
+          nusuBalanceDisplay.textContent = state.nusuBalance.toLocaleString();
+          nusuUgxDisplay.textContent = (state.nusuBalance * EXCHANGE_RATE).toLocaleString();
+
+          // Show revenue wallet only if user has revenue balance (admin or broker with earnings)
+          if (state.revenueBalance > 0) {
+            revenueWallet.style.display = 'inline-flex';
+            revenueDisplay.textContent = state.revenueBalance.toLocaleString();
+          } else {
+            revenueWallet.style.display = 'none';
+          }
         } catch (err) {
           console.error('Error loading wallet:', err);
         }
       }
 
+      // ─── Top Up (Deposit UGX) ──────────────────────────────────────
       async function depositWallet(amount) {
         if (!state.currentUser) return false;
         try {
@@ -876,17 +955,21 @@
         }
       }
 
-      // ─── Coin preview ──────────────────────────────────────────────
-      topupAmount.addEventListener('input', function() {
-        const val = parseInt(this.value);
-        if (val && val >= 500) {
-          const coins = Math.floor(val / EXCHANGE_RATE);
-          coinPreview.classList.remove('hidden');
-          coinPreviewCount.textContent = coins;
-        } else {
-          coinPreview.classList.add('hidden');
+      // ─── Buy Nusu ──────────────────────────────────────────────────
+      async function buyNusu(ugxAmount) {
+        if (!state.currentUser) return false;
+        try {
+          const { data, error } = await supabase.functions.invoke('buy-nusu', {
+            body: { ugx_amount: ugxAmount }
+          });
+          if (error) throw error;
+          await loadWallet();
+          return true;
+        } catch (err) {
+          console.error('Buy Nusu error:', err);
+          return false;
         }
-      });
+      }
 
       // ─── Top-up form ───────────────────────────────────────────────
       topupForm.addEventListener('submit', async (e) => {
@@ -901,10 +984,9 @@
         topupStatus.className = 'mt-3 text-sm text-indigo-600';
         const success = await depositWallet(amount);
         if (success) {
-          const coins = Math.floor(amount / EXCHANGE_RATE);
-          topupStatus.textContent = `✅ Deposited ${coins} coins (${amount.toLocaleString()} UGX)!`;
+          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX to App Wallet!`;
           topupStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => topupModal.classList.add('hidden'), 2000);
+          setTimeout(() => topupModal.classList.add('hidden'), 1500);
         } else {
           topupStatus.textContent = '❌ Deposit failed. Please try again.';
           topupStatus.className = 'mt-3 text-sm text-red-600';
@@ -914,12 +996,56 @@
       topupBtn.addEventListener('click', () => {
         topupAmount.value = '';
         topupStatus.textContent = '';
-        coinPreview.classList.add('hidden');
         topupModal.classList.remove('hidden');
       });
 
       closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
+
+      // ─── Buy Nusu form ────────────────────────────────────────────
+      buyNusuAmount.addEventListener('input', function() {
+        const val = parseInt(this.value);
+        if (val && val >= 500) {
+          const nusu = Math.floor(val / EXCHANGE_RATE);
+          nusuPreview.classList.remove('hidden');
+          nusuPreviewCount.textContent = nusu;
+        } else {
+          nusuPreview.classList.add('hidden');
+        }
+      });
+
+      buyNusuForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = parseInt(buyNusuAmount.value);
+        if (!amount || amount < 500) {
+          buyNusuStatus.textContent = 'Please enter a valid amount (min 500 UGX).';
+          buyNusuStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+        buyNusuStatus.textContent = 'Processing...';
+        buyNusuStatus.className = 'mt-3 text-sm text-indigo-600';
+        const success = await buyNusu(amount);
+        if (success) {
+          const nusu = Math.floor(amount / EXCHANGE_RATE);
+          buyNusuStatus.textContent = `✅ Bought ${nusu} Nusu coins (${amount.toLocaleString()} UGX)!`;
+          buyNusuStatus.className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => buyNusuModal.classList.add('hidden'), 1500);
+        } else {
+          buyNusuStatus.textContent = '❌ Purchase failed. Check your App Wallet balance.';
+          buyNusuStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      buyNusuBtn.addEventListener('click', () => {
+        buyNusuAmount.value = '';
+        buyNusuStatus.textContent = '';
+        nusuPreview.classList.add('hidden');
+        buyNusuModal.classList.remove('hidden');
+      });
+
+      closeBuyNusuModal.addEventListener('click', () => buyNusuModal.classList.add('hidden'));
+      buyNusuModal.addEventListener('click', (e) => { if (e.target === buyNusuModal) buyNusuModal.classList.add('hidden'); });
+
       refreshWalletBtn.addEventListener('click', loadWallet);
 
       // ─── Favorites ──────────────────────────────────────────────────

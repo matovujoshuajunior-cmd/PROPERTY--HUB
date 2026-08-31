@@ -182,7 +182,7 @@
       background: #10b981;
       color: white;
       font-size: 0.6rem;
-      padding: 0.1rem 0.5rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 9999px;
       display: inline-flex;
       align-items: center;
@@ -193,7 +193,7 @@
       background: #f59e0b;
       color: white;
       font-size: 0.6rem;
-      padding: 0.1rem 0.5rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 9999px;
       display: inline-flex;
       align-items: center;
@@ -273,8 +273,8 @@
     <div class="flex items-start gap-3">
       <i class="fas fa-shield-alt text-emerald-400 text-xl mt-0.5"></i>
       <div class="flex-1 text-sm">
-        <p class="font-semibold">🔒 Verified Properties</p>
-        <p class="text-slate-300 text-xs">Property Hub allows brokers to request verification for their listings. Look for the verified badge for extra trust.</p>
+        <p class="font-semibold">🔒 Trust Verified Properties</p>
+        <p class="text-slate-300 text-xs">Look for the <span class="text-emerald-400 font-medium">Verified</span> badge on listings. These properties have been reviewed and confirmed by our team for your safety and peace of mind.</p>
       </div>
       <button id="closeSecurityNotification" class="close-btn"><i class="fas fa-times"></i></button>
     </div>
@@ -345,7 +345,6 @@
           <div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div>
           <input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
         </div>
-        <!-- Verification checkbox -->
         <div class="flex items-center gap-3 mt-2">
           <input type="checkbox" id="editRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
@@ -490,7 +489,7 @@
             <option value="other">Other</option>
           </select>
         </div>
-        <div class="mb-4" id="reportItemField">
+        <div class="mb-4">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property ID or Broker Name *</label>
           <input type="text" id="reportItem" required placeholder="Enter property ID or broker name" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
         </div>
@@ -558,7 +557,6 @@
             <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">UGX</span>
           </div>
           <div class="flex items-center gap-3">
-            <!-- Report button in navbar -->
             <button id="navbarReportBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition flex items-center gap-1">
               <i class="fas fa-flag"></i> <span class="hidden sm:inline">Report</span>
             </button>
@@ -600,8 +598,8 @@
           <div class="safety-banner">
             <i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i>
             <div>
-              <p class="text-sm font-semibold text-amber-800">🔒 Verified properties get a badge</p>
-              <p class="text-xs text-amber-700">Brokers can request verification for their properties. Look for the verified badge when browsing listings.</p>
+              <p class="text-sm font-semibold text-amber-800">🔒 Trust Verified Listings</p>
+              <p class="text-xs text-amber-700">Look for the <span class="font-bold">Verified</span> badge on properties. Our team reviews these listings to ensure authenticity and safety.</p>
             </div>
           </div>
         </div>
@@ -759,7 +757,6 @@
               </select></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><input type="file" id="propImage" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
-              <!-- Verification checkbox -->
               <div class="md:col-span-2 flex items-center gap-3 mt-2">
                 <input type="checkbox" id="addRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
                 <label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
@@ -769,16 +766,16 @@
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
                   <i class="fas fa-plus mr-2"></i> Add Property
                 </button>
-                <p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Requesting verification helps build trust with potential clients.</p>
+                <p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Requesting verification builds trust with potential clients.</p>
               </div>
             </form>
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== VERIFICATION SECTION (Broker Verification) ===== -->
+          <!-- ===== VERIFICATION SECTION ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
-              <h4 class="font-semibold text-slate-700">🛡️ Verification Status</h4>
+              <h4 class="font-semibold text-slate-700">🛡️ Broker Verification</h4>
               <span id="verificationStatusBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Unverified</span>
             </div>
             
@@ -844,7 +841,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=12">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=13">
   </script>
 
   <script>
@@ -1007,7 +1004,7 @@
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
 
-      // Report Modal (navbar)
+      // Report Modal
       const reportModal = $('#reportModal');
       const closeReportModal = $('#closeReportModal');
       const reportForm = $('#reportForm');
@@ -1278,7 +1275,7 @@
         }
       });
 
-      // ─── Report (navbar) ────────────────────────────────────────────
+      // ─── Report ─────────────────────────────────────────────────────
       navbarReportBtn.addEventListener('click', () => {
         reportModal.classList.remove('hidden');
         reportForm.reset();
@@ -1377,7 +1374,6 @@
           rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
         }
 
-        // Determine which badge to show
         let badgeHtml = '';
         if (isVerified && verificationStatus === 'approved') {
           badgeHtml = `<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>`;
@@ -1418,7 +1414,6 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                ${!isOwner ? `<button class="report-btn text-xs text-red-500 hover:text-red-700 font-medium" data-broker-id="${broker?.id || ''}" data-property-id="${property.id}"><i class="fas fa-flag mr-1"></i>Report</button>` : ''}
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -1454,15 +1449,6 @@
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
-        });
-
-        article.querySelector('.report-btn')?.addEventListener('click', e => {
-          e.stopPropagation();
-          const brokerId = e.currentTarget.dataset.brokerId;
-          const propertyId = e.currentTarget.dataset.propertyId;
-          reportModal.classList.remove('hidden');
-          reportItem.value = propertyId || brokerId;
-          reportType.value = brokerId ? 'broker' : 'property';
         });
 
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
@@ -1707,7 +1693,6 @@
         editModal._currentImages = images;
         editModal._currentProperty = prop;
 
-        // Set the verification checkbox based on current status
         editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
 
         editModal.classList.remove('hidden');
@@ -1764,14 +1749,12 @@
 
         const dbType = TYPE_MAP[type] || type;
 
-        // Determine verification status
         const requestVerification = editRequestVerification.checked;
         let isVerified = false;
         let verificationStatus = 'unverified';
         if (requestVerification) {
-          // If they request verification, set to pending (admin will approve later)
           verificationStatus = 'pending';
-          isVerified = false; // will become true after admin approval
+          isVerified = false;
         } else {
           verificationStatus = 'unverified';
           isVerified = false;
@@ -1851,7 +1834,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // Fetch ALL properties (no status filter)
           const { data: properties, error: propError } = await supabase
             .from('properties')
             .select('*')
@@ -2128,12 +2110,11 @@
         const dbType = TYPE_MAP[type] || type;
         const fkCol = COLUMNS.FOREIGN_KEY || 'owner_id';
 
-        // Set verification fields
         let isVerified = false;
         let verificationStatus = 'unverified';
         if (requestVerification) {
           verificationStatus = 'pending';
-          isVerified = false; // will become true after admin approval
+          isVerified = false;
         }
 
         const insertData = {

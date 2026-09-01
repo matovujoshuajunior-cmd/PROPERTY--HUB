@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Property Hub Uganda – Find Homes, Rentals &amp; Lodges</title>
   <meta name="description" content="Discover the best properties, rentals, and lodges across Uganda." />
   <link rel="canonical" href="https://yourdomain.com/" />
@@ -339,6 +338,66 @@
     }
     .write-review-toggle:hover { color: #4338ca; }
 
+    .review-auth-message {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+      color: #92400e;
+      font-size: 0.875rem;
+      display: none;
+    }
+    .review-auth-message.visible { display: block; }
+    .review-auth-message a {
+      color: #4f46e5;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .review-auth-message a:hover { color: #4338ca; }
+
+    /* ---- Property verification list item ---- */
+    .verification-property-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .verification-property-item .property-title {
+      font-weight: 600;
+      color: #1e293b;
+      flex: 1;
+    }
+    .verification-property-item .property-status {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.1rem 0.6rem;
+      border-radius: 9999px;
+    }
+    .verification-property-item .property-status.approved {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .verification-property-item .property-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    .verification-property-item .property-status.rejected {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    .verification-property-item .property-status.unverified {
+      background: #e2e8f0;
+      color: #475569;
+    }
+
     @media (max-width: 640px) {
       .dashboard-toolbar {
         flex-direction: column;
@@ -358,6 +417,11 @@
         max-width: unset;
       }
       .review-stats { gap: 1rem; }
+      .verification-property-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
     }
   </style>
 </head>
@@ -381,13 +445,14 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL (with Write Review toggle) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-slate-800">⭐ Reviews</h2>
         <button id="closeReviewModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
+
       <!-- Write Review toggle -->
       <div class="flex justify-between items-center mb-3">
         <span class="text-sm text-slate-500">What others say</span>
@@ -395,11 +460,15 @@
           <i class="fas fa-pen"></i> Write a Review
         </button>
       </div>
+
+      <!-- Sign-in required message -->
+      <div id="reviewAuthMessage" class="review-auth-message">
+        <i class="fas fa-info-circle mr-2"></i>
+        Please <a href="#" id="reviewSignInLink">sign in</a> to leave a review.
+      </div>
+
       <!-- Review form (hidden by default) -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-        <div id="reviewAuthMessage" class="text-sm text-amber-600 mb-3 hidden">
-          <i class="fas fa-info-circle"></i> Please <a href="#" id="reviewSignInLink" class="text-indigo-600 hover:underline">sign in</a> to leave a review.
-        </div>
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
           <div class="mb-3">
@@ -422,6 +491,7 @@
           </button>
         </form>
       </div>
+
       <!-- Reviews list -->
       <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto">
         <p class="text-slate-500 text-sm">Loading reviews...</p>
@@ -739,7 +809,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (Report button restored) ===== -->
+      <!-- ===== BROKER PROFILE VIEW (with Report button revived) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -768,7 +838,7 @@
                 <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-comment"></i> Reviews
                 </button>
-                <!-- Report button restored -->
+                <!-- REPORT BUTTON revived -->
                 <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-flag"></i> Report
                 </button>
@@ -906,57 +976,31 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== BROKER VERIFICATION SECTION ===== -->
+          <!-- ===== PROPERTY VERIFICATION PANEL (replaces broker verification) ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
-              <h4 class="font-semibold text-slate-700">🛡️ Broker Verification</h4>
-              <span id="verificationStatusBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Unverified</span>
-            </div>
-            
-            <div id="alreadyVerified" class="hidden">
-              <div class="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">
-                <i class="fas fa-check-circle text-green-500 text-2xl"></i>
-                <div>
-                  <p class="font-semibold text-green-700">✅ Verified Broker</p>
-                  <p class="text-sm text-green-600">You have been verified. Your properties show a verified badge.</p>
-                </div>
-              </div>
+              <h4 class="font-semibold text-slate-700">🛡️ Property Verification</h4>
+              <span id="verificationInfoBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Manage verifications</span>
             </div>
 
-            <div id="verificationPending" class="hidden">
-              <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
-                <i class="fas fa-clock text-amber-500 text-2xl"></i>
-                <div>
-                  <p class="font-semibold text-amber-700">⏳ Verification Pending</p>
-                  <p class="text-sm text-amber-600">Your verification request is being reviewed. You'll be notified once approved.</p>
-                </div>
-              </div>
+            <!-- Info panel explaining process -->
+            <div class="verification-info-panel visible mb-4">
+              <p class="font-medium">🔍 Verification Process</p>
+              <ul>
+                <li>Request verification for any of your properties.</li>
+                <li>Our admin team will review the listing, images, and details.</li>
+                <li>Once approved, the property gets a <span class="badge-verified">Verified</span> badge.</li>
+                <li>Verified properties rank higher and attract more trust.</li>
+                <li>You will be notified when the review is complete.</li>
+              </ul>
             </div>
 
-            <div id="verificationForm" class="space-y-4">
-              <p class="text-sm text-slate-600">Get verified to build trust with potential clients. Verified brokers get a badge on their listings and profiles.</p>
-              <form id="verificationApplyForm" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Registration Number *</label>
-                  <input type="text" id="businessRegNumber" required placeholder="e.g. 1234567890" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Address *</label>
-                  <input type="text" id="businessAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Upload ID (Passport/National ID)</label>
-                  <input type="file" id="idDocument" accept="image/*,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Upload Business Registration Certificate</label>
-                  <input type="file" id="businessDocument" accept="image/*,.pdf" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
-                </div>
-                <button type="submit" id="submitVerificationBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
-                  <i class="fas fa-paper-plane mr-2"></i> Submit Verification Request
-                </button>
-              </form>
-              <div id="verificationStatus" class="mt-3 text-sm text-slate-600"></div>
+            <!-- List of properties with verification status -->
+            <div id="propertyVerificationList">
+              <p class="text-slate-500 text-sm">Loading your properties...</p>
+            </div>
+            <div id="propertyVerificationEmpty" class="hidden text-center py-4 text-slate-400 text-sm">
+              You don't have any properties yet. <a href="#" id="gotoAddPropertyFromVerification" class="text-indigo-600 hover:underline">Add a property</a> to request verification.
             </div>
           </div>
 
@@ -1175,18 +1219,10 @@
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
 
-      // Verification
-      const verificationStatusBadge = $('#verificationStatusBadge');
-      const alreadyVerified = $('#alreadyVerified');
-      const verificationPending = $('#verificationPending');
-      const verificationForm = $('#verificationForm');
-      const verificationApplyForm = $('#verificationApplyForm');
-      const businessRegNumber = $('#businessRegNumber');
-      const businessAddress = $('#businessAddress');
-      const idDocument = $('#idDocument');
-      const businessDocument = $('#businessDocument');
-      const verificationStatus = $('#verificationStatus');
-      const submitVerificationBtn = $('#submitVerificationBtn');
+      // Property Verification (new)
+      const propertyVerificationList = $('#propertyVerificationList');
+      const propertyVerificationEmpty = $('#propertyVerificationEmpty');
+      const gotoAddPropertyFromVerification = $('#gotoAddPropertyFromVerification');
 
       // Security Notification
       const securityNotification = $('#securityNotification');
@@ -1236,7 +1272,7 @@
         securityNotification.style.display = 'none';
       });
 
-      // ─── Verification info panel toggle ───────────────────────────
+      // ─── Verification info panel toggle (for add/edit property) ───
       addRequestVerification.addEventListener('change', function() {
         if (this.checked) {
           addVerificationInfo.classList.add('visible');
@@ -1376,16 +1412,14 @@
       refreshWalletBtn.addEventListener('click', loadWallet);
 
       // ─── Reviews Modal Logic ───────────────────────────────────────
-      // Toggle review form
       toggleWriteReview.addEventListener('click', function() {
-        // Check if user is signed in
         if (!state.currentUser) {
-          reviewAuthMessage.classList.remove('hidden');
+          reviewAuthMessage.classList.add('visible');
           reviewFormContainer.classList.add('hidden');
           this.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
           return;
         }
-        reviewAuthMessage.classList.add('hidden');
+        reviewAuthMessage.classList.remove('visible');
         const isHidden = reviewFormContainer.classList.contains('hidden');
         if (isHidden) {
           reviewFormContainer.classList.remove('hidden');
@@ -1396,27 +1430,28 @@
         }
       });
 
-      // Sign in link in review auth message
       reviewSignInLink.addEventListener('click', function(e) {
         e.preventDefault();
         reviewModal.classList.add('hidden');
         navigateToAuth();
       });
 
-      // Open review modal (called from profile)
       async function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
         reviewText.value = '';
         updateStarUI(5);
         reviewFormContainer.classList.add('hidden');
-        reviewAuthMessage.classList.add('hidden');
+        if (!state.currentUser) {
+          reviewAuthMessage.classList.add('visible');
+        } else {
+          reviewAuthMessage.classList.remove('visible');
+        }
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
       }
 
-      // Load reviews into the modal
       async function loadReviewsForModal(brokerId) {
         reviewsList.innerHTML = '<p class="text-slate-500 text-sm">Loading reviews...</p>';
         noReviewsMessage.classList.add('hidden');
@@ -1459,7 +1494,7 @@
         }
       }
 
-      // ─── Star selector (with hover) ──────────────────────────────
+      // ─── Star selector ──────────────────────────────────────────────
       starSelector.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
@@ -1483,7 +1518,6 @@
         });
       }
 
-      // ─── Review form submit ────────────────────────────────────────
       reviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
@@ -1523,15 +1557,17 @@
         }
       });
 
-      // ─── Close review modal ────────────────────────────────────────
       closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
       reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
 
-      // ─── View Reviews button (profile) ────────────────────────────
       async function openViewReviewsModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewFormContainer.classList.add('hidden');
-        reviewAuthMessage.classList.add('hidden');
+        if (!state.currentUser) {
+          reviewAuthMessage.classList.add('visible');
+        } else {
+          reviewAuthMessage.classList.remove('visible');
+        }
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
@@ -1610,7 +1646,7 @@
         }
       });
 
-      // ─── RANKING ALGORITHM (Step 1: Review-based) ────────────────
+      // ─── RANKING ALGORITHM ────────────────────────────────
       function isTrustedBroker(broker) {
         if (!broker) return false;
         const rating = broker.average_rating || 0;
@@ -1622,35 +1658,23 @@
 
       function calculateRankScore(property, broker, reportCount = 0) {
         let score = 0;
-
-        // 1. Property verification
         if (property.verification_status === 'approved') {
           score += 100;
         } else if (property.verification_status === 'pending') {
           score += 30;
         }
-
         if (broker) {
-          // 2. Trusted Broker
           if (isTrustedBroker(broker)) {
             score += 20;
           }
-
-          // 3. REVIEW-BASED RANKING (Step 1)
           const rating = broker.average_rating || 0;
           score += rating * 10;
-
           const reviewCount = broker.review_count || 0;
           score += Math.min(reviewCount, 50) * 0.5;
-
-          // 4. Lead score (max 50)
           const leadScore = broker.lead_score || 0;
           score += leadScore / 2;
-
-          // 5. Report penalty
           score -= (reportCount || 0) * 5;
         }
-
         return Math.round(score);
       }
 
@@ -1829,126 +1853,80 @@
         });
       }
 
-      // ─── Verification Functions ────────────────────────────────────
-      async function loadVerificationStatus() {
+      // ─── Property Verification Functions (new) ─────────────────────
+      async function loadPropertyVerificationList() {
         if (!state.currentUser) return;
         try {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('is_verified, verification_badge')
-            .eq('id', state.currentUser.id)
-            .single();
-
-          if (profile?.is_verified) {
-            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-green-500 text-white';
-            verificationStatusBadge.textContent = '✅ Verified';
-            alreadyVerified.classList.remove('hidden');
-            verificationPending.classList.add('hidden');
-            verificationForm.classList.add('hidden');
-            return;
-          }
-
           const { data, error } = await supabase
-            .from('verification_requests')
-            .select('status')
-            .eq('broker_id', state.currentUser.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+            .from('properties')
+            .select('*')
+            .eq(COLUMNS.FOREIGN_KEY || 'owner_id', state.currentUser.id)
+            .order('created_at', { ascending: false });
 
           if (error) throw error;
 
-          if (data && data.status === 'pending') {
-            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-amber-500 text-white';
-            verificationStatusBadge.textContent = '⏳ Pending';
-            alreadyVerified.classList.add('hidden');
-            verificationPending.classList.remove('hidden');
-            verificationForm.classList.add('hidden');
-          } else {
-            verificationStatusBadge.className = 'text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600';
-            verificationStatusBadge.textContent = 'Unverified';
-            alreadyVerified.classList.add('hidden');
-            verificationPending.classList.add('hidden');
-            verificationForm.classList.remove('hidden');
+          if (!data || data.length === 0) {
+            propertyVerificationList.innerHTML = '';
+            propertyVerificationEmpty.classList.remove('hidden');
+            return;
           }
+          propertyVerificationEmpty.classList.add('hidden');
+
+          let html = '';
+          data.forEach(prop => {
+            const status = prop[COLUMNS.VERIFICATION_STATUS] || 'unverified';
+            let statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+            let statusClass = status;
+            if (status === 'approved') statusLabel = '✅ Approved';
+            else if (status === 'pending') statusLabel = '⏳ Pending';
+            else if (status === 'rejected') statusLabel = '❌ Rejected';
+            else statusLabel = 'Not requested';
+
+            const canRequest = (status === 'unverified' || status === 'rejected');
+
+            html += `
+              <div class="verification-property-item">
+                <div class="property-title">${prop[COLUMNS.TITLE] || 'Untitled'}</div>
+                <div>
+                  <span class="property-status ${statusClass}">${statusLabel}</span>
+                </div>
+                <div>
+                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` : `<span class="text-xs text-slate-400">Verification ${status === 'approved' ? 'complete' : 'in progress'}</span>`}
+                </div>
+              </div>
+            `;
+          });
+          propertyVerificationList.innerHTML = html;
+
+          // Attach event listeners to request buttons
+          propertyVerificationList.querySelectorAll('.request-verification-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+              const propertyId = this.dataset.propertyId;
+              if (confirm('Request verification for this property? An admin will review it.')) {
+                try {
+                  const { error } = await supabase
+                    .from('properties')
+                    .update({
+                      [COLUMNS.VERIFICATION_STATUS]: 'pending',
+                      [COLUMNS.IS_VERIFIED]: false,
+                    })
+                    .eq('id', propertyId);
+                  if (error) throw error;
+                  alert('✅ Verification requested. You will be notified once reviewed.');
+                  await loadPropertyVerificationList();
+                  await loadMyProperties();
+                  await fetchAllData();
+                } catch (err) {
+                  alert('Error requesting verification: ' + err.message);
+                }
+              }
+            });
+          });
+
         } catch (err) {
-          console.error('Error loading verification status:', err);
+          propertyVerificationList.innerHTML = `<p class="text-red-500 text-sm">Error loading properties: ${err.message}</p>`;
         }
       }
-
-      // ─── Submit Verification Request ──────────────────────────────
-      verificationApplyForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!state.currentUser) {
-          alert('Please sign in first.');
-          return;
-        }
-
-        const regNumber = businessRegNumber.value.trim();
-        const address = businessAddress.value.trim();
-        const idFile = idDocument.files[0];
-        const businessFile = businessDocument.files[0];
-
-        if (!regNumber || !address) {
-          verificationStatus.textContent = 'Please fill in all required fields.';
-          verificationStatus.className = 'mt-3 text-sm text-red-600';
-          return;
-        }
-
-        verificationStatus.textContent = 'Uploading documents...';
-        verificationStatus.className = 'mt-3 text-sm text-indigo-600';
-
-        let idDocumentUrl = null;
-        let businessDocumentUrl = null;
-
-        if (idFile) {
-          const fileExt = idFile.name.split('.').pop();
-          const fileName = `${state.currentUser.id}/id_${Date.now()}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage.from('verification-docs').upload(fileName, idFile);
-          if (uploadError) {
-            verificationStatus.textContent = '❌ ID upload failed: ' + uploadError.message;
-            verificationStatus.className = 'mt-3 text-sm text-red-600';
-            return;
-          }
-          const { data: urlData } = supabase.storage.from('verification-docs').getPublicUrl(fileName);
-          idDocumentUrl = urlData.publicUrl;
-        }
-
-        if (businessFile) {
-          const fileExt = businessFile.name.split('.').pop();
-          const fileName = `${state.currentUser.id}/business_${Date.now()}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage.from('verification-docs').upload(fileName, businessFile);
-          if (uploadError) {
-            verificationStatus.textContent = '❌ Business document upload failed: ' + uploadError.message;
-            verificationStatus.className = 'mt-3 text-sm text-red-600';
-            return;
-          }
-          const { data: urlData } = supabase.storage.from('verification-docs').getPublicUrl(fileName);
-          businessDocumentUrl = urlData.publicUrl;
-        }
-
-        verificationStatus.textContent = 'Submitting request...';
-        verificationStatus.className = 'mt-3 text-sm text-indigo-600';
-
-        try {
-          const { data, error } = await supabase.functions.invoke('request-verification', {
-            body: {
-              business_reg_number: regNumber,
-              business_address: address,
-              id_document_url: idDocumentUrl,
-              business_document_url: businessDocumentUrl,
-            }
-          });
-          if (error) throw error;
-          verificationStatus.textContent = '✅ Request submitted! You will be notified once approved.';
-          verificationStatus.className = 'mt-3 text-sm text-emerald-600';
-          verificationApplyForm.reset();
-          await loadVerificationStatus();
-        } catch (err) {
-          verificationStatus.textContent = '❌ Submission failed: ' + err.message;
-          verificationStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
 
       // ─── Dashboard toggles ────────────────────────────────────────
       function toggleProfileForm() {
@@ -1981,7 +1959,7 @@
           verificationContainer.classList.add('visible');
           profileFormContainer.classList.remove('visible');
           addPropertyContainer.classList.remove('visible');
-          loadVerificationStatus();
+          loadPropertyVerificationList();
         }
       }
 
@@ -1990,6 +1968,12 @@
       dashboardVerificationBtn?.addEventListener('click', toggleVerificationForm);
       cancelProfileEditBtn?.addEventListener('click', () => {
         profileFormContainer.classList.remove('visible');
+      });
+
+      // Link from empty state to add property
+      gotoAddPropertyFromVerification?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAddPropertyForm();
       });
 
       // ─── CRUD ──────────────────────────────────────────────────────
@@ -2344,11 +2328,9 @@
           brokerReviewCount.textContent = `(${reviewCount} reviews)`;
           brokerLeadScore.textContent = `⚡ ${leadScore}`;
 
-          // Update review stats
           statTotalReviews.textContent = reviewCount;
           statAvgRating.textContent = rating.toFixed(1);
 
-          // Show buttons if logged in and not viewing own profile
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
@@ -2556,7 +2538,6 @@
             await loadProfileSettings();
             await loadMyProperties();
             await loadWallet();
-            await loadVerificationStatus();
             await fetchAllData();
           } catch (err) {
             alert('❌ Sign in failed: ' + err.message);
@@ -2594,7 +2575,6 @@
               showView(dashboardView);
               await loadMyProperties();
               await loadWallet();
-              await loadVerificationStatus();
             }
           } else {
             navigateTo('/auth', true);
@@ -2787,7 +2767,6 @@
           navigateTo('/dashboard');
           loadMyProperties();
           loadWallet();
-          loadVerificationStatus();
         } else {
           navigateToAuth();
         }
@@ -2818,22 +2797,4 @@
                 state.currentUser = data.user;
                 portalBtnLabel.textContent = 'Dashboard';
                 window.history.replaceState(null, '', '/');
-                showView(dashboardView);
-                navigateTo('/dashboard');
-                await loadProfileSettings();
-                await loadMyProperties();
-                await loadWallet();
-                await loadVerificationStatus();
-                await fetchAllData();
-                alert('✅ Email verified! Welcome to your dashboard.');
-                return;
-              }
-            } catch (err) {
-              console.error('Session set error:', err);
-              alert('❌ Verification failed: ' + err.message);
-            }
-          }
-        }
-
-        try {
-          const { data: { user
+               

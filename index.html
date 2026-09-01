@@ -106,11 +106,24 @@
     .stars { color: #f59e0b; letter-spacing: 2px; }
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
+    
+    /* ---- Review Star Selector (with color feedback) ---- */
     .star-rating .star {
-      cursor: pointer; font-size: 2rem; color: #d1d5db; transition: 0.15s;
+      cursor: pointer;
+      font-size: 2rem;
+      color: #d1d5db;
+      transition: 0.15s;
     }
-    .star-rating .star.active { color: #f59e0b; }
-    .star-rating .star:hover { transform: scale(1.2); }
+    .star-rating .star.active {
+      color: #f59e0b;
+    }
+    .star-rating .star:hover {
+      transform: scale(1.2);
+      color: #f59e0b;
+    }
+    .star-rating .star:hover ~ .star {
+      color: #d1d5db;
+    }
 
     /* ---- BADGES ---- */
     .badge-verified {
@@ -267,7 +280,7 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ---- Verification info panel (inside property form) ---- */
+    /* ---- Verification info panel ---- */
     .verification-info-panel {
       background: #f0f9ff;
       border: 1px solid #bae6fd;
@@ -282,8 +295,37 @@
     .verification-info-panel ul { list-style: disc; padding-left: 1.5rem; margin-top: 0.25rem; }
     .verification-info-panel ul li { margin-bottom: 0.2rem; }
 
-    /* ---- Review stars in reviews modal ---- */
+    /* ---- Review item ---- */
+    .review-item {
+      background: #f8fafc;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .review-item .review-text { font-size: 0.875rem; color: #334155; }
+    .review-item .review-meta { font-size: 0.75rem; color: #94a3b8; }
     .review-item .stars-small { letter-spacing: 1px; }
+
+    /* ---- Dashboard stats ---- */
+    .review-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-top: 0.5rem;
+    }
+    .review-stats .stat {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: #475569;
+    }
+    .review-stats .stat .value {
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: #1e293b;
+    }
+    .review-stats .stat .label { color: #94a3b8; }
 
     @media (max-width: 640px) {
       .dashboard-toolbar {
@@ -303,6 +345,7 @@
         left: 10px;
         max-width: unset;
       }
+      .review-stats { gap: 1rem; }
     }
   </style>
 </head>
@@ -326,7 +369,7 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL ===== -->
+  <!-- ===== REVIEW MODAL (with star color feedback) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -347,7 +390,7 @@
           <input type="hidden" id="reviewRating" value="5" />
         </div>
         <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Review (optional)</label>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Review</label>
           <textarea id="reviewText" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
         </div>
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
@@ -396,7 +439,6 @@
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
           <span class="text-xs text-slate-400">(Admin will review and approve)</span>
         </div>
-        <!-- Verification info panel (appears when checkbox is checked) -->
         <div id="editVerificationInfo" class="verification-info-panel">
           <p class="font-medium">🔍 Verification Process</p>
           <ul>
@@ -603,7 +645,6 @@
             <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">UGX</span>
           </div>
           <div class="flex items-center gap-3">
-            <!-- Report button removed from navbar -->
             <span id="propertyCount" class="bg-slate-100 px-3 py-1 rounded-full text-slate-700 font-medium text-xs">0 listings</span>
             <button id="brokerPortalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow flex items-center gap-2">
               <i class="fas fa-user-tie"></i> <span id="portalBtnLabel">Broker Portal</span>
@@ -637,7 +678,6 @@
           </div>
         </div>
 
-        <!-- Safety Banner -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
           <div class="safety-banner">
             <i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i>
@@ -669,7 +709,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW ===== -->
+      <!-- ===== BROKER PROFILE VIEW (with Reviews) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -685,9 +725,13 @@
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
                   <span class="badge-lead" id="brokerLeadScore">⚡ 0</span>
                 </div>
+                <!-- Review stats -->
+                <div id="brokerReviewStats" class="review-stats mt-1">
+                  <span class="stat"><span class="value" id="statTotalReviews">0</span> <span class="label">reviews</span></span>
+                  <span class="stat"><span class="value" id="statAvgRating">0.0</span> <span class="label">avg rating</span></span>
+                </div>
               </div>
-              <div class="flex items-center gap-3">
-                <!-- Rate, Reviews, and Report buttons -->
+              <div class="flex items-center gap-3 flex-wrap">
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate
                 </button>
@@ -739,7 +783,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW ===== -->
+      <!-- ===== DASHBOARD VIEW (with Review Stats) ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -811,7 +855,6 @@
                 <label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
                 <span class="text-xs text-slate-400">(Admin will review and approve)</span>
               </div>
-              <!-- Verification info panel (appears when checkbox is checked) -->
               <div id="addVerificationInfo" class="verification-info-panel">
                 <p class="font-medium">🔍 Verification Process</p>
                 <ul>
@@ -832,7 +875,7 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== BROKER VERIFICATION SECTION (full) ===== -->
+          <!-- ===== BROKER VERIFICATION SECTION ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
               <h4 class="font-semibold text-slate-700">🛡️ Broker Verification</h4>
@@ -915,7 +958,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=18">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=19">
   </script>
 
   <script>
@@ -1019,6 +1062,8 @@
       const viewReviewsBtn = $('#viewReviewsBtn');
       const reportBrokerBtn = $('#reportBrokerBtn');
       const brokerReportNotice = $('#brokerReportNotice');
+      const statTotalReviews = $('#statTotalReviews');
+      const statAvgRating = $('#statAvgRating');
 
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
@@ -1419,7 +1464,7 @@
         }
       });
 
-      // ─── Star selector ─────────────────────────────────────────────
+      // ─── Star selector (with hover + color feedback) ─────────────
       starSelector.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
@@ -1505,7 +1550,7 @@
         }
       });
 
-      // ─── RANKING ALGORITHM ──────────────────────────────────────────
+      // ─── RANKING ALGORITHM (Step 1: Review-based) ────────────────
       function isTrustedBroker(broker) {
         if (!broker) return false;
         const rating = broker.average_rating || 0;
@@ -1518,6 +1563,7 @@
       function calculateRankScore(property, broker, reportCount = 0) {
         let score = 0;
 
+        // 1. Property verification
         if (property.verification_status === 'approved') {
           score += 100;
         } else if (property.verification_status === 'pending') {
@@ -1525,15 +1571,25 @@
         }
 
         if (broker) {
+          // 2. Trusted Broker
           if (isTrustedBroker(broker)) {
             score += 20;
           }
+
+          // 3. REVIEW-BASED RANKING (Step 1)
+          // Quality: average rating × 10 (max 50)
           const rating = broker.average_rating || 0;
           score += rating * 10;
+
+          // Quantity: review count (diminishing returns, max 25)
           const reviewCount = broker.review_count || 0;
           score += Math.min(reviewCount, 50) * 0.5;
+
+          // 4. Lead score (max 50)
           const leadScore = broker.lead_score || 0;
           score += leadScore / 2;
+
+          // 5. Report penalty
           score -= (reportCount || 0) * 5;
         }
 
@@ -1623,8 +1679,6 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <!-- Report button removed from card (only in profile) -->
-                <!-- CONNECT BUTTON – Always visible -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
                 </button>
@@ -1663,11 +1717,10 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
-        // ─── CONNECT BUTTON – always works ───────────────────────────
+        // ─── CONNECT BUTTON ───────────────────────────────────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
-          // Only allow if user is logged in
           if (!state.currentUser) {
             alert('Please sign in to connect with a broker.');
             navigateToAuth();
@@ -1913,7 +1966,6 @@
         editModal._currentProperty = prop;
 
         editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
-        // Show/hide info panel based on checkbox
         if (editRequestVerification.checked) {
           editVerificationInfo.classList.add('visible');
         } else {
@@ -2235,7 +2287,10 @@
           brokerReviewCount.textContent = `(${reviewCount} reviews)`;
           brokerLeadScore.textContent = `⚡ ${leadScore}`;
 
-          // Show Rate, Reviews, and Report buttons if logged in and not viewing own profile
+          // Update review stats
+          statTotalReviews.textContent = reviewCount;
+          statAvgRating.textContent = rating.toFixed(1);
+
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
@@ -2244,7 +2299,6 @@
             reportBrokerBtn.classList.remove('hidden');
             reportBrokerBtn.onclick = () => openReportModal(brokerId);
           } else {
-            // Hide rate and report for own profile, but show reviews
             rateBrokerBtn.classList.add('hidden');
             reportBrokerBtn.classList.add('hidden');
             viewReviewsBtn.classList.remove('hidden');

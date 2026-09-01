@@ -159,36 +159,11 @@
       font-weight: 700;
       border: 1px solid #d97706;
     }
-    .badge-top {
-      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
-      color: white;
-      font-size: 0.6rem;
-      padding: 0.1rem 0.5rem;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-weight: 700;
-      border: 1px solid #7c3aed;
-    }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.8); }
       to { opacity: 1; transform: scale(1); }
     }
-
-    /* ---- Ranking Room / Top Properties ---- */
-    .ranking-room {
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      color: white;
-    }
-    .ranking-room .trophy { color: #fbbf24; }
-    .ranking-room .subtitle { color: #94a3b8; font-size: 0.875rem; }
-    .ranking-room .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-    .ranking-room .badge-row span { background: rgba(255,255,255,0.1); padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; }
 
     .dashboard-toolbar {
       display: flex;
@@ -291,6 +266,16 @@
       from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
+
+    /* ---- Review Stars ---- */
+    .review-item {
+      background: #f8fafc;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e2e8f0;
+    }
+    .review-item .review-text { font-size: 0.875rem; color: #334155; }
+    .review-item .review-meta { font-size: 0.75rem; color: #94a3b8; }
 
     @media (max-width: 640px) {
       .dashboard-toolbar {
@@ -658,22 +643,6 @@
         </div>
 
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <!-- ===== RANKING ROOM – Top Properties ===== -->
-          <div class="ranking-room">
-            <div class="flex items-center gap-2 mb-1">
-              <span class="trophy text-2xl"><i class="fas fa-trophy"></i></span>
-              <h2 class="text-xl font-bold">Top Properties</h2>
-            </div>
-            <p class="subtitle">Highest-ranked listings based on verification, broker reputation, reviews, lead score, and report history.</p>
-            <div class="badge-row">
-              <span><i class="fas fa-check-circle text-emerald-400"></i> Verified = +100</span>
-              <span><i class="fas fa-star text-amber-400"></i> Trusted Broker = +20</span>
-              <span><i class="fas fa-star text-yellow-400"></i> Reviews = up to +50</span>
-              <span><i class="fas fa-bolt text-emerald-400"></i> Lead Score = up to +50</span>
-              <span><i class="fas fa-flag text-red-400"></i> Reports = penalty</span>
-            </div>
-          </div>
-
           <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
             <button class="filter-pill active px-5 py-2 rounded-full border border-slate-200 bg-slate-900 text-white text-sm font-medium whitespace-nowrap" data-filter="all"><i class="fas fa-th-large mr-1.5"></i> All</button>
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="rental"><i class="fas fa-key mr-1.5"></i> Rentals</button>
@@ -694,7 +663,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW ===== -->
+      <!-- ===== BROKER PROFILE VIEW (with Reviews) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -714,6 +683,9 @@
               <div class="flex items-center gap-3">
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-star"></i> Rate Broker
+                </button>
+                <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
+                  <i class="fas fa-comment"></i> Reviews
                 </button>
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
@@ -905,10 +877,24 @@
     </main>
   </div>
 
+  <!-- ===== REVIEWS MODAL (for viewing reviews) ===== -->
+  <div id="reviewsModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">📝 Reviews</h2>
+        <button id="closeReviewsModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <div id="reviewsList" class="space-y-3 max-h-80 overflow-y-auto">
+        <p class="text-slate-500 text-sm">Loading reviews...</p>
+      </div>
+      <div id="noReviewsMessage" class="hidden text-slate-500 text-sm text-center py-4">No reviews yet. Be the first to leave a review!</div>
+    </div>
+  </div>
+
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=16">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=17">
   </script>
 
   <script>
@@ -1009,6 +995,7 @@
       const brokerReviewCount = $('#brokerReviewCount');
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
+      const viewReviewsBtn = $('#viewReviewsBtn');
       const brokerReportNotice = $('#brokerReportNotice');
 
       const toggleSignIn = $('#toggleSignIn');
@@ -1070,6 +1057,12 @@
       const reviewRating = $('#reviewRating');
       const reviewText = $('#reviewText');
       const starSelector = $('#starSelector');
+
+      // Reviews Modal (view reviews)
+      const reviewsModal = $('#reviewsModal');
+      const closeReviewsModal = $('#closeReviewsModal');
+      const reviewsList = $('#reviewsList');
+      const noReviewsMessage = $('#noReviewsMessage');
 
       // Report Modal
       const reportModal = $('#reportModal');
@@ -1181,6 +1174,14 @@
         for (let i = 0; i < empty; i++) html += '<i class="far fa-star empty"></i>';
         return html;
       }
+      function renderStarsSmall(rating) {
+        const full = Math.floor(rating);
+        const empty = 5 - full;
+        let html = '';
+        for (let i = 0; i < full; i++) html += '<i class="fas fa-star text-amber-400 text-xs"></i>';
+        for (let i = 0; i < empty; i++) html += '<i class="far fa-star text-slate-300 text-xs"></i>';
+        return html;
+      }
       function navigateTo(url, replace = false) { if (replace) window.history.replaceState(null, '', url); else window.history.pushState(null, '', url); handleRoute(); }
       function getCurrentPath() { return window.location.pathname + window.location.search; }
       function showView(view) {
@@ -1281,6 +1282,55 @@
         reviewModal.classList.remove('hidden');
       }
 
+      // ─── View Reviews Modal ────────────────────────────────────────
+      async function openViewReviewsModal(brokerId) {
+        reviewsModal.classList.remove('hidden');
+        reviewsList.innerHTML = '<p class="text-slate-500 text-sm">Loading reviews...</p>';
+        noReviewsMessage.classList.add('hidden');
+
+        try {
+          const { data, error } = await supabase
+            .from('reviews')
+            .select('*')
+            .eq('broker_id', brokerId)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            reviewsList.innerHTML = '';
+            noReviewsMessage.classList.remove('hidden');
+            return;
+          }
+
+          let html = '';
+          data.forEach(review => {
+            const stars = renderStarsSmall(review.rating);
+            const date = new Date(review.created_at).toLocaleDateString('en-UG', { day: 'numeric', month: 'short', year: 'numeric' });
+            html += `
+              <div class="review-item">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-slate-700">${review.user_id ? 'User' : 'Anonymous'}</span>
+                    <span class="text-xs">${stars}</span>
+                  </div>
+                  <span class="review-meta">${date}</span>
+                </div>
+                ${review.review_text ? `<p class="review-text mt-1">${review.review_text}</p>` : ''}
+              </div>
+            `;
+          });
+          reviewsList.innerHTML = html;
+        } catch (err) {
+          reviewsList.innerHTML = `<p class="text-red-500 text-sm">Error loading reviews: ${err.message}</p>`;
+        }
+      }
+
+      // ─── Reviews Modal Events ──────────────────────────────────────
+      closeReviewsModal.addEventListener('click', () => reviewsModal.classList.add('hidden'));
+      reviewsModal.addEventListener('click', (e) => { if (e.target === reviewsModal) reviewsModal.classList.add('hidden'); });
+
+      // ─── Star selector ─────────────────────────────────────────────
       starSelector.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
@@ -1427,7 +1477,6 @@
       function calculateRankScore(property, broker, reportCount = 0) {
         let score = 0;
 
-        // 1. Property verification (per property)
         if (property.verification_status === 'approved') {
           score += 100;
         } else if (property.verification_status === 'pending') {
@@ -1435,24 +1484,15 @@
         }
 
         if (broker) {
-          // 2. Trusted Broker (reputation-based, applies to all properties)
           if (isTrustedBroker(broker)) {
             score += 20;
           }
-
-          // 3. Average rating (0-5) => max 50
           const rating = broker.average_rating || 0;
           score += rating * 10;
-
-          // 4. Review count (diminishing returns, max 25)
           const reviewCount = broker.review_count || 0;
           score += Math.min(reviewCount, 50) * 0.5;
-
-          // 5. Lead score (max 50)
           const leadScore = broker.lead_score || 0;
           score += leadScore / 2;
-
-          // 6. Report penalty (each report reduces score)
           score -= (reportCount || 0) * 5;
         }
 
@@ -1477,7 +1517,6 @@
         const reportCount = broker?.report_count || 0;
         const rankScore = property.rankScore || calculateRankScore(property, broker, reportCount);
 
-        // Badge HTML
         let badgeHtml = '';
         if (isVerified) {
           badgeHtml = `<span class="badge-verified"><i class="fas fa-check-circle"></i> Verified</span>`;
@@ -1491,8 +1530,6 @@
         if (isTrusted) {
           trustedHtml = `<span class="badge-trusted"><i class="fas fa-star"></i> Trusted</span>`;
         }
-
-        const showConnect = isVerified;
 
         let actionsHtml = '';
         if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
@@ -1546,9 +1583,10 @@
                 ${boostHtml}
                 ${rateHtml}
                 ${!isOwner && isVerified ? `<button class="report-btn text-xs text-red-500 hover:text-red-700 font-medium" data-broker-id="${broker?.id || ''}" data-property-id="${property.id}"><i class="fas fa-flag mr-1"></i>Report</button>` : ''}
-                ${showConnect ? `<button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
+                <!-- CONNECT BUTTON – Always visible -->
+                <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
-                </button>` : ''}
+                </button>
               </div>
             </div>
           </div>
@@ -1593,9 +1631,16 @@
           reportType.value = brokerId ? 'broker' : 'property';
         });
 
+        // ─── CONNECT BUTTON – always works ───────────────────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
+          // Only allow if user is logged in
+          if (!state.currentUser) {
+            alert('Please sign in to connect with a broker.');
+            navigateToAuth();
+            return;
+          }
           openQuizModal(propertyId);
         });
 
@@ -1973,7 +2018,6 @@
         emptyState.classList.add('hidden');
 
         try {
-          // 1. Fetch all properties
           const { data: properties, error: propError } = await supabase
             .from('properties')
             .select('*')
@@ -1990,7 +2034,6 @@
             return;
           }
 
-          // 2. Detect foreign key
           const firstProp = properties[0];
           const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
           let fkColumn = null;
@@ -2015,7 +2058,6 @@
             console.warn('⚠️ No foreign key column found');
           }
 
-          // 3. Fetch broker profiles
           let profilesMap = {};
           if (fkColumn) {
             const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
@@ -2031,7 +2073,6 @@
           }
           state.profilesMap = profilesMap;
 
-          // 4. Fetch report counts per broker (for penalty)
           const { data: reports, error: repError } = await supabase
             .from('reports')
             .select('broker_id, status')
@@ -2041,13 +2082,11 @@
             reports.forEach(r => {
               reportCounts[r.broker_id] = (reportCounts[r.broker_id] || 0) + 1;
             });
-            // Attach to profiles
             Object.keys(profilesMap).forEach(id => {
               profilesMap[id].report_count = reportCounts[id] || 0;
             });
           }
 
-          // 5. Enrich properties and calculate rank score
           const enriched = properties.map(prop => {
             const broker = fkColumn ? profilesMap[prop[fkColumn]] || null : null;
             const reportCount = broker?.report_count || 0;
@@ -2055,7 +2094,6 @@
             return { ...prop, broker, rankScore };
           });
 
-          // 6. Sort by rankScore descending (highest first)
           enriched.sort((a, b) => b.rankScore - a.rankScore);
 
           state.allProperties = enriched;
@@ -2140,7 +2178,6 @@
             brokerTrustedBadge.classList.add('hidden');
           }
 
-          // Show report notice if reports > 0
           const reportCount = broker.report_count || 0;
           if (reportCount > 0) {
             brokerReportNotice.classList.remove('hidden');
@@ -2160,11 +2197,17 @@
           brokerReviewCount.textContent = `(${reviewCount} reviews)`;
           brokerLeadScore.textContent = `⚡ ${leadScore}`;
 
+          // Show Rate and Reviews buttons if logged in and not viewing own profile
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
+            viewReviewsBtn.classList.remove('hidden');
+            viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
           } else {
             rateBrokerBtn.classList.add('hidden');
+            // Still show reviews button even if logged out or viewing own profile
+            viewReviewsBtn.classList.remove('hidden');
+            viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
           }
 
           const { data: props, error: propsError } = await supabase

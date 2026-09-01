@@ -43,7 +43,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
   <style>
-    /* (Same CSS as before – kept for brevity) */
+    /* ... (all the same CSS as before – keeping it brief) ... */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -420,7 +420,7 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL (no sign-in required) ===== -->
+  <!-- ===== REVIEW MODAL (updated with name field) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -435,10 +435,14 @@
         </button>
       </div>
 
-      <!-- Review form (hidden by default) – no sign-in message -->
+      <!-- Review form (hidden by default) -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Name (optional)</label>
+            <input type="text" id="reviewClientName" placeholder="e.g. John Doe" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+          </div>
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Rating</label>
             <div id="starSelector" class="star-rating flex gap-1">
@@ -452,7 +456,7 @@
           </div>
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Review</label>
-            <textarea id="reviewContent" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+            <textarea id="reviewComment" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
           </div>
           <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
             <i class="fas fa-paper-plane mr-2"></i> Submit Review
@@ -1096,12 +1100,11 @@
       const reviewForm = $('#reviewForm');
       const reviewBrokerId = $('#reviewBrokerId');
       const reviewRating = $('#reviewRating');
-      const reviewContent = $('#reviewContent');
+      const reviewComment = $('#reviewComment');
+      const reviewClientName = $('#reviewClientName');
       const starSelector = $('#starSelector');
       const reviewsList = $('#reviewsList');
       const noReviewsMessage = $('#noReviewsMessage');
-
-      // Removed reviewAuthMessage and reviewSignInLink entirely.
 
       const reportModal = $('#reportModal');
       const closeReportModal = $('#closeReportModal');
@@ -1354,9 +1357,8 @@
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Reviews (no sign-in required) ────────────────────────────
+      // ─── Reviews (updated for comment + client_name) ──────────────
       toggleWriteReview.addEventListener('click', function() {
-        // Simply toggle the form – no sign-in check
         const isHidden = reviewFormContainer.classList.contains('hidden');
         if (isHidden) {
           reviewFormContainer.classList.remove('hidden');
@@ -1370,7 +1372,8 @@
       async function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
-        reviewContent.value = '';
+        reviewComment.value = '';
+        reviewClientName.value = '';
         updateStarUI(5);
         reviewFormContainer.classList.add('hidden');
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
@@ -1397,16 +1400,17 @@
           data.forEach(review => {
             const stars = renderStarsSmall(review.rating);
             const date = new Date(review.created_at).toLocaleDateString('en-UG', { day: 'numeric', month: 'short', year: 'numeric' });
+            const reviewer = review.client_name || 'Guest';
             html += `
               <div class="review-item">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <span class="font-medium text-slate-700">${review.user_id ? 'User' : 'Guest'}</span>
+                    <span class="font-medium text-slate-700">${reviewer}</span>
                     <span class="stars-small">${stars}</span>
                   </div>
                   <span class="review-meta">${date}</span>
                 </div>
-                ${review.content ? `<p class="review-text mt-1">${review.content}</p>` : ''}
+                ${review.comment ? `<p class="review-text mt-1">${review.comment}</p>` : ''}
               </div>
             `;
           });
@@ -1443,19 +1447,20 @@
         e.preventDefault();
         const brokerId = reviewBrokerId.value;
         const rating = parseInt(reviewRating.value);
-        const content = reviewContent.value.trim();
+        const comment = reviewComment.value.trim();
+        const clientName = reviewClientName.value.trim() || null; // optional
 
         if (!rating || rating < 1 || rating > 5) {
           alert('Please select a rating (1-5 stars).');
           return;
         }
         try {
-          // Insert review without user_id (allow anonymous)
+          // Insert using your table columns: rating, comment, client_name, broker_id
           const { error } = await supabase.from('reviews').insert({
             broker_id: brokerId,
             rating: rating,
-            content: content || null,
-            user_id: null, // explicitly null
+            comment: comment || null,
+            client_name: clientName,
           });
           if (error) throw error;
           alert('✅ Review submitted! Thank you.');
@@ -1565,14 +1570,12 @@
 
       function calculateRankScore(property, broker, reportCount = 0) {
         let score = 0;
-        // Verification badge ranking
         if (property.verification_status === 'approved') {
           score += 100;
         } else if (property.verification_status === 'pending') {
           score += 30;
         }
         if (broker) {
-          // Reputation-based ranking (reviews)
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
           score += rating * 10;

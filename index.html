@@ -112,6 +112,84 @@
     .star-rating .star.active { color: #f59e0b; }
     .star-rating .star:hover { transform: scale(1.2); }
 
+    /* ---- BADGES ---- */
+    .badge-verified {
+      background: #10b981;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 600;
+      animation: fadeIn 0.3s ease;
+    }
+    .badge-pending {
+      background: #f59e0b;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 600;
+    }
+    .badge-rejected {
+      background: #ef4444;
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 600;
+    }
+    .badge-trusted {
+      background: #f59e0b;
+      color: #1e293b;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 700;
+      border: 1px solid #d97706;
+    }
+    .badge-top {
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: white;
+      font-size: 0.6rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-weight: 700;
+      border: 1px solid #7c3aed;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ---- Ranking Room / Top Properties ---- */
+    .ranking-room {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: white;
+    }
+    .ranking-room .trophy { color: #fbbf24; }
+    .ranking-room .subtitle { color: #94a3b8; font-size: 0.875rem; }
+    .ranking-room .badge-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+    .ranking-room .badge-row span { background: rgba(255,255,255,0.1); padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.65rem; }
+
     .dashboard-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -135,9 +213,7 @@
       gap: 0.5rem;
       flex-wrap: wrap;
     }
-    .wallet-pill .balance {
-      color: #34d399;
-    }
+    .wallet-pill .balance { color: #34d399; }
     .wallet-pill .wallet-label {
       color: #94a3b8;
       font-weight: 400;
@@ -177,29 +253,6 @@
       display: none;
     }
     .profile-form-container.visible, .add-property-container.visible, .verification-form-container.visible { display: block; }
-
-    .verified-badge {
-      background: #10b981;
-      color: white;
-      font-size: 0.6rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-weight: 600;
-    }
-    .pending-badge {
-      background: #f59e0b;
-      color: white;
-      font-size: 0.6rem;
-      padding: 0.15rem 0.5rem;
-      border-radius: 9999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-weight: 600;
-    }
 
     .safety-banner {
       background: #fffbeb;
@@ -273,8 +326,8 @@
     <div class="flex items-start gap-3">
       <i class="fas fa-shield-alt text-emerald-400 text-xl mt-0.5"></i>
       <div class="flex-1 text-sm">
-        <p class="font-semibold">🔒 Trust Verified Properties</p>
-        <p class="text-slate-300 text-xs">Look for the <span class="text-emerald-400 font-medium">Verified</span> badge on listings. These properties have been reviewed and confirmed by our team for your safety and peace of mind.</p>
+        <p class="font-semibold">🔒 Verified &amp; Trusted Properties</p>
+        <p class="text-slate-300 text-xs">Look for the <span class="text-emerald-400 font-medium">Verified</span> badge (property reviewed) and the <span class="text-amber-400 font-medium">Trusted</span> badge (broker with great reputation).</p>
       </div>
       <button id="closeSecurityNotification" class="close-btn"><i class="fas fa-times"></i></button>
     </div>
@@ -348,7 +401,7 @@
         <div class="flex items-center gap-3 mt-2">
           <input type="checkbox" id="editRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
-          <span class="text-xs text-slate-400">(Get a verified badge on your listing)</span>
+          <span class="text-xs text-slate-400">(Admin will review and approve)</span>
         </div>
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
           <i class="fas fa-save mr-2"></i> Update Property
@@ -472,7 +525,7 @@
     </div>
   </div>
 
-  <!-- ===== REPORT MODAL (navbar) ===== -->
+  <!-- ===== REPORT MODAL ===== -->
   <div id="reportModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
@@ -598,19 +651,35 @@
           <div class="safety-banner">
             <i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i>
             <div>
-              <p class="text-sm font-semibold text-amber-800">🔒 Trust Verified Listings</p>
-              <p class="text-xs text-amber-700">Look for the <span class="font-bold">Verified</span> badge on properties. Our team reviews these listings to ensure authenticity and safety.</p>
+              <p class="text-sm font-semibold text-amber-800">🔒 Verified &amp; Trusted Properties</p>
+              <p class="text-xs text-amber-700">Look for the <span class="font-bold text-emerald-600">Verified</span> badge (property reviewed) and the <span class="font-bold text-amber-600">Trusted</span> badge (broker with great reputation).</p>
             </div>
           </div>
         </div>
 
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <!-- ===== RANKING ROOM – Top Properties ===== -->
+          <div class="ranking-room">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="trophy text-2xl"><i class="fas fa-trophy"></i></span>
+              <h2 class="text-xl font-bold">Top Properties</h2>
+            </div>
+            <p class="subtitle">Highest-ranked listings based on verification, broker reputation, reviews, lead score, and report history.</p>
+            <div class="badge-row">
+              <span><i class="fas fa-check-circle text-emerald-400"></i> Verified = +100</span>
+              <span><i class="fas fa-star text-amber-400"></i> Trusted Broker = +20</span>
+              <span><i class="fas fa-star text-yellow-400"></i> Reviews = up to +50</span>
+              <span><i class="fas fa-bolt text-emerald-400"></i> Lead Score = up to +50</span>
+              <span><i class="fas fa-flag text-red-400"></i> Reports = penalty</span>
+            </div>
+          </div>
+
           <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
             <button class="filter-pill active px-5 py-2 rounded-full border border-slate-200 bg-slate-900 text-white text-sm font-medium whitespace-nowrap" data-filter="all"><i class="fas fa-th-large mr-1.5"></i> All</button>
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="rental"><i class="fas fa-key mr-1.5"></i> Rentals</button>
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="property"><i class="fas fa-building mr-1.5"></i> Properties</button>
             <button class="filter-pill px-5 py-2 rounded-full border border-slate-200 bg-white text-slate-700 text-sm font-medium whitespace-nowrap hover:bg-slate-50" data-filter="lodge"><i class="fas fa-bed mr-1.5"></i> Lodges</button>
-            <span class="text-xs text-slate-400 ml-2 hidden sm:inline"><i class="fas fa-arrow-right mr-1"></i> Premium first</span>
+            <span class="text-xs text-slate-400 ml-2 hidden sm:inline"><i class="fas fa-arrow-right mr-1"></i> Ranked by trust</span>
           </div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
@@ -634,9 +703,7 @@
               <div>
                 <div class="flex items-center gap-3">
                   <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
-                  <span id="brokerVerifiedBadge" class="hidden verified-badge">
-                    <i class="fas fa-check-circle"></i> Verified
-                  </span>
+                  <span id="brokerTrustedBadge" class="badge-trusted hidden"><i class="fas fa-star"></i> Trusted</span>
                 </div>
                 <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
                   <span class="stars" id="brokerStars"></span>
@@ -657,10 +724,10 @@
               <i class="fas fa-store mr-1.5 text-slate-400"></i>
               <span class="italic">Browse all properties listed by this broker.</span>
             </p>
-            <div id="brokerSafetyNotice" class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700 hidden">
-              <i class="fas fa-info-circle mr-1"></i>
-              <span class="font-medium">⚠️ Unverified Broker</span>
-              <span> - We recommend verifying the broker's identity before any transactions.</span>
+            <div id="brokerReportNotice" class="mt-3 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 hidden">
+              <i class="fas fa-exclamation-triangle mr-1"></i>
+              <span class="font-medium">⚠️ This broker has reported issues.</span>
+              <span> Proceed with caution.</span>
             </div>
           </div>
           <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
@@ -760,19 +827,19 @@
               <div class="md:col-span-2 flex items-center gap-3 mt-2">
                 <input type="checkbox" id="addRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
                 <label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
-                <span class="text-xs text-slate-400">(Get a verified badge on your listing)</span>
+                <span class="text-xs text-slate-400">(Admin will review and approve)</span>
               </div>
               <div class="md:col-span-2">
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
                   <i class="fas fa-plus mr-2"></i> Add Property
                 </button>
-                <p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Requesting verification builds trust with potential clients.</p>
+                <p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Verified properties rank higher. Build your reputation with good reviews to earn a "Trusted" badge.</p>
               </div>
             </form>
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== VERIFICATION SECTION ===== -->
+          <!-- ===== BROKER VERIFICATION SECTION ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
               <h4 class="font-semibold text-slate-700">🛡️ Broker Verification</h4>
@@ -841,7 +908,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=13">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=16">
   </script>
 
   <script>
@@ -933,8 +1000,7 @@
       const filterPills = $$('.filter-pill');
 
       const brokerBusinessName = $('#brokerBusinessName');
-      const brokerVerifiedBadge = $('#brokerVerifiedBadge');
-      const brokerSafetyNotice = $('#brokerSafetyNotice');
+      const brokerTrustedBadge = $('#brokerTrustedBadge');
       const brokerWhatsAppLink = $('#brokerWhatsAppLink');
       const brokerListingsGrid = $('#brokerListingsGrid');
       const brokerEmptyState = $('#brokerEmptyState');
@@ -943,6 +1009,7 @@
       const brokerReviewCount = $('#brokerReviewCount');
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
+      const brokerReportNotice = $('#brokerReportNotice');
 
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
@@ -1347,7 +1414,52 @@
         }
       });
 
-      // ─── Property card ─────────────────────────────────────────────
+      // ─── RANKING ALGORITHM ──────────────────────────────────────────
+      function isTrustedBroker(broker) {
+        if (!broker) return false;
+        const rating = broker.average_rating || 0;
+        const reviewCount = broker.review_count || 0;
+        const leadScore = broker.lead_score || 0;
+        const reportCount = broker.report_count || 0;
+        return rating >= 4.0 && reviewCount >= 10 && leadScore >= 20 && reportCount < 3;
+      }
+
+      function calculateRankScore(property, broker, reportCount = 0) {
+        let score = 0;
+
+        // 1. Property verification (per property)
+        if (property.verification_status === 'approved') {
+          score += 100;
+        } else if (property.verification_status === 'pending') {
+          score += 30;
+        }
+
+        if (broker) {
+          // 2. Trusted Broker (reputation-based, applies to all properties)
+          if (isTrustedBroker(broker)) {
+            score += 20;
+          }
+
+          // 3. Average rating (0-5) => max 50
+          const rating = broker.average_rating || 0;
+          score += rating * 10;
+
+          // 4. Review count (diminishing returns, max 25)
+          const reviewCount = broker.review_count || 0;
+          score += Math.min(reviewCount, 50) * 0.5;
+
+          // 5. Lead score (max 50)
+          const leadScore = broker.lead_score || 0;
+          score += leadScore / 2;
+
+          // 6. Report penalty (each report reduces score)
+          score -= (reportCount || 0) * 5;
+        }
+
+        return Math.round(score);
+      }
+
+      // ─── Property card ──────────────────────────────────────────────
       function createPropertyCard(property, broker, showBrokerLink = true, showEdit = false) {
         const article = document.createElement('article');
         article.className =
@@ -1357,9 +1469,30 @@
         const rating = broker?.average_rating || 0;
         const reviewCount = broker?.review_count || 0;
         const leadScore = broker?.lead_score || 0;
-        const isVerified = property[COLUMNS.IS_VERIFIED] || false;
-        const verificationStatus = property[COLUMNS.VERIFICATION_STATUS] || 'unverified';
         const isOwner = state.currentUser && broker && state.currentUser.id === broker.id;
+
+        const verificationStatus = property[COLUMNS.VERIFICATION_STATUS] || 'pending';
+        const isVerified = verificationStatus === 'approved';
+        const isTrusted = broker ? isTrustedBroker(broker) : false;
+        const reportCount = broker?.report_count || 0;
+        const rankScore = property.rankScore || calculateRankScore(property, broker, reportCount);
+
+        // Badge HTML
+        let badgeHtml = '';
+        if (isVerified) {
+          badgeHtml = `<span class="badge-verified"><i class="fas fa-check-circle"></i> Verified</span>`;
+        } else if (verificationStatus === 'pending') {
+          badgeHtml = `<span class="badge-pending"><i class="fas fa-clock"></i> Pending</span>`;
+        } else if (verificationStatus === 'rejected') {
+          badgeHtml = `<span class="badge-rejected"><i class="fas fa-times-circle"></i> Rejected</span>`;
+        }
+
+        let trustedHtml = '';
+        if (isTrusted) {
+          trustedHtml = `<span class="badge-trusted"><i class="fas fa-star"></i> Trusted</span>`;
+        }
+
+        const showConnect = isVerified;
 
         let actionsHtml = '';
         if (showEdit) actionsHtml += `<button class="edit-btn text-xs text-indigo-600 hover:text-indigo-800 font-medium" data-id="${property.id}"><i class="fas fa-edit mr-1"></i>Edit</button>`;
@@ -1374,13 +1507,6 @@
           rateHtml = `<button class="rate-btn text-xs text-yellow-600 hover:text-yellow-800 font-medium" data-broker-id="${broker.id}"><i class="fas fa-star mr-1"></i>Rate</button>`;
         }
 
-        let badgeHtml = '';
-        if (isVerified && verificationStatus === 'approved') {
-          badgeHtml = `<span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>`;
-        } else if (verificationStatus === 'pending') {
-          badgeHtml = `<span class="pending-badge"><i class="fas fa-clock"></i> Pending</span>`;
-        }
-
         article.innerHTML = `
           <div class="relative aspect-[4/3] bg-slate-200 overflow-hidden">
             <img src="${imageUrl}" alt="${property[COLUMNS.TITLE] || 'Property'}" 
@@ -1389,11 +1515,15 @@
             <span class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full">
               ${property[COLUMNS.TYPE] || 'Property'}
             </span>
+            ${!showEdit && isVerified ? `<span class="absolute top-3 right-3 bg-emerald-600 text-white text-[8px] font-bold px-2 py-1 rounded-full shadow-md"><i class="fas fa-check-circle mr-1"></i>VERIFIED</span>` : ''}
           </div>
           <div class="p-4 flex flex-col flex-1">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between flex-wrap gap-1">
               <h3 class="font-semibold text-slate-800 text-base leading-snug line-clamp-1">${property[COLUMNS.TITLE] || 'Untitled'}</h3>
-              ${badgeHtml}
+              <div class="flex items-center gap-1">
+                ${!showEdit ? badgeHtml : ''}
+                ${!showEdit && isTrusted ? trustedHtml : ''}
+              </div>
             </div>
             <p class="text-indigo-700 font-bold text-sm mt-0.5">${formatPrice(property[COLUMNS.PRICE])}</p>
             <p class="text-slate-500 text-xs flex items-center gap-1 mt-0.5">
@@ -1405,23 +1535,26 @@
               <span class="text-slate-500">(${reviewCount})</span>
               <span class="badge-lead">⚡ ${leadScore}</span>
             </div>
+            ${!showEdit ? `<div class="mt-1 flex items-center gap-2 text-xs text-slate-400"><span>Rank Score: ${rankScore}</span>${reportCount > 0 ? `<span class="text-red-500"><i class="fas fa-exclamation-triangle"></i> ${reportCount} report${reportCount > 1 ? 's' : ''}</span>` : ''}</div>` : ''}
             <div class="mt-3 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 flex-wrap">
               ${showBrokerLink ? `<button class="broker-name-link text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 cursor-pointer" data-broker-id="${broker?.id || ''}">
                 <i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Unknown Broker'}
-                ${broker?.is_verified ? `<span class="text-[10px] text-emerald-600 ml-1"><i class="fas fa-check-circle"></i></span>` : ''}
+                ${isTrusted ? `<span class="text-amber-500 text-[10px]"><i class="fas fa-star"></i></span>` : ''}
               </button>` : `<span class="text-xs text-slate-500 flex items-center gap-1"><i class="fas fa-user-circle text-slate-400"></i> ${broker?.business_name || 'Broker'}</span>`}
               <div class="flex gap-2">
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
+                ${!isOwner && isVerified ? `<button class="report-btn text-xs text-red-500 hover:text-red-700 font-medium" data-broker-id="${broker?.id || ''}" data-property-id="${property.id}"><i class="fas fa-flag mr-1"></i>Report</button>` : ''}
+                ${showConnect ? `<button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
-                </button>
+                </button>` : ''}
               </div>
             </div>
           </div>
         `;
 
+        // ─── Event Listeners ──────────────────────────────────────────
         article.querySelector('.edit-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           openEditModal(property.id);
@@ -1449,6 +1582,15 @@
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
+        });
+
+        article.querySelector('.report-btn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          const brokerId = e.currentTarget.dataset.brokerId;
+          const propertyId = e.currentTarget.dataset.propertyId;
+          reportModal.classList.remove('hidden');
+          reportItem.value = propertyId || brokerId;
+          reportType.value = brokerId ? 'broker' : 'property';
         });
 
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
@@ -1750,13 +1892,10 @@
         const dbType = TYPE_MAP[type] || type;
 
         const requestVerification = editRequestVerification.checked;
-        let isVerified = false;
         let verificationStatus = 'unverified';
+        let isVerified = false;
         if (requestVerification) {
           verificationStatus = 'pending';
-          isVerified = false;
-        } else {
-          verificationStatus = 'unverified';
           isVerified = false;
         }
 
@@ -1826,7 +1965,7 @@
         }
       });
 
-      // ─── Fetch all data ────────────────────────────────────────────
+      // ─── Fetch all data with ranking ──────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -1834,6 +1973,7 @@
         emptyState.classList.add('hidden');
 
         try {
+          // 1. Fetch all properties
           const { data: properties, error: propError } = await supabase
             .from('properties')
             .select('*')
@@ -1850,6 +1990,7 @@
             return;
           }
 
+          // 2. Detect foreign key
           const firstProp = properties[0];
           const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
           let fkColumn = null;
@@ -1874,6 +2015,7 @@
             console.warn('⚠️ No foreign key column found');
           }
 
+          // 3. Fetch broker profiles
           let profilesMap = {};
           if (fkColumn) {
             const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
@@ -1889,18 +2031,32 @@
           }
           state.profilesMap = profilesMap;
 
-          const enriched = properties.map(prop => ({
-            ...prop,
-            broker: fkColumn ? profilesMap[prop[fkColumn]] || null : null,
-          }));
+          // 4. Fetch report counts per broker (for penalty)
+          const { data: reports, error: repError } = await supabase
+            .from('reports')
+            .select('broker_id, status')
+            .eq('status', 'pending');
+          if (!repError && reports) {
+            const reportCounts = {};
+            reports.forEach(r => {
+              reportCounts[r.broker_id] = (reportCounts[r.broker_id] || 0) + 1;
+            });
+            // Attach to profiles
+            Object.keys(profilesMap).forEach(id => {
+              profilesMap[id].report_count = reportCounts[id] || 0;
+            });
+          }
 
-          const tierOrder = { 'platinum': 3, 'gold': 2, 'bronze': 1 };
-          enriched.sort((a, b) => {
-            const aTier = tierOrder[(a.broker?.tier || 'bronze').toLowerCase()] || 0;
-            const bTier = tierOrder[(b.broker?.tier || 'bronze').toLowerCase()] || 0;
-            if (aTier !== bTier) return bTier - aTier;
-            return (b.broker?.lead_score || 0) - (a.broker?.lead_score || 0);
+          // 5. Enrich properties and calculate rank score
+          const enriched = properties.map(prop => {
+            const broker = fkColumn ? profilesMap[prop[fkColumn]] || null : null;
+            const reportCount = broker?.report_count || 0;
+            const rankScore = calculateRankScore(prop, broker, reportCount);
+            return { ...prop, broker, rankScore };
           });
+
+          // 6. Sort by rankScore descending (highest first)
+          enriched.sort((a, b) => b.rankScore - a.rankScore);
 
           state.allProperties = enriched;
           state.filteredProperties = [...enriched];
@@ -1976,15 +2132,26 @@
           }
 
           brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
-          brokerWhatsAppLink.style.display = 'none';
 
-          if (broker.is_verified) {
-            brokerVerifiedBadge.classList.remove('hidden');
-            brokerSafetyNotice.classList.add('hidden');
+          const isTrusted = isTrustedBroker(broker);
+          if (isTrusted) {
+            brokerTrustedBadge.classList.remove('hidden');
           } else {
-            brokerVerifiedBadge.classList.add('hidden');
-            brokerSafetyNotice.classList.remove('hidden');
+            brokerTrustedBadge.classList.add('hidden');
           }
+
+          // Show report notice if reports > 0
+          const reportCount = broker.report_count || 0;
+          if (reportCount > 0) {
+            brokerReportNotice.classList.remove('hidden');
+            brokerReportNotice.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>
+              <span class="font-medium">⚠️ This broker has ${reportCount} report${reportCount > 1 ? 's' : ''}.</span>
+              <span> Proceed with caution.</span>`;
+          } else {
+            brokerReportNotice.classList.add('hidden');
+          }
+
+          brokerWhatsAppLink.style.display = 'none';
 
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
@@ -2110,8 +2277,8 @@
         const dbType = TYPE_MAP[type] || type;
         const fkCol = COLUMNS.FOREIGN_KEY || 'owner_id';
 
-        let isVerified = false;
         let verificationStatus = 'unverified';
+        let isVerified = false;
         if (requestVerification) {
           verificationStatus = 'pending';
           isVerified = false;
@@ -2131,7 +2298,7 @@
         try {
           const { error } = await supabase.from('properties').insert(insertData);
           if (error) throw error;
-          uploadStatus.textContent = requestVerification ? '✅ Property added! Verification requested.' : '✅ Property added successfully!';
+          uploadStatus.textContent = requestVerification ? '✅ Property added! Verification requested.' : '✅ Property added!';
           uploadStatus.className = 'mt-3 text-sm text-emerald-600';
           addPropertyForm.reset();
           addRequestVerification.checked = false;

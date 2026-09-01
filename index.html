@@ -333,25 +333,6 @@
     }
     .write-review-toggle:hover { color: #4338ca; }
 
-    .review-auth-message {
-      background: #fef3c7;
-      border: 1px solid #f59e0b;
-      border-radius: 0.75rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: 0.75rem;
-      color: #92400e;
-      font-size: 0.875rem;
-      display: none;
-    }
-    .review-auth-message.visible { display: block; }
-    .review-auth-message a {
-      color: #4f46e5;
-      font-weight: 600;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-    .review-auth-message a:hover { color: #4338ca; }
-
     .verification-property-item {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -439,7 +420,7 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL ===== -->
+  <!-- ===== REVIEW MODAL (no sign-in required) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
@@ -454,11 +435,7 @@
         </button>
       </div>
 
-      <div id="reviewAuthMessage" class="review-auth-message">
-        <i class="fas fa-info-circle mr-2"></i>
-        Please <a href="#" id="reviewSignInLink">sign in</a> to leave a review.
-      </div>
-
+      <!-- Review form (hidden by default) – no sign-in message -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
@@ -1003,7 +980,7 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – SUPABASE & FULL APP (Complete, error-free)
+  JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
   </script>
@@ -1119,12 +1096,12 @@
       const reviewForm = $('#reviewForm');
       const reviewBrokerId = $('#reviewBrokerId');
       const reviewRating = $('#reviewRating');
-      const reviewContent = $('#reviewContent'); // changed from reviewText
+      const reviewContent = $('#reviewContent');
       const starSelector = $('#starSelector');
       const reviewsList = $('#reviewsList');
       const noReviewsMessage = $('#noReviewsMessage');
-      const reviewAuthMessage = $('#reviewAuthMessage');
-      const reviewSignInLink = $('#reviewSignInLink');
+
+      // Removed reviewAuthMessage and reviewSignInLink entirely.
 
       const reportModal = $('#reportModal');
       const closeReportModal = $('#closeReportModal');
@@ -1377,15 +1354,9 @@
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Reviews ─────────────────────────────────────────────────────
+      // ─── Reviews (no sign-in required) ────────────────────────────
       toggleWriteReview.addEventListener('click', function() {
-        if (!state.currentUser) {
-          reviewAuthMessage.classList.add('visible');
-          reviewFormContainer.classList.add('hidden');
-          this.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
-          return;
-        }
-        reviewAuthMessage.classList.remove('visible');
+        // Simply toggle the form – no sign-in check
         const isHidden = reviewFormContainer.classList.contains('hidden');
         if (isHidden) {
           reviewFormContainer.classList.remove('hidden');
@@ -1396,23 +1367,12 @@
         }
       });
 
-      reviewSignInLink.addEventListener('click', function(e) {
-        e.preventDefault();
-        reviewModal.classList.add('hidden');
-        navigateToAuth();
-      });
-
       async function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
         reviewContent.value = '';
         updateStarUI(5);
         reviewFormContainer.classList.add('hidden');
-        if (!state.currentUser) {
-          reviewAuthMessage.classList.add('visible');
-        } else {
-          reviewAuthMessage.classList.remove('visible');
-        }
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
@@ -1441,7 +1401,7 @@
               <div class="review-item">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <span class="font-medium text-slate-700">${review.user_id ? 'User' : 'Anonymous'}</span>
+                    <span class="font-medium text-slate-700">${review.user_id ? 'User' : 'Guest'}</span>
                     <span class="stars-small">${stars}</span>
                   </div>
                   <span class="review-meta">${date}</span>
@@ -1481,10 +1441,6 @@
 
       reviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!state.currentUser) {
-          alert('Please sign in to leave a review.');
-          return;
-        }
         const brokerId = reviewBrokerId.value;
         const rating = parseInt(reviewRating.value);
         const content = reviewContent.value.trim();
@@ -1494,11 +1450,12 @@
           return;
         }
         try {
+          // Insert review without user_id (allow anonymous)
           const { error } = await supabase.from('reviews').insert({
             broker_id: brokerId,
-            user_id: state.currentUser.id,
             rating: rating,
-            content: content || null, // changed from review_text to content
+            content: content || null,
+            user_id: null, // explicitly null
           });
           if (error) throw error;
           alert('✅ Review submitted! Thank you.');
@@ -1523,11 +1480,6 @@
       async function openViewReviewsModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewFormContainer.classList.add('hidden');
-        if (!state.currentUser) {
-          reviewAuthMessage.classList.add('visible');
-        } else {
-          reviewAuthMessage.classList.remove('visible');
-        }
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
@@ -1623,10 +1575,8 @@
           // Reputation-based ranking (reviews)
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
-          // Quality: rating * 10, Quantity: up to 50 reviews * 0.5
           score += rating * 10;
           score += Math.min(reviewCount, 50) * 0.5;
-          // Trusted badge bonus
           if (isTrustedBroker(broker)) {
             score += 20;
           }

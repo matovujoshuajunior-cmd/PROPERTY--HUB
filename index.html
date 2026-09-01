@@ -267,15 +267,23 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ---- Review Stars ---- */
-    .review-item {
-      background: #f8fafc;
+    /* ---- Verification info panel (inside property form) ---- */
+    .verification-info-panel {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
       border-radius: 0.75rem;
       padding: 0.75rem 1rem;
-      border: 1px solid #e2e8f0;
+      margin-top: 0.5rem;
+      display: none;
+      font-size: 0.875rem;
+      color: #0369a1;
     }
-    .review-item .review-text { font-size: 0.875rem; color: #334155; }
-    .review-item .review-meta { font-size: 0.75rem; color: #94a3b8; }
+    .verification-info-panel.visible { display: block; }
+    .verification-info-panel ul { list-style: disc; padding-left: 1.5rem; margin-top: 0.25rem; }
+    .verification-info-panel ul li { margin-bottom: 0.2rem; }
+
+    /* ---- Review stars in reviews modal ---- */
+    .review-item .stars-small { letter-spacing: 1px; }
 
     @media (max-width: 640px) {
       .dashboard-toolbar {
@@ -387,6 +395,17 @@
           <input type="checkbox" id="editRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
           <span class="text-xs text-slate-400">(Admin will review and approve)</span>
+        </div>
+        <!-- Verification info panel (appears when checkbox is checked) -->
+        <div id="editVerificationInfo" class="verification-info-panel">
+          <p class="font-medium">🔍 Verification Process</p>
+          <ul>
+            <li>Your property will be reviewed by our admin team.</li>
+            <li>We check listing accuracy, images, and broker details.</li>
+            <li>Once approved, your property gets a <span class="badge-verified">Verified</span> badge.</li>
+            <li>Verified properties rank higher and build more trust with clients.</li>
+            <li>You will be notified once the review is complete.</li>
+          </ul>
         </div>
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
           <i class="fas fa-save mr-2"></i> Update Property
@@ -514,23 +533,12 @@
   <div id="reportModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-sm">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">🚨 Report a Problem</h2>
+        <h2 class="text-xl font-bold text-slate-800">🚨 Report Broker</h2>
         <button id="closeReportModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <p class="text-slate-500 text-sm mb-4">Report suspicious property, broker, or activity. We'll investigate promptly.</p>
+      <p class="text-slate-500 text-sm mb-4">Report suspicious behavior or fraudulent activity.</p>
       <form id="reportForm">
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">What are you reporting? *</label>
-          <select id="reportType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-            <option value="property">Property Listing</option>
-            <option value="broker">Broker</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property ID or Broker Name *</label>
-          <input type="text" id="reportItem" required placeholder="Enter property ID or broker name" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
+        <input type="hidden" id="reportBrokerId" />
         <div class="mb-4">
           <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Reason *</label>
           <select id="reportReason" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
@@ -595,9 +603,7 @@
             <span class="hidden sm:inline text-xs font-medium bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full">UGX</span>
           </div>
           <div class="flex items-center gap-3">
-            <button id="navbarReportBtn" class="text-sm text-red-500 hover:text-red-700 font-medium transition flex items-center gap-1">
-              <i class="fas fa-flag"></i> <span class="hidden sm:inline">Report</span>
-            </button>
+            <!-- Report button removed from navbar -->
             <span id="propertyCount" class="bg-slate-100 px-3 py-1 rounded-full text-slate-700 font-medium text-xs">0 listings</span>
             <button id="brokerPortalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition shadow-sm hover:shadow flex items-center gap-2">
               <i class="fas fa-user-tie"></i> <span id="portalBtnLabel">Broker Portal</span>
@@ -663,7 +669,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (with Reviews) ===== -->
+      <!-- ===== BROKER PROFILE VIEW ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -681,11 +687,15 @@
                 </div>
               </div>
               <div class="flex items-center gap-3">
+                <!-- Rate, Reviews, and Report buttons -->
                 <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-star"></i> Rate Broker
+                  <i class="fas fa-star"></i> Rate
                 </button>
                 <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-comment"></i> Reviews
+                </button>
+                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
+                  <i class="fas fa-flag"></i> Report
                 </button>
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
@@ -801,6 +811,17 @@
                 <label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
                 <span class="text-xs text-slate-400">(Admin will review and approve)</span>
               </div>
+              <!-- Verification info panel (appears when checkbox is checked) -->
+              <div id="addVerificationInfo" class="verification-info-panel">
+                <p class="font-medium">🔍 Verification Process</p>
+                <ul>
+                  <li>Your property will be reviewed by our admin team.</li>
+                  <li>We check listing accuracy, images, and broker details.</li>
+                  <li>Once approved, your property gets a <span class="badge-verified">Verified</span> badge.</li>
+                  <li>Verified properties rank higher and build more trust with clients.</li>
+                  <li>You will be notified once the review is complete.</li>
+                </ul>
+              </div>
               <div class="md:col-span-2">
                 <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
                   <i class="fas fa-plus mr-2"></i> Add Property
@@ -811,7 +832,7 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== BROKER VERIFICATION SECTION ===== -->
+          <!-- ===== BROKER VERIFICATION SECTION (full) ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
               <h4 class="font-semibold text-slate-700">🛡️ Broker Verification</h4>
@@ -894,7 +915,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=17">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=18">
   </script>
 
   <script>
@@ -996,6 +1017,7 @@
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
       const viewReviewsBtn = $('#viewReviewsBtn');
+      const reportBrokerBtn = $('#reportBrokerBtn');
       const brokerReportNotice = $('#brokerReportNotice');
 
       const toggleSignIn = $('#toggleSignIn');
@@ -1031,6 +1053,7 @@
       const propAddress = $('#propAddress');
       const propImage = $('#propImage');
       const addRequestVerification = $('#addRequestVerification');
+      const addVerificationInfo = $('#addVerificationInfo');
       const uploadStatus = $('#uploadStatus');
       const myPropertiesList = $('#myPropertiesList');
       const myPropertiesEmpty = $('#myPropertiesEmpty');
@@ -1049,6 +1072,7 @@
       const editImageInput = $('#editImageInput');
       const editImagePreviews = $('#editImagePreviews');
       const editRequestVerification = $('#editRequestVerification');
+      const editVerificationInfo = $('#editVerificationInfo');
 
       const reviewModal = $('#reviewModal');
       const closeReviewModal = $('#closeReviewModal');
@@ -1068,12 +1092,10 @@
       const reportModal = $('#reportModal');
       const closeReportModal = $('#closeReportModal');
       const reportForm = $('#reportForm');
-      const reportType = $('#reportType');
-      const reportItem = $('#reportItem');
+      const reportBrokerIdInput = $('#reportBrokerId');
       const reportReason = $('#reportReason');
       const reportDescription = $('#reportDescription');
       const reportStatus = $('#reportStatus');
-      const navbarReportBtn = $('#navbarReportBtn');
 
       // Terms Modal
       const termsModal = $('#termsModal');
@@ -1149,6 +1171,23 @@
 
       closeSecurityNotification.addEventListener('click', () => {
         securityNotification.style.display = 'none';
+      });
+
+      // ─── Verification info panel toggle ───────────────────────────
+      addRequestVerification.addEventListener('change', function() {
+        if (this.checked) {
+          addVerificationInfo.classList.add('visible');
+        } else {
+          addVerificationInfo.classList.remove('visible');
+        }
+      });
+
+      editRequestVerification.addEventListener('change', function() {
+        if (this.checked) {
+          editVerificationInfo.classList.add('visible');
+        } else {
+          editVerificationInfo.classList.remove('visible');
+        }
       });
 
       // ─── Helpers ────────────────────────────────────────────────────
@@ -1312,7 +1351,7 @@
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
                     <span class="font-medium text-slate-700">${review.user_id ? 'User' : 'Anonymous'}</span>
-                    <span class="text-xs">${stars}</span>
+                    <span class="stars-small">${stars}</span>
                   </div>
                   <span class="review-meta">${date}</span>
                 </div>
@@ -1326,9 +1365,59 @@
         }
       }
 
+      // ─── Report Modal ──────────────────────────────────────────────
+      function openReportModal(brokerId) {
+        reportBrokerIdInput.value = brokerId;
+        reportReason.value = '';
+        reportDescription.value = '';
+        reportStatus.textContent = '';
+        reportModal.classList.remove('hidden');
+      }
+
       // ─── Reviews Modal Events ──────────────────────────────────────
       closeReviewsModal.addEventListener('click', () => reviewsModal.classList.add('hidden'));
       reviewsModal.addEventListener('click', (e) => { if (e.target === reviewsModal) reviewsModal.classList.add('hidden'); });
+
+      // ─── Report Modal Events ──────────────────────────────────────
+      closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
+      reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
+
+      reportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in to report.');
+          return;
+        }
+        const brokerId = reportBrokerIdInput.value;
+        const reason = reportReason.value;
+        const description = reportDescription.value.trim();
+
+        if (!reason || !description) {
+          reportStatus.textContent = 'Please fill in all fields.';
+          reportStatus.className = 'mt-3 text-sm text-red-600';
+          return;
+        }
+
+        reportStatus.textContent = 'Submitting report...';
+        reportStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        try {
+          const { error } = await supabase.from('reports').insert({
+            reporter_id: state.currentUser.id,
+            broker_id: brokerId,
+            reason: reason,
+            description: description,
+            status: 'pending',
+          });
+          if (error) throw error;
+          reportStatus.textContent = '✅ Report submitted! We will investigate.';
+          reportStatus.className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => reportModal.classList.add('hidden'), 2000);
+        } catch (err) {
+          reportStatus.textContent = '❌ Failed to submit report: ' + err.message;
+          reportStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
 
       // ─── Star selector ─────────────────────────────────────────────
       starSelector.querySelectorAll('.star').forEach(star => {
@@ -1389,54 +1478,6 @@
           }
         } catch (err) {
           alert('Error submitting review: ' + err.message);
-        }
-      });
-
-      // ─── Report ─────────────────────────────────────────────────────
-      navbarReportBtn.addEventListener('click', () => {
-        reportModal.classList.remove('hidden');
-        reportForm.reset();
-        reportStatus.textContent = '';
-      });
-
-      closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
-      reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
-
-      reportForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!state.currentUser) {
-          alert('Please sign in to report.');
-          return;
-        }
-        const type = reportType.value;
-        const item = reportItem.value.trim();
-        const reason = reportReason.value;
-        const description = reportDescription.value.trim();
-
-        if (!item || !reason || !description) {
-          reportStatus.textContent = 'Please fill in all fields.';
-          reportStatus.className = 'mt-3 text-sm text-red-600';
-          return;
-        }
-
-        reportStatus.textContent = 'Submitting report...';
-        reportStatus.className = 'mt-3 text-sm text-indigo-600';
-
-        try {
-          const { error } = await supabase.from('reports').insert({
-            reporter_id: state.currentUser.id,
-            reason: reason,
-            description: description,
-            status: 'pending',
-            metadata: { type: type, item: item },
-          });
-          if (error) throw error;
-          reportStatus.textContent = '✅ Report submitted! We will investigate.';
-          reportStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => reportModal.classList.add('hidden'), 2000);
-        } catch (err) {
-          reportStatus.textContent = '❌ Failed to submit report: ' + err.message;
-          reportStatus.className = 'mt-3 text-sm text-red-600';
         }
       });
 
@@ -1582,7 +1623,7 @@
                 ${actionsHtml}
                 ${boostHtml}
                 ${rateHtml}
-                ${!isOwner && isVerified ? `<button class="report-btn text-xs text-red-500 hover:text-red-700 font-medium" data-broker-id="${broker?.id || ''}" data-property-id="${property.id}"><i class="fas fa-flag mr-1"></i>Report</button>` : ''}
+                <!-- Report button removed from card (only in profile) -->
                 <!-- CONNECT BUTTON – Always visible -->
                 <button class="connect-btn bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm hover:shadow transition" data-property-id="${property.id}">
                   <i class="fas fa-handshake"></i> Connect
@@ -1620,15 +1661,6 @@
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
-        });
-
-        article.querySelector('.report-btn')?.addEventListener('click', e => {
-          e.stopPropagation();
-          const brokerId = e.currentTarget.dataset.brokerId;
-          const propertyId = e.currentTarget.dataset.propertyId;
-          reportModal.classList.remove('hidden');
-          reportItem.value = propertyId || brokerId;
-          reportType.value = brokerId ? 'broker' : 'property';
         });
 
         // ─── CONNECT BUTTON – always works ───────────────────────────
@@ -1881,6 +1913,12 @@
         editModal._currentProperty = prop;
 
         editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
+        // Show/hide info panel based on checkbox
+        if (editRequestVerification.checked) {
+          editVerificationInfo.classList.add('visible');
+        } else {
+          editVerificationInfo.classList.remove('visible');
+        }
 
         editModal.classList.remove('hidden');
       }
@@ -2197,15 +2235,18 @@
           brokerReviewCount.textContent = `(${reviewCount} reviews)`;
           brokerLeadScore.textContent = `⚡ ${leadScore}`;
 
-          // Show Rate and Reviews buttons if logged in and not viewing own profile
+          // Show Rate, Reviews, and Report buttons if logged in and not viewing own profile
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
+            reportBrokerBtn.classList.remove('hidden');
+            reportBrokerBtn.onclick = () => openReportModal(brokerId);
           } else {
+            // Hide rate and report for own profile, but show reviews
             rateBrokerBtn.classList.add('hidden');
-            // Still show reviews button even if logged out or viewing own profile
+            reportBrokerBtn.classList.add('hidden');
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
           }
@@ -2345,6 +2386,7 @@
           uploadStatus.className = 'mt-3 text-sm text-emerald-600';
           addPropertyForm.reset();
           addRequestVerification.checked = false;
+          addVerificationInfo.classList.remove('visible');
           propImage.value = '';
           await loadMyProperties();
           await fetchAllData();

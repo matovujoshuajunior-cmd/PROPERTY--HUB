@@ -106,7 +106,6 @@
     .stars .empty { color: #d1d5db; }
     .badge-lead { background: #10b981; color: white; padding: 0.1rem 0.5rem; border-radius: 9999px; font-size: 0.6rem; font-weight: bold; }
     
-    /* ---- Review Star Selector (with color feedback) ---- */
     .star-rating .star {
       cursor: pointer;
       font-size: 2rem;
@@ -124,7 +123,6 @@
       color: #d1d5db;
     }
 
-    /* ---- BADGES ---- */
     .badge-verified {
       background: #10b981;
       color: white;
@@ -279,7 +277,6 @@
       to { transform: translateY(0); opacity: 1; }
     }
 
-    /* ---- Verification info panel ---- */
     .verification-info-panel {
       background: #f0f9ff;
       border: 1px solid #bae6fd;
@@ -294,7 +291,6 @@
     .verification-info-panel ul { list-style: disc; padding-left: 1.5rem; margin-top: 0.25rem; }
     .verification-info-panel ul li { margin-bottom: 0.2rem; }
 
-    /* ---- Review item ---- */
     .review-item {
       background: #f8fafc;
       border-radius: 0.75rem;
@@ -305,7 +301,6 @@
     .review-item .review-meta { font-size: 0.75rem; color: #94a3b8; }
     .review-item .stars-small { letter-spacing: 1px; }
 
-    /* ---- Dashboard stats ---- */
     .review-stats {
       display: flex;
       flex-wrap: wrap;
@@ -326,7 +321,6 @@
     }
     .review-stats .stat .label { color: #94a3b8; }
 
-    /* ---- Write review toggle ---- */
     .write-review-toggle {
       cursor: pointer;
       display: inline-flex;
@@ -357,7 +351,6 @@
     }
     .review-auth-message a:hover { color: #4338ca; }
 
-    /* ---- Property verification list item ---- */
     .verification-property-item {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -453,7 +446,6 @@
         <button id="closeReviewModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
 
-      <!-- Write Review toggle -->
       <div class="flex justify-between items-center mb-3">
         <span class="text-sm text-slate-500">What others say</span>
         <button id="toggleWriteReview" class="write-review-toggle">
@@ -461,13 +453,11 @@
         </button>
       </div>
 
-      <!-- Sign-in required message -->
       <div id="reviewAuthMessage" class="review-auth-message">
         <i class="fas fa-info-circle mr-2"></i>
         Please <a href="#" id="reviewSignInLink">sign in</a> to leave a review.
       </div>
 
-      <!-- Review form (hidden by default) -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
@@ -492,7 +482,6 @@
         </form>
       </div>
 
-      <!-- Reviews list -->
       <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto">
         <p class="text-slate-500 text-sm">Loading reviews...</p>
       </div>
@@ -809,7 +798,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (with Report button revived) ===== -->
+      <!-- ===== BROKER PROFILE VIEW ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -825,7 +814,6 @@
                   <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
                   <span class="badge-lead" id="brokerLeadScore">⚡ 0</span>
                 </div>
-                <!-- Review stats -->
                 <div id="brokerReviewStats" class="review-stats mt-1">
                   <span class="stat"><span class="value" id="statTotalReviews">0</span> <span class="label">reviews</span></span>
                   <span class="stat"><span class="value" id="statAvgRating">0.0</span> <span class="label">avg rating</span></span>
@@ -838,7 +826,6 @@
                 <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-comment"></i> Reviews
                 </button>
-                <!-- REPORT BUTTON revived -->
                 <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-flag"></i> Report
                 </button>
@@ -976,14 +963,13 @@
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
-          <!-- ===== PROPERTY VERIFICATION PANEL (replaces broker verification) ===== -->
+          <!-- ===== PROPERTY VERIFICATION PANEL ===== -->
           <div id="verificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
               <h4 class="font-semibold text-slate-700">🛡️ Property Verification</h4>
               <span id="verificationInfoBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Manage verifications</span>
             </div>
 
-            <!-- Info panel explaining process -->
             <div class="verification-info-panel visible mb-4">
               <p class="font-medium">🔍 Verification Process</p>
               <ul>
@@ -995,7 +981,6 @@
               </ul>
             </div>
 
-            <!-- List of properties with verification status -->
             <div id="propertyVerificationList">
               <p class="text-slate-500 text-sm">Loading your properties...</p>
             </div>
@@ -1126,7 +1111,6 @@
       const statTotalReviews = $('#statTotalReviews');
       const statAvgRating = $('#statAvgRating');
 
-      // Reviews modal
       const reviewModal = $('#reviewModal');
       const closeReviewModal = $('#closeReviewModal');
       const reviewFormContainer = $('#reviewFormContainer');
@@ -1141,7 +1125,6 @@
       const reviewAuthMessage = $('#reviewAuthMessage');
       const reviewSignInLink = $('#reviewSignInLink');
 
-      // Report Modal
       const reportModal = $('#reportModal');
       const closeReportModal = $('#closeReportModal');
       const reportForm = $('#reportForm');
@@ -1204,12 +1187,10 @@
       const editRequestVerification = $('#editRequestVerification');
       const editVerificationInfo = $('#editVerificationInfo');
 
-      // Terms Modal
       const termsModal = $('#termsModal');
       const closeTermsModal = $('#closeTermsModal');
       const acceptTermsBtn = $('#acceptTermsBtn');
 
-      // Wallet
       const walletBalanceDisplay = $('#walletBalanceDisplay');
       const topupBtn = $('#topupBtn');
       const refreshWalletBtn = $('#refreshWalletBtn');
@@ -1219,16 +1200,13 @@
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
 
-      // Property Verification (new)
       const propertyVerificationList = $('#propertyVerificationList');
       const propertyVerificationEmpty = $('#propertyVerificationEmpty');
       const gotoAddPropertyFromVerification = $('#gotoAddPropertyFromVerification');
 
-      // Security Notification
       const securityNotification = $('#securityNotification');
       const closeSecurityNotification = $('#closeSecurityNotification');
 
-      // Quiz modals
       const quizModal = $('#quizModal');
       const closeQuizModal = $('#closeQuizModal');
       const quizForm = $('#quizForm');
@@ -1239,7 +1217,6 @@
       const quizStep1 = $('#quizStep1');
       const quizStep2 = $('#quizStep2');
       const quizNextBtn = $('#quizNextBtn');
-      const quizQuestionsContainer = $('#quizQuestionsContainer');
 
       const waitingModal = $('#waitingModal');
       const waitingStatus = $('#waitingStatus');
@@ -1251,7 +1228,7 @@
       const otpInput = $('#otpInput');
       const otpError = $('#otpError');
 
-      // ─── Security Notification Logic ──────────────────────────────
+      // ─── Security Notification ──────────────────────────────────────
       let securityShown = false;
       function showSecurityNotification() {
         if (!securityShown) {
@@ -1259,7 +1236,6 @@
           securityShown = true;
         }
       }
-
       setTimeout(showSecurityNotification, 3000);
       window.addEventListener('scroll', function firstScroll() {
         if (window.scrollY > 50) {
@@ -1267,26 +1243,18 @@
           window.removeEventListener('scroll', firstScroll);
         }
       });
-
       closeSecurityNotification.addEventListener('click', () => {
         securityNotification.style.display = 'none';
       });
 
-      // ─── Verification info panel toggle (for add/edit property) ───
+      // ─── Verification info panel toggle ───────────────────────────
       addRequestVerification.addEventListener('change', function() {
-        if (this.checked) {
-          addVerificationInfo.classList.add('visible');
-        } else {
-          addVerificationInfo.classList.remove('visible');
-        }
+        if (this.checked) addVerificationInfo.classList.add('visible');
+        else addVerificationInfo.classList.remove('visible');
       });
-
       editRequestVerification.addEventListener('change', function() {
-        if (this.checked) {
-          editVerificationInfo.classList.add('visible');
-        } else {
-          editVerificationInfo.classList.remove('visible');
-        }
+        if (this.checked) editVerificationInfo.classList.add('visible');
+        else editVerificationInfo.classList.remove('visible');
       });
 
       // ─── Helpers ────────────────────────────────────────────────────
@@ -1379,7 +1347,6 @@
         }
       }
 
-      // ─── Top-up form ───────────────────────────────────────────────
       topupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const amount = parseInt(topupAmount.value);
@@ -1400,18 +1367,16 @@
           topupStatus.className = 'mt-3 text-sm text-red-600';
         }
       });
-
       topupBtn.addEventListener('click', () => {
         topupAmount.value = '';
         topupStatus.textContent = '';
         topupModal.classList.remove('hidden');
       });
-
       closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Reviews Modal Logic ───────────────────────────────────────
+      // ─── Reviews ─────────────────────────────────────────────────────
       toggleWriteReview.addEventListener('click', function() {
         if (!state.currentUser) {
           reviewAuthMessage.classList.add('visible');
@@ -1455,22 +1420,18 @@
       async function loadReviewsForModal(brokerId) {
         reviewsList.innerHTML = '<p class="text-slate-500 text-sm">Loading reviews...</p>';
         noReviewsMessage.classList.add('hidden');
-
         try {
           const { data, error } = await supabase
             .from('reviews')
             .select('*')
             .eq('broker_id', brokerId)
             .order('created_at', { ascending: false });
-
           if (error) throw error;
-
           if (!data || data.length === 0) {
             reviewsList.innerHTML = '';
             noReviewsMessage.classList.remove('hidden');
             return;
           }
-
           let html = '';
           data.forEach(review => {
             const stars = renderStarsSmall(review.rating);
@@ -1494,7 +1455,6 @@
         }
       }
 
-      // ─── Star selector ──────────────────────────────────────────────
       starSelector.querySelectorAll('.star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
@@ -1527,12 +1487,10 @@
         const brokerId = reviewBrokerId.value;
         const rating = parseInt(reviewRating.value);
         const review = reviewText.value.trim();
-
         if (!rating || rating < 1 || rating > 5) {
           alert('Please select a rating (1-5 stars).');
           return;
         }
-
         try {
           const { error } = await supabase.from('reviews').insert({
             broker_id: brokerId,
@@ -1573,7 +1531,7 @@
         await loadReviewsForModal(brokerId);
       }
 
-      // ─── Report Modal ──────────────────────────────────────────────
+      // ─── Report ──────────────────────────────────────────────────────
       function openReportModal(brokerId) {
         reportBrokerIdInput.value = brokerId;
         reportReason.value = '';
@@ -1581,7 +1539,6 @@
         reportStatus.textContent = '';
         reportModal.classList.remove('hidden');
       }
-
       closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
       reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
 
@@ -1594,16 +1551,13 @@
         const brokerId = reportBrokerIdInput.value;
         const reason = reportReason.value;
         const description = reportDescription.value.trim();
-
         if (!reason || !description) {
           reportStatus.textContent = 'Please fill in all fields.';
           reportStatus.className = 'mt-3 text-sm text-red-600';
           return;
         }
-
         reportStatus.textContent = 'Submitting report...';
         reportStatus.className = 'mt-3 text-sm text-indigo-600';
-
         try {
           const { error } = await supabase.from('reports').insert({
             reporter_id: state.currentUser.id,
@@ -1622,10 +1576,9 @@
         }
       });
 
-      // ─── Terms Modal ────────────────────────────────────────────────
+      // ─── Terms ──────────────────────────────────────────────────────
       closeTermsModal.addEventListener('click', () => termsModal.classList.add('hidden'));
       termsModal.addEventListener('click', (e) => { if (e.target === termsModal) termsModal.classList.add('hidden'); });
-
       acceptTermsBtn.addEventListener('click', async () => {
         if (!state.currentUser) {
           alert('Please sign in first.');
@@ -1646,7 +1599,7 @@
         }
       });
 
-      // ─── RANKING ALGORITHM ────────────────────────────────
+      // ─── Ranking ────────────────────────────────────────────────────
       function isTrustedBroker(broker) {
         if (!broker) return false;
         const rating = broker.average_rating || 0;
@@ -1769,12 +1722,10 @@
           </div>
         `;
 
-        // ─── Event Listeners ──────────────────────────────────────────
         article.querySelector('.edit-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           openEditModal(property.id);
         });
-
         article.querySelector('.boost-btn')?.addEventListener('click', async e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
@@ -1786,19 +1737,16 @@
             if (state.currentUser) await loadMyProperties();
           } catch (err) { alert('Error boosting lead score: ' + err.message); }
         });
-
         article.querySelector('.rate-btn')?.addEventListener('click', e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           openReviewModal(brokerId);
         });
-
         article.querySelector('.broker-name-link')?.addEventListener('click', e => {
           e.stopPropagation();
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
         });
-
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
@@ -1853,52 +1801,45 @@
         });
       }
 
-      // ─── Property Verification Functions (new) ─────────────────────
+      // ─── Property Verification (new) ──────────────────────────────
       async function loadPropertyVerificationList() {
         if (!state.currentUser) return;
+        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
         try {
           const { data, error } = await supabase
             .from('properties')
             .select('*')
-            .eq(COLUMNS.FOREIGN_KEY || 'owner_id', state.currentUser.id)
+            .eq(fk, state.currentUser.id)
             .order('created_at', { ascending: false });
-
           if (error) throw error;
-
           if (!data || data.length === 0) {
             propertyVerificationList.innerHTML = '';
             propertyVerificationEmpty.classList.remove('hidden');
             return;
           }
           propertyVerificationEmpty.classList.add('hidden');
-
           let html = '';
           data.forEach(prop => {
             const status = prop[COLUMNS.VERIFICATION_STATUS] || 'unverified';
             let statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
             let statusClass = status;
-            if (status === 'approved') statusLabel = '✅ Approved';
-            else if (status === 'pending') statusLabel = '⏳ Pending';
-            else if (status === 'rejected') statusLabel = '❌ Rejected';
-            else statusLabel = 'Not requested';
+            if (status === 'approved') { statusLabel = '✅ Approved'; statusClass = 'approved'; }
+            else if (status === 'pending') { statusLabel = '⏳ Pending'; statusClass = 'pending'; }
+            else if (status === 'rejected') { statusLabel = '❌ Rejected'; statusClass = 'rejected'; }
+            else { statusLabel = 'Not requested'; statusClass = 'unverified'; }
 
             const canRequest = (status === 'unverified' || status === 'rejected');
-
             html += `
               <div class="verification-property-item">
                 <div class="property-title">${prop[COLUMNS.TITLE] || 'Untitled'}</div>
+                <div><span class="property-status ${statusClass}">${statusLabel}</span></div>
                 <div>
-                  <span class="property-status ${statusClass}">${statusLabel}</span>
-                </div>
-                <div>
-                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` : `<span class="text-xs text-slate-400">Verification ${status === 'approved' ? 'complete' : 'in progress'}</span>`}
+                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` : `<span class="text-xs text-slate-400">${status === 'approved' ? 'Verified' : 'In progress'}</span>`}
                 </div>
               </div>
             `;
           });
           propertyVerificationList.innerHTML = html;
-
-          // Attach event listeners to request buttons
           propertyVerificationList.querySelectorAll('.request-verification-btn').forEach(btn => {
             btn.addEventListener('click', async function() {
               const propertyId = this.dataset.propertyId;
@@ -1922,7 +1863,6 @@
               }
             });
           });
-
         } catch (err) {
           propertyVerificationList.innerHTML = `<p class="text-red-500 text-sm">Error loading properties: ${err.message}</p>`;
         }
@@ -1969,8 +1909,6 @@
       cancelProfileEditBtn?.addEventListener('click', () => {
         profileFormContainer.classList.remove('visible');
       });
-
-      // Link from empty state to add property
       gotoAddPropertyFromVerification?.addEventListener('click', (e) => {
         e.preventDefault();
         toggleAddPropertyForm();
@@ -2012,7 +1950,6 @@
         } else {
           editVerificationInfo.classList.remove('visible');
         }
-
         editModal.classList.remove('hidden');
       }
 
@@ -2066,7 +2003,6 @@
         }
 
         const dbType = TYPE_MAP[type] || type;
-
         const requestVerification = editRequestVerification.checked;
         let verificationStatus = 'unverified';
         let isVerified = false;
@@ -2120,7 +2056,6 @@
         if (!state.currentUser) return;
         const businessName = settingsBusinessName.value.trim();
         const phone = settingsPhone.value.trim();
-
         try {
           const { error } = await supabase
             .from('profiles')
@@ -2141,7 +2076,7 @@
         }
       });
 
-      // ─── Fetch all data with ranking ──────────────────────────────
+      // ─── Fetch all data ──────────────────────────────────────────────
       async function fetchAllData() {
         state.isLoading = true;
         loadingSkeleton.style.display = 'grid';
@@ -2393,11 +2328,12 @@
       // ─── Dashboard ──────────────────────────────────────────────────
       async function loadMyProperties() {
         if (!state.currentUser) return;
+        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
         try {
           const { data, error } = await supabase
             .from('properties')
             .select('*')
-            .eq(COLUMNS.FOREIGN_KEY || 'owner_id', state.currentUser.id)
+            .eq(fk, state.currentUser.id)
             .order('created_at', { ascending: false });
           if (error) throw error;
           state.myProperties = data || [];
@@ -2406,7 +2342,7 @@
           console.error('Error loading my properties:', err);
           myPropertiesList.innerHTML = `
             <div class="col-span-full text-center py-8 text-slate-500">
-              Could not load your properties. Check RLS policies and column '${COLUMNS.FOREIGN_KEY || 'owner_id'}'.
+              Could not load your properties. Check RLS policies and column '${fk}'.
             </div>
           `;
         }
@@ -2617,184 +2553,4 @@
         const propertyId = quizPropertyId.value;
         const name = quizName.value.trim();
         const email = quizEmail.value.trim();
-        const whatsapp = quizWhatsapp.value.trim();
-
-        const q1 = document.querySelector('input[name="q1"]:checked');
-        const q2 = document.querySelector('input[name="q2"]:checked');
-        if (!q1 || !q2) {
-          alert('Please answer both quiz questions.');
-          return;
-        }
-
-        const score1 = parseInt(q1.value);
-        const score2 = parseInt(q2.value);
-        const totalScore = score1 + score2;
-        let leadType = 'cold';
-        if (totalScore >= 7) leadType = 'hot';
-        else if (totalScore >= 4) leadType = 'warm';
-
-        const answers = { q1: score1, q2: score2 };
-
-        try {
-          const { data, error } = await supabase.functions.invoke('request-lead', {
-            body: {
-              property_id: propertyId,
-              visitor_name: name,
-              visitor_email: email,
-              visitor_whatsapp: whatsapp,
-              quiz_answers: answers,
-              total_score: totalScore,
-              lead_type: leadType
-            }
-          });
-          if (error) throw error;
-
-          quizModal.classList.add('hidden');
-          waitingModal.classList.remove('hidden');
-          waitingStatus.textContent = 'Request sent. Waiting for broker...';
-
-          const requestId = data.request_id;
-          subscribeToLeadRequest(requestId);
-        } catch (err) {
-          alert('Error submitting request: ' + err.message);
-        }
-      });
-
-      function subscribeToLeadRequest(requestId) {
-        const channel = supabase
-          .channel(`lead-request-${requestId}`)
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'lead_requests',
-              filter: `id=eq.${requestId}`
-            },
-            (payload) => {
-              const newStatus = payload.new.status;
-              if (newStatus === 'approved') {
-                waitingStatus.textContent = '✅ Broker approved! Verifying your identity...';
-                waitingModal.classList.add('hidden');
-                otpRequestId.value = requestId;
-                otpModal.classList.remove('hidden');
-                sendOTP(requestId);
-                if (state.currentUser) loadWallet();
-              } else if (newStatus === 'rejected') {
-                waitingStatus.textContent = '❌ Broker declined this request.';
-                setTimeout(() => {
-                  waitingModal.classList.add('hidden');
-                }, 3000);
-              } else if (newStatus === 'expired') {
-                waitingStatus.textContent = '⏰ Request expired.';
-                setTimeout(() => {
-                  waitingModal.classList.add('hidden');
-                }, 3000);
-              }
-            }
-          )
-          .subscribe();
-      }
-
-      async function sendOTP(requestId) {
-        try {
-          await supabase.functions.invoke('send-otp', { body: { request_id: requestId } });
-        } catch (err) {
-          console.error('OTP send error:', err);
-        }
-      }
-
-      otpForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const requestId = otpRequestId.value;
-        const otp = otpInput.value.trim();
-        if (!otp || otp.length < 4) {
-          alert('Please enter the full OTP.');
-          return;
-        }
-        try {
-          const { data, error } = await supabase.functions.invoke('verify-otp', {
-            body: { request_id: requestId, otp: otp }
-          });
-          if (error) throw error;
-          otpModal.classList.add('hidden');
-          const waLink = `https://wa.me/${data.broker_whatsapp}`;
-          alert(`✅ Verified! Click OK to chat with the broker on WhatsApp.`);
-          window.open(waLink, '_blank');
-        } catch (err) {
-          otpError.classList.remove('hidden');
-          otpError.textContent = 'Invalid OTP. Please try again.';
-        }
-      });
-
-      cancelWaitBtn.addEventListener('click', function() {
-        if (confirm('Cancel this request?')) {
-          waitingModal.classList.add('hidden');
-        }
-      });
-
-      closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
-      quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
-
-      // ─── Event Binding ─────────────────────────────────────────────
-      searchInput.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value;
-        applyFiltersAndSearch();
-      });
-      clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        state.searchQuery = '';
-        applyFiltersAndSearch();
-        searchInput.focus();
-      });
-
-      filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-          filterPills.forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          state.currentFilter = pill.dataset.filter;
-          applyFiltersAndSearch();
-        });
-      });
-
-      backToDiscovery.addEventListener('click', goToDiscovery);
-      backToSearchBtn.addEventListener('click', goToDiscovery);
-      logoutBtn.addEventListener('click', handleLogout);
-
-      brokerPortalBtn.addEventListener('click', () => {
-        if (state.currentUser) {
-          showView(dashboardView);
-          navigateTo('/dashboard');
-          loadMyProperties();
-          loadWallet();
-        } else {
-          navigateToAuth();
-        }
-      });
-
-      toggleSignIn.addEventListener('click', () => setAuthMode(false));
-      toggleSignUp.addEventListener('click', () => setAuthMode(true));
-
-      authForm.addEventListener('submit', handleAuthSubmit);
-
-      window.addEventListener('popstate', handleRoute);
-
-      // ─── Init ────────────────────────────────────────────────────────
-      async function init() {
-        const hash = window.location.hash;
-        if (hash && hash.includes('access_token')) {
-          const params = new URLSearchParams(hash.substring(1));
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-          if (accessToken && refreshToken) {
-            try {
-              const { data, error } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-              });
-              if (error) throw error;
-              if (data.user) {
-                state.currentUser = data.user;
-                portalBtnLabel.textContent = 'Dashboard';
-                window.history.replaceState(null, '', '/');
-               
+        const whatsapp = quizWhatsapp.value.trim

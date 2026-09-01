@@ -327,6 +327,18 @@
     }
     .review-stats .stat .label { color: #94a3b8; }
 
+    /* ---- Write review toggle ---- */
+    .write-review-toggle {
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4f46e5;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .write-review-toggle:hover { color: #4338ca; }
+
     @media (max-width: 640px) {
       .dashboard-toolbar {
         flex-direction: column;
@@ -369,34 +381,49 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL (with star color feedback) ===== -->
+  <!-- ===== REVIEW MODAL (with Write Review toggle) ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">⭐ Rate this Broker</h2>
+        <h2 class="text-xl font-bold text-slate-800">⭐ Reviews</h2>
         <button id="closeReviewModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <form id="reviewForm">
-        <input type="hidden" id="reviewBrokerId" />
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Rating</label>
-          <div id="starSelector" class="star-rating flex gap-1">
-            <span class="star" data-value="1">★</span>
-            <span class="star" data-value="2">★</span>
-            <span class="star" data-value="3">★</span>
-            <span class="star" data-value="4">★</span>
-            <span class="star" data-value="5">★</span>
-          </div>
-          <input type="hidden" id="reviewRating" value="5" />
-        </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Review</label>
-          <textarea id="reviewText" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-          <i class="fas fa-paper-plane mr-2"></i> Submit Review
+      <!-- Write Review toggle -->
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm text-slate-500">What others say</span>
+        <button id="toggleWriteReview" class="write-review-toggle">
+          <i class="fas fa-pen"></i> Write a Review
         </button>
-      </form>
+      </div>
+      <!-- Review form (hidden by default) -->
+      <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <form id="reviewForm">
+          <input type="hidden" id="reviewBrokerId" />
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Rating</label>
+            <div id="starSelector" class="star-rating flex gap-1">
+              <span class="star" data-value="1">★</span>
+              <span class="star" data-value="2">★</span>
+              <span class="star" data-value="3">★</span>
+              <span class="star" data-value="4">★</span>
+              <span class="star" data-value="5">★</span>
+            </div>
+            <input type="hidden" id="reviewRating" value="5" />
+          </div>
+          <div class="mb-3">
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Review</label>
+            <textarea id="reviewText" rows="3" placeholder="Share your experience with this broker..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+            <i class="fas fa-paper-plane mr-2"></i> Submit Review
+          </button>
+        </form>
+      </div>
+      <!-- Reviews list -->
+      <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto">
+        <p class="text-slate-500 text-sm">Loading reviews...</p>
+      </div>
+      <div id="noReviewsMessage" class="hidden text-slate-500 text-sm text-center py-4">No reviews yet. Be the first to leave a review!</div>
     </div>
   </div>
 
@@ -709,7 +736,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (with Reviews) ===== -->
+      <!-- ===== BROKER PROFILE VIEW (Report button removed) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -738,9 +765,7 @@
                 <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-comment"></i> Reviews
                 </button>
-                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-flag"></i> Report
-                </button>
+                <!-- Report button removed -->
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
@@ -783,7 +808,7 @@
         </div>
       </section>
 
-      <!-- ===== DASHBOARD VIEW (with Review Stats) ===== -->
+      <!-- ===== DASHBOARD VIEW ===== -->
       <section id="dashboardView" class="view view-hidden">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div class="flex items-center justify-between mb-6">
@@ -941,24 +966,10 @@
     </main>
   </div>
 
-  <!-- ===== REVIEWS MODAL (for viewing reviews) ===== -->
-  <div id="reviewsModal" class="modal-backdrop hidden">
-    <div class="modal-content max-w-lg">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">📝 Reviews</h2>
-        <button id="closeReviewsModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
-      </div>
-      <div id="reviewsList" class="space-y-3 max-h-80 overflow-y-auto">
-        <p class="text-slate-500 text-sm">Loading reviews...</p>
-      </div>
-      <div id="noReviewsMessage" class="hidden text-slate-500 text-sm text-center py-4">No reviews yet. Be the first to leave a review!</div>
-    </div>
-  </div>
-
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=19">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=20">
   </script>
 
   <script>
@@ -1060,10 +1071,31 @@
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
       const viewReviewsBtn = $('#viewReviewsBtn');
-      const reportBrokerBtn = $('#reportBrokerBtn');
       const brokerReportNotice = $('#brokerReportNotice');
       const statTotalReviews = $('#statTotalReviews');
       const statAvgRating = $('#statAvgRating');
+
+      // Reviews modal
+      const reviewModal = $('#reviewModal');
+      const closeReviewModal = $('#closeReviewModal');
+      const reviewFormContainer = $('#reviewFormContainer');
+      const toggleWriteReview = $('#toggleWriteReview');
+      const reviewForm = $('#reviewForm');
+      const reviewBrokerId = $('#reviewBrokerId');
+      const reviewRating = $('#reviewRating');
+      const reviewText = $('#reviewText');
+      const starSelector = $('#starSelector');
+      const reviewsList = $('#reviewsList');
+      const noReviewsMessage = $('#noReviewsMessage');
+
+      // Report Modal
+      const reportModal = $('#reportModal');
+      const closeReportModal = $('#closeReportModal');
+      const reportForm = $('#reportForm');
+      const reportBrokerIdInput = $('#reportBrokerId');
+      const reportReason = $('#reportReason');
+      const reportDescription = $('#reportDescription');
+      const reportStatus = $('#reportStatus');
 
       const toggleSignIn = $('#toggleSignIn');
       const toggleSignUp = $('#toggleSignUp');
@@ -1118,29 +1150,6 @@
       const editImagePreviews = $('#editImagePreviews');
       const editRequestVerification = $('#editRequestVerification');
       const editVerificationInfo = $('#editVerificationInfo');
-
-      const reviewModal = $('#reviewModal');
-      const closeReviewModal = $('#closeReviewModal');
-      const reviewForm = $('#reviewForm');
-      const reviewBrokerId = $('#reviewBrokerId');
-      const reviewRating = $('#reviewRating');
-      const reviewText = $('#reviewText');
-      const starSelector = $('#starSelector');
-
-      // Reviews Modal (view reviews)
-      const reviewsModal = $('#reviewsModal');
-      const closeReviewsModal = $('#closeReviewsModal');
-      const reviewsList = $('#reviewsList');
-      const noReviewsMessage = $('#noReviewsMessage');
-
-      // Report Modal
-      const reportModal = $('#reportModal');
-      const closeReportModal = $('#closeReportModal');
-      const reportForm = $('#reportForm');
-      const reportBrokerIdInput = $('#reportBrokerId');
-      const reportReason = $('#reportReason');
-      const reportDescription = $('#reportDescription');
-      const reportStatus = $('#reportStatus');
 
       // Terms Modal
       const termsModal = $('#termsModal');
@@ -1357,18 +1366,35 @@
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Reviews ────────────────────────────────────────────────────
-      function openReviewModal(brokerId) {
+      // ─── Reviews Modal Logic ───────────────────────────────────────
+      // Toggle review form
+      toggleWriteReview.addEventListener('click', function() {
+        const isHidden = reviewFormContainer.classList.contains('hidden');
+        if (isHidden) {
+          reviewFormContainer.classList.remove('hidden');
+          this.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        } else {
+          reviewFormContainer.classList.add('hidden');
+          this.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+        }
+      });
+
+      // Open review modal (called from profile)
+      async function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
         reviewText.value = '';
         updateStarUI(5);
+        // Reset form visibility
+        reviewFormContainer.classList.add('hidden');
+        toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+        // Load reviews
         reviewModal.classList.remove('hidden');
+        await loadReviewsForModal(brokerId);
       }
 
-      // ─── View Reviews Modal ────────────────────────────────────────
-      async function openViewReviewsModal(brokerId) {
-        reviewsModal.classList.remove('hidden');
+      // Load reviews into the modal
+      async function loadReviewsForModal(brokerId) {
         reviewsList.innerHTML = '<p class="text-slate-500 text-sm">Loading reviews...</p>';
         noReviewsMessage.classList.add('hidden');
 
@@ -1410,6 +1436,88 @@
         }
       }
 
+      // ─── Star selector (with hover) ──────────────────────────────
+      starSelector.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', () => {
+          const val = parseInt(star.dataset.value);
+          reviewRating.value = val;
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseenter', () => {
+          const val = parseInt(star.dataset.value);
+          updateStarUI(val);
+        });
+        star.addEventListener('mouseleave', () => {
+          const current = parseInt(reviewRating.value) || 5;
+          updateStarUI(current);
+        });
+      });
+
+      function updateStarUI(active) {
+        starSelector.querySelectorAll('.star').forEach(el => {
+          const val = parseInt(el.dataset.value);
+          el.classList.toggle('active', val <= active);
+        });
+      }
+
+      // ─── Review form submit ────────────────────────────────────────
+      reviewForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const brokerId = reviewBrokerId.value;
+        const rating = parseInt(reviewRating.value);
+        const review = reviewText.value.trim();
+
+        if (!rating || rating < 1 || rating > 5) {
+          alert('Please select a rating (1-5 stars).');
+          return;
+        }
+
+        if (!state.currentUser) {
+          alert('Please sign in to leave a review.');
+          return;
+        }
+
+        try {
+          const { error } = await supabase.from('reviews').insert({
+            broker_id: brokerId,
+            user_id: state.currentUser.id,
+            rating: rating,
+            review_text: review || null,
+          });
+          if (error) throw error;
+          alert('✅ Review submitted! Thank you.');
+          // Refresh reviews in modal
+          await loadReviewsForModal(brokerId);
+          // Reset form
+          reviewForm.reset();
+          reviewRating.value = 5;
+          updateStarUI(5);
+          reviewFormContainer.classList.add('hidden');
+          toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+          // Refresh main data
+          await fetchAllData();
+          if (state.currentBrokerId) {
+            await loadBrokerProfile(state.currentBrokerId);
+          }
+        } catch (err) {
+          alert('Error submitting review: ' + err.message);
+        }
+      });
+
+      // ─── Close review modal ────────────────────────────────────────
+      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
+      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
+
+      // ─── View Reviews button (profile) ────────────────────────────
+      async function openViewReviewsModal(brokerId) {
+        // Reuse the same modal
+        reviewBrokerId.value = brokerId;
+        reviewFormContainer.classList.add('hidden');
+        toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+        reviewModal.classList.remove('hidden');
+        await loadReviewsForModal(brokerId);
+      }
+
       // ─── Report Modal ──────────────────────────────────────────────
       function openReportModal(brokerId) {
         reportBrokerIdInput.value = brokerId;
@@ -1419,11 +1527,6 @@
         reportModal.classList.remove('hidden');
       }
 
-      // ─── Reviews Modal Events ──────────────────────────────────────
-      closeReviewsModal.addEventListener('click', () => reviewsModal.classList.add('hidden'));
-      reviewsModal.addEventListener('click', (e) => { if (e.target === reviewsModal) reviewsModal.classList.add('hidden'); });
-
-      // ─── Report Modal Events ──────────────────────────────────────
       closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
       reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
 
@@ -1461,68 +1564,6 @@
         } catch (err) {
           reportStatus.textContent = '❌ Failed to submit report: ' + err.message;
           reportStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
-
-      // ─── Star selector (with hover + color feedback) ─────────────
-      starSelector.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', () => {
-          const val = parseInt(star.dataset.value);
-          reviewRating.value = val;
-          updateStarUI(val);
-        });
-        star.addEventListener('mouseenter', () => {
-          const val = parseInt(star.dataset.value);
-          updateStarUI(val);
-        });
-        star.addEventListener('mouseleave', () => {
-          const current = parseInt(reviewRating.value) || 5;
-          updateStarUI(current);
-        });
-      });
-
-      function updateStarUI(active) {
-        starSelector.querySelectorAll('.star').forEach(el => {
-          const val = parseInt(el.dataset.value);
-          el.classList.toggle('active', val <= active);
-        });
-      }
-
-      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
-      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
-
-      reviewForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const brokerId = reviewBrokerId.value;
-        const rating = parseInt(reviewRating.value);
-        const review = reviewText.value.trim();
-
-        if (!rating || rating < 1 || rating > 5) {
-          alert('Please select a rating (1-5 stars).');
-          return;
-        }
-
-        if (!state.currentUser) {
-          alert('Please sign in to leave a review.');
-          return;
-        }
-
-        try {
-          const { error } = await supabase.from('reviews').insert({
-            broker_id: brokerId,
-            user_id: state.currentUser.id,
-            rating: rating,
-            review_text: review || null,
-          });
-          if (error) throw error;
-          alert('✅ Review submitted! Thank you.');
-          reviewModal.classList.add('hidden');
-          await fetchAllData();
-          if (state.currentBrokerId) {
-            await loadBrokerProfile(state.currentBrokerId);
-          }
-        } catch (err) {
-          alert('Error submitting review: ' + err.message);
         }
       });
 
@@ -1577,11 +1618,9 @@
           }
 
           // 3. REVIEW-BASED RANKING (Step 1)
-          // Quality: average rating × 10 (max 50)
           const rating = broker.average_rating || 0;
           score += rating * 10;
 
-          // Quantity: review count (diminishing returns, max 25)
           const reviewCount = broker.review_count || 0;
           score += Math.min(reviewCount, 50) * 0.5;
 
@@ -1717,7 +1756,6 @@
           if (brokerId) navigateToBroker(brokerId);
         });
 
-        // ─── CONNECT BUTTON ───────────────────────────────────────────
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
@@ -2296,11 +2334,8 @@
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
-            reportBrokerBtn.classList.remove('hidden');
-            reportBrokerBtn.onclick = () => openReportModal(brokerId);
           } else {
             rateBrokerBtn.classList.add('hidden');
-            reportBrokerBtn.classList.add('hidden');
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
           }

@@ -397,6 +397,9 @@
       </div>
       <!-- Review form (hidden by default) -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+        <div id="reviewAuthMessage" class="text-sm text-amber-600 mb-3 hidden">
+          <i class="fas fa-info-circle"></i> Please <a href="#" id="reviewSignInLink" class="text-indigo-600 hover:underline">sign in</a> to leave a review.
+        </div>
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
           <div class="mb-3">
@@ -736,7 +739,7 @@
         </section>
       </section>
 
-      <!-- ===== BROKER PROFILE VIEW (Report button removed) ===== -->
+      <!-- ===== BROKER PROFILE VIEW (Report button restored) ===== -->
       <section id="brokerView" class="view view-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button id="backToDiscovery" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-800 mb-6 transition"><i class="fas fa-arrow-left"></i> Back to discovery</button>
@@ -765,7 +768,10 @@
                 <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
                   <i class="fas fa-comment"></i> Reviews
                 </button>
-                <!-- Report button removed -->
+                <!-- Report button restored -->
+                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
+                  <i class="fas fa-flag"></i> Report
+                </button>
                 <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
                   <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
                 </a>
@@ -969,7 +975,7 @@
   <!-- ============================================================
   JAVASCRIPT – SUPABASE & FULL APP
   ============================================================ -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=20">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js?v=21">
   </script>
 
   <script>
@@ -1071,6 +1077,7 @@
       const brokerLeadScore = $('#brokerLeadScore');
       const rateBrokerBtn = $('#rateBrokerBtn');
       const viewReviewsBtn = $('#viewReviewsBtn');
+      const reportBrokerBtn = $('#reportBrokerBtn');
       const brokerReportNotice = $('#brokerReportNotice');
       const statTotalReviews = $('#statTotalReviews');
       const statAvgRating = $('#statAvgRating');
@@ -1087,6 +1094,8 @@
       const starSelector = $('#starSelector');
       const reviewsList = $('#reviewsList');
       const noReviewsMessage = $('#noReviewsMessage');
+      const reviewAuthMessage = $('#reviewAuthMessage');
+      const reviewSignInLink = $('#reviewSignInLink');
 
       // Report Modal
       const reportModal = $('#reportModal');
@@ -1369,6 +1378,14 @@
       // ─── Reviews Modal Logic ───────────────────────────────────────
       // Toggle review form
       toggleWriteReview.addEventListener('click', function() {
+        // Check if user is signed in
+        if (!state.currentUser) {
+          reviewAuthMessage.classList.remove('hidden');
+          reviewFormContainer.classList.add('hidden');
+          this.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+          return;
+        }
+        reviewAuthMessage.classList.add('hidden');
         const isHidden = reviewFormContainer.classList.contains('hidden');
         if (isHidden) {
           reviewFormContainer.classList.remove('hidden');
@@ -1379,16 +1396,22 @@
         }
       });
 
+      // Sign in link in review auth message
+      reviewSignInLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        reviewModal.classList.add('hidden');
+        navigateToAuth();
+      });
+
       // Open review modal (called from profile)
       async function openReviewModal(brokerId) {
         reviewBrokerId.value = brokerId;
         reviewRating.value = 5;
         reviewText.value = '';
         updateStarUI(5);
-        // Reset form visibility
         reviewFormContainer.classList.add('hidden');
+        reviewAuthMessage.classList.add('hidden');
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
-        // Load reviews
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
       }
@@ -1463,17 +1486,16 @@
       // ─── Review form submit ────────────────────────────────────────
       reviewForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (!state.currentUser) {
+          alert('Please sign in to leave a review.');
+          return;
+        }
         const brokerId = reviewBrokerId.value;
         const rating = parseInt(reviewRating.value);
         const review = reviewText.value.trim();
 
         if (!rating || rating < 1 || rating > 5) {
           alert('Please select a rating (1-5 stars).');
-          return;
-        }
-
-        if (!state.currentUser) {
-          alert('Please sign in to leave a review.');
           return;
         }
 
@@ -1486,15 +1508,12 @@
           });
           if (error) throw error;
           alert('✅ Review submitted! Thank you.');
-          // Refresh reviews in modal
           await loadReviewsForModal(brokerId);
-          // Reset form
           reviewForm.reset();
           reviewRating.value = 5;
           updateStarUI(5);
           reviewFormContainer.classList.add('hidden');
           toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
-          // Refresh main data
           await fetchAllData();
           if (state.currentBrokerId) {
             await loadBrokerProfile(state.currentBrokerId);
@@ -1510,9 +1529,9 @@
 
       // ─── View Reviews button (profile) ────────────────────────────
       async function openViewReviewsModal(brokerId) {
-        // Reuse the same modal
         reviewBrokerId.value = brokerId;
         reviewFormContainer.classList.add('hidden');
+        reviewAuthMessage.classList.add('hidden');
         toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         reviewModal.classList.remove('hidden');
         await loadReviewsForModal(brokerId);
@@ -2329,13 +2348,17 @@
           statTotalReviews.textContent = reviewCount;
           statAvgRating.textContent = rating.toFixed(1);
 
+          // Show buttons if logged in and not viewing own profile
           if (state.currentUser && state.currentUser.id !== brokerId) {
             rateBrokerBtn.classList.remove('hidden');
             rateBrokerBtn.onclick = () => openReviewModal(brokerId);
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
+            reportBrokerBtn.classList.remove('hidden');
+            reportBrokerBtn.onclick = () => openReportModal(brokerId);
           } else {
             rateBrokerBtn.classList.add('hidden');
+            reportBrokerBtn.classList.add('hidden');
             viewReviewsBtn.classList.remove('hidden');
             viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
           }
@@ -2813,35 +2836,4 @@
         }
 
         try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            state.currentUser = user;
-            portalBtnLabel.textContent = 'Dashboard';
-            await loadProfileSettings();
-            await loadWallet();
-            await loadVerificationStatus();
-          }
-        } catch (err) {
-          console.log('No active session (403 is normal).');
-        }
-
-        await handleRoute();
-        await fetchAllData();
-
-        hideLoading();
-      }
-
-      init();
-      window.__state = state;
-    }
-
-    // ─── Start when DOM ready ────────────────────────────────────────
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', startApp);
-    } else {
-      startApp();
-    }
-  </script>
-
-</body>
-</html>
+          const { data: { user

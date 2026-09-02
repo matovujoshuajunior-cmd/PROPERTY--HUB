@@ -9,20 +9,17 @@
   <meta name="robots" content="index, follow" />
   <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
 
-  <!-- Open Graph -->
+  <!-- Open Graph / Twitter / Structured Data (same as before) -->
   <meta property="og:title" content="Property Hub Uganda" />
   <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
   <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
   <meta property="og:url" content="https://yourdomain.com/" />
   <meta property="og:type" content="website" />
-
-  <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Property Hub Uganda" />
   <meta name="twitter:description" content="Find your perfect property in Uganda." />
   <meta name="twitter:image" content="https://yourdomain.com/og-image.jpg" />
 
-  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -41,9 +38,11 @@
   <!-- Styles -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
   <style>
-    /* ... (all the same CSS as before – keeping it brief) ... */
+    /* ===== ALL CSS (same as before, plus minor adjustments) ===== */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -229,6 +228,8 @@
     .dashboard-toolbar .toolbar-btn.green:hover { background: #059669; }
     .dashboard-toolbar .toolbar-btn.amber { background: #f59e0b; color: white; }
     .dashboard-toolbar .toolbar-btn.amber:hover { background: #d97706; }
+    .dashboard-toolbar .toolbar-btn.red { background: #ef4444; color: white; }
+    .dashboard-toolbar .toolbar-btn.red:hover { background: #dc2626; }
 
     .profile-form-container, .add-property-container, .verification-form-container {
       background: white;
@@ -420,22 +421,19 @@
     </div>
   </div>
 
-  <!-- ===== REVIEW MODAL (updated with name field) ===== -->
+  <!-- ===== REVIEW MODAL ===== -->
   <div id="reviewModal" class="modal-backdrop hidden">
     <div class="modal-content">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-slate-800">⭐ Reviews</h2>
         <button id="closeReviewModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-
       <div class="flex justify-between items-center mb-3">
         <span class="text-sm text-slate-500">What others say</span>
         <button id="toggleWriteReview" class="write-review-toggle">
           <i class="fas fa-pen"></i> Write a Review
         </button>
       </div>
-
-      <!-- Review form (hidden by default) -->
       <div id="reviewFormContainer" class="hidden mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
         <form id="reviewForm">
           <input type="hidden" id="reviewBrokerId" />
@@ -446,10 +444,8 @@
           <div class="mb-3">
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Rating</label>
             <div id="starSelector" class="star-rating flex gap-1">
-              <span class="star" data-value="1">★</span>
-              <span class="star" data-value="2">★</span>
-              <span class="star" data-value="3">★</span>
-              <span class="star" data-value="4">★</span>
+              <span class="star" data-value="1">★</span><span class="star" data-value="2">★</span>
+              <span class="star" data-value="3">★</span><span class="star" data-value="4">★</span>
               <span class="star" data-value="5">★</span>
             </div>
             <input type="hidden" id="reviewRating" value="5" />
@@ -463,7 +459,6 @@
           </button>
         </form>
       </div>
-
       <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto">
         <p class="text-slate-500 text-sm">Loading reviews...</p>
       </div>
@@ -480,230 +475,59 @@
       </div>
       <form id="editPropertyForm" class="space-y-4">
         <input type="hidden" id="editPropertyId" />
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label>
-          <input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label>
-          <input type="number" id="editPrice" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label>
-          <select id="editType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-            <option value="Rentals">Rentals</option>
-            <option value="Properties">Properties</option>
-            <option value="Lodges">Lodges</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label>
-          <input type="text" id="editAddress" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label>
-          <div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div>
-          <input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
-        </div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="editTitle" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="editPrice" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="editType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white"><option value="Rentals">Rentals</option><option value="Properties">Properties</option><option value="Lodges">Lodges</option></select></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="editAddress" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+        <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><div id="editImagePreviews" class="flex flex-wrap gap-2 mb-2"></div><input type="file" id="editImageInput" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
         <div class="flex items-center gap-3 mt-2">
           <input type="checkbox" id="editRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
-          <span class="text-xs text-slate-400">(Admin will review and approve)</span>
+          <span class="text-xs text-slate-400">(You'll be asked to provide details later)</span>
         </div>
-        <div id="editVerificationInfo" class="verification-info-panel">
-          <p class="font-medium">🔍 Verification Process</p>
-          <ul>
-            <li>Your property will be reviewed by our admin team.</li>
-            <li>We check listing accuracy, images, and broker details.</li>
-            <li>Once approved, your property gets a <span class="badge-verified">Verified</span> badge.</li>
-            <li>Verified properties rank higher and build more trust with clients.</li>
-            <li>You will be notified once the review is complete.</li>
-          </ul>
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-          <i class="fas fa-save mr-2"></i> Update Property
-        </button>
+        <div id="editVerificationInfo" class="verification-info-panel"><p class="font-medium">🔍 Verification Process</p><ul><li>After saving, go to the Verification panel to submit required documents.</li><li>We'll review your property and approve it.</li><li>Verified properties rank higher.</li></ul></div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-save mr-2"></i> Update Property</button>
       </form>
     </div>
   </div>
 
-  <!-- ===== QUIZ MODAL ===== -->
-  <div id="quizModal" class="modal-backdrop hidden">
-    <div class="modal-content max-w-lg">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">📞 Connect with Broker</h2>
-        <button id="closeQuizModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
-      </div>
-      <form id="quizForm">
-        <input type="hidden" id="quizPropertyId" />
-        <div id="quizStep1">
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label>
-            <input type="text" id="quizName" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-          </div>
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address *</label>
-            <input type="email" id="quizEmail" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-          </div>
-          <div class="mb-3">
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Number *</label>
-            <input type="text" id="quizWhatsapp" required placeholder="e.g. 256700123456" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-          </div>
-          <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
-        </div>
-        <div id="quizStep2" class="hidden">
-          <div id="quizQuestionsContainer" class="space-y-4">
-            <div class="mb-4">
-              <p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p>
-              <div class="flex flex-wrap gap-2">
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q1" value="1" required /> More than 6 months
-                </label>
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q1" value="2" /> 1 – 6 months
-                </label>
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q1" value="3" /> Less than 1 month / ASAP
-                </label>
-              </div>
-            </div>
-            <div class="mb-4">
-              <p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p>
-              <div class="flex flex-wrap gap-2">
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q2" value="1" required /> Below property price
-                </label>
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q2" value="2" /> Matches property price
-                </label>
-                <label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer">
-                  <input type="radio" name="q2" value="3" /> Above property price
-                </label>
-              </div>
-            </div>
-          </div>
-          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4">
-            <i class="fas fa-paper-plane mr-2"></i> Submit Request
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===== WAITING ROOM ===== -->
-  <div id="waitingModal" class="modal-backdrop hidden">
-    <div class="modal-content text-center max-w-md">
-      <div class="py-8">
-        <i class="fas fa-hourglass-half text-5xl text-indigo-400 mb-4 animate-pulse"></i>
-        <h3 class="text-xl font-bold text-slate-800">⏳ Waiting for Broker</h3>
-        <p class="text-slate-500 text-sm mt-2">Your request has been sent. The broker will review it shortly.</p>
-        <p class="text-xs text-slate-400 mt-1">You'll be notified here once they respond.</p>
-        <div id="waitingStatus" class="mt-4 text-sm text-slate-600"></div>
-        <button id="cancelWaitBtn" class="mt-6 text-sm text-red-500 hover:text-red-700">Cancel Request</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== OTP MODAL ===== -->
-  <div id="otpModal" class="modal-backdrop hidden">
-    <div class="modal-content max-w-sm">
-      <h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3>
-      <p class="text-slate-500 text-sm">We've sent a one‑time password to your email and WhatsApp. Enter it below to reveal the broker's contact.</p>
-      <form id="otpForm" class="mt-4">
-        <input type="hidden" id="otpRequestId" />
-        <div class="mb-3">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">OTP Code</label>
-          <input type="text" id="otpInput" placeholder="6-digit code" maxlength="6" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-center" />
-        </div>
-        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Verify & Reveal WhatsApp</button>
-      </form>
-      <p id="otpError" class="text-red-500 text-xs mt-2 hidden"></p>
-    </div>
-  </div>
-
-  <!-- ===== TOP-UP MODAL ===== -->
-  <div id="topupModal" class="modal-backdrop hidden">
-    <div class="modal-content max-w-sm">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2>
-        <button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
-      </div>
-      <p class="text-slate-500 text-sm mb-4">Deposit real money (UGX) into your wallet.</p>
-      <form id="topupForm">
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label>
-          <input type="number" id="topupAmount" required min="1000" step="1000" placeholder="e.g. 10000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-        </div>
-        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-          <i class="fas fa-plus-circle mr-2"></i> Deposit
-        </button>
-      </form>
-      <div id="topupStatus" class="mt-3 text-sm text-slate-600"></div>
-    </div>
-  </div>
-
-  <!-- ===== REPORT MODAL ===== -->
-  <div id="reportModal" class="modal-backdrop hidden">
-    <div class="modal-content max-w-sm">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">🚨 Report Broker</h2>
-        <button id="closeReportModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
-      </div>
-      <p class="text-slate-500 text-sm mb-4">Report suspicious behavior or fraudulent activity.</p>
-      <form id="reportForm">
-        <input type="hidden" id="reportBrokerId" />
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Reason *</label>
-          <select id="reportReason" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-            <option value="">Select a reason</option>
-            <option value="fraud">Fraud / Scam</option>
-            <option value="fake_listing">Fake Listing</option>
-            <option value="harassment">Harassment</option>
-            <option value="spam">Spam</option>
-            <option value="misleading">Misleading Information</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div class="mb-4">
-          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description *</label>
-          <textarea id="reportDescription" rows="3" required placeholder="Describe the issue..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
-        </div>
-        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-          <i class="fas fa-flag mr-2"></i> Submit Report
-        </button>
-      </form>
-      <div id="reportStatus" class="mt-3 text-sm text-slate-600"></div>
-    </div>
-  </div>
-
-  <!-- ===== TERMS OF SERVICE MODAL ===== -->
-  <div id="termsModal" class="modal-backdrop hidden">
+  <!-- ===== PROPERTY VERIFICATION MODAL (new) ===== -->
+  <div id="propertyVerificationModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-slate-800">📜 Terms of Service</h2>
-        <button id="closeTermsModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+        <h2 class="text-xl font-bold text-slate-800">📋 Property Verification</h2>
+        <button id="closeVerificationModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
       </div>
-      <div class="max-h-96 overflow-y-auto text-sm text-slate-600 space-y-3">
-        <h3 class="font-bold text-slate-800">1. Platform Use</h3>
-        <p>Property Hub Uganda is a marketplace connecting property seekers with brokers. We do not own or manage any properties listed on this platform.</p>
-        <h3 class="font-bold text-slate-800">2. Visitor Safety</h3>
-        <p>Always verify properties in person before making any payments. Never send money to a broker without viewing the property first. Report suspicious activity immediately.</p>
-        <h3 class="font-bold text-slate-800">3. Broker Responsibilities</h3>
-        <p>Brokers must provide accurate property information. Misleading or fraudulent listings will result in account termination and legal action.</p>
-        <h3 class="font-bold text-slate-800">4. Liability</h3>
-        <p>Property Hub Uganda is not liable for any disputes between visitors and brokers. We provide a platform for connection – all transactions are between the visitor and the broker.</p>
-        <h3 class="font-bold text-slate-800">5. Reporting Fraud</h3>
-        <p>If you suspect fraud, report the broker immediately using the "Report Broker" button on their profile. We will investigate and take appropriate action.</p>
-        <h3 class="font-bold text-slate-800">6. Account Termination</h3>
-        <p>We reserve the right to terminate accounts that violate our terms of service or engage in fraudulent activity.</p>
-      </div>
-      <div class="mt-4 flex justify-end">
-        <button id="acceptTermsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition">
-          <i class="fas fa-check mr-2"></i> I Agree
+      <form id="propertyVerificationForm" class="space-y-4">
+        <input type="hidden" id="verifPropertyId" />
+        <input type="hidden" id="verifPropertyType" />
+        <p class="text-sm text-slate-600">Please provide the required information based on the property type. All fields are required unless marked optional.</p>
+        <div id="verifDynamicFields"></div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
+          <i class="fas fa-paper-plane mr-2"></i> Submit Verification Request
         </button>
-      </div>
+      </form>
+      <div id="verifStatus" class="mt-3 text-sm"></div>
     </div>
   </div>
+
+  <!-- ===== QUIZ / CONNECT MODAL ===== -->
+  <div id="quizModal" class="modal-backdrop hidden"><div class="modal-content max-w-lg"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-slate-800">📞 Connect with Broker</h2><button id="closeQuizModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button></div><form id="quizForm"><input type="hidden" id="quizPropertyId" /><div id="quizStep1"><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label><input type="text" id="quizName" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address *</label><input type="email" id="quizEmail" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Number *</label><input type="text" id="quizWhatsapp" required placeholder="e.g. 256700123456" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button></div><div id="quizStep2" class="hidden"><div id="quizQuestionsContainer" class="space-y-4"><div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="1" required /> More than 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="2" /> 1 – 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="3" /> Less than 1 month / ASAP</label></div></div><div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="1" required /> Below property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="2" /> Matches property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="3" /> Above property price</label></div></div></div><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4"><i class="fas fa-paper-plane mr-2"></i> Submit Request</button></div></form></div></div>
+
+  <!-- ===== WAITING ROOM ===== -->
+  <div id="waitingModal" class="modal-backdrop hidden"><div class="modal-content text-center max-w-md"><div class="py-8"><i class="fas fa-hourglass-half text-5xl text-indigo-400 mb-4 animate-pulse"></i><h3 class="text-xl font-bold text-slate-800">⏳ Waiting for Broker</h3><p class="text-slate-500 text-sm mt-2">Your request has been sent. The broker will review it shortly.</p><p class="text-xs text-slate-400 mt-1">You'll be notified here once they respond.</p><div id="waitingStatus" class="mt-4 text-sm text-slate-600"></div><button id="cancelWaitBtn" class="mt-6 text-sm text-red-500 hover:text-red-700">Cancel Request</button></div></div></div>
+
+  <!-- ===== OTP MODAL ===== -->
+  <div id="otpModal" class="modal-backdrop hidden"><div class="modal-content max-w-sm"><h3 class="text-xl font-bold text-slate-800 mb-2">🔐 Verify Your Identity</h3><p class="text-slate-500 text-sm">We've sent a one‑time password to your email and WhatsApp. Enter it below to reveal the broker's contact.</p><form id="otpForm" class="mt-4"><input type="hidden" id="otpRequestId" /><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">OTP Code</label><input type="text" id="otpInput" placeholder="6-digit code" maxlength="6" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm text-center" /></div><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Verify & Reveal WhatsApp</button></form><p id="otpError" class="text-red-500 text-xs mt-2 hidden"></p></div></div>
+
+  <!-- ===== TOP-UP MODAL ===== -->
+  <div id="topupModal" class="modal-backdrop hidden"><div class="modal-content max-w-sm"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-slate-800">💰 Top Up Wallet</h2><button id="closeTopupModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button></div><p class="text-slate-500 text-sm mb-4">Deposit real money (UGX) into your wallet.</p><form id="topupForm"><div class="mb-4"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Amount (UGX)</label><input type="number" id="topupAmount" required min="1000" step="1000" placeholder="e.g. 10000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-plus-circle mr-2"></i> Deposit</button></form><div id="topupStatus" class="mt-3 text-sm text-slate-600"></div></div></div>
+
+  <!-- ===== REPORT MODAL ===== -->
+  <div id="reportModal" class="modal-backdrop hidden"><div class="modal-content max-w-sm"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-slate-800">🚨 Report Broker</h2><button id="closeReportModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button></div><p class="text-slate-500 text-sm mb-4">Report suspicious behavior or fraudulent activity.</p><form id="reportForm"><input type="hidden" id="reportBrokerId" /><div class="mb-4"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Reason *</label><select id="reportReason" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white"><option value="">Select a reason</option><option value="fraud">Fraud / Scam</option><option value="fake_listing">Fake Listing</option><option value="harassment">Harassment</option><option value="spam">Spam</option><option value="misleading">Misleading Information</option><option value="other">Other</option></select></div><div class="mb-4"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description *</label><textarea id="reportDescription" rows="3" required placeholder="Describe the issue..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea></div><button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-flag mr-2"></i> Submit Report</button></form><div id="reportStatus" class="mt-3 text-sm text-slate-600"></div></div></div>
+
+  <!-- ===== TERMS OF SERVICE MODAL ===== -->
+  <div id="termsModal" class="modal-backdrop hidden"><div class="modal-content max-w-2xl"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-slate-800">📜 Terms of Service</h2><button id="closeTermsModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button></div><div class="max-h-96 overflow-y-auto text-sm text-slate-600 space-y-3"><h3 class="font-bold text-slate-800">1. Platform Use</h3><p>Property Hub Uganda is a marketplace connecting property seekers with brokers. We do not own or manage any properties listed on this platform.</p><h3 class="font-bold text-slate-800">2. Visitor Safety</h3><p>Always verify properties in person before making any payments. Never send money to a broker without viewing the property first. Report suspicious activity immediately.</p><h3 class="font-bold text-slate-800">3. Broker Responsibilities</h3><p>Brokers must provide accurate property information. Misleading or fraudulent listings will result in account termination and legal action.</p><h3 class="font-bold text-slate-800">4. Liability</h3><p>Property Hub Uganda is not liable for any disputes between visitors and brokers. We provide a platform for connection – all transactions are between the visitor and the broker.</p><h3 class="font-bold text-slate-800">5. Reporting Fraud</h3><p>If you suspect fraud, report the broker immediately using the "Report Broker" button on their profile. We will investigate and take appropriate action.</p><h3 class="font-bold text-slate-800">6. Account Termination</h3><p>We reserve the right to terminate accounts that violate our terms of service or engage in fraudulent activity.</p></div><div class="mt-4 flex justify-end"><button id="acceptTermsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-xl transition"><i class="fas fa-check mr-2"></i> I Agree</button></div></div></div>
 
   <div id="app" class="min-h-screen">
 
@@ -738,27 +562,16 @@
               <div class="mt-6 flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-1">
                   <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                  <input id="searchInput" type="text" placeholder="Search by address, city, or area…"
-                         class="w-full pl-10 pr-4 py-3 rounded-xl border-0 shadow-lg text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+                  <input id="searchInput" type="text" placeholder="Search by address, city, or area…" class="w-full pl-10 pr-4 py-3 rounded-xl border-0 shadow-lg text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
                 </div>
-                <button id="clearSearchBtn" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-5 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 border border-white/10">
-                  <i class="fas fa-times"></i><span class="clear-btn-text">Clear</span><span class="clear-btn-icon">×</span>
-                </button>
+                <button id="clearSearchBtn" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-5 py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2 border border-white/10"><i class="fas fa-times"></i><span class="clear-btn-text">Clear</span><span class="clear-btn-icon">×</span></button>
               </div>
             </div>
           </div>
         </div>
-
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4">
-          <div class="safety-banner">
-            <i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i>
-            <div>
-              <p class="text-sm font-semibold text-amber-800">🔒 Verified &amp; Trusted Properties</p>
-              <p class="text-xs text-amber-700">Look for the <span class="font-bold text-emerald-600">Verified</span> badge (property reviewed) and the <span class="font-bold text-amber-600">Trusted</span> badge (broker with great reputation).</p>
-            </div>
-          </div>
+          <div class="safety-banner"><i class="fas fa-shield-alt text-amber-500 text-lg mt-0.5"></i><div><p class="text-sm font-semibold text-amber-800">🔒 Verified &amp; Trusted Properties</p><p class="text-xs text-amber-700">Look for the <span class="font-bold text-emerald-600">Verified</span> badge (property reviewed) and the <span class="font-bold text-amber-600">Trusted</span> badge (broker with great reputation).</p></div></div>
         </div>
-
         <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div class="flex items-center gap-2 overflow-x-auto pb-3 mb-6">
             <button class="filter-pill active px-5 py-2 rounded-full border border-slate-200 bg-slate-900 text-white text-sm font-medium whitespace-nowrap" data-filter="all"><i class="fas fa-th-large mr-1.5"></i> All</button>
@@ -769,14 +582,7 @@
           </div>
           <div id="listingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="emptyState" class="hidden text-center py-20"><i class="fas fa-home text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">No properties match your criteria.</p><p class="text-slate-400 text-sm mt-1">Try adjusting the search or filters.</p></div>
-          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-            <div class="skeleton-card" style="display:block;">&nbsp;</div>
-          </div>
+          <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div><div class="skeleton-card" style="display:block;">&nbsp;</div></div>
         </section>
       </section>
 
@@ -787,44 +593,19 @@
           <div id="brokerHeader" class="broker-header rounded-2xl p-6 md:p-8 mb-8 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <div class="flex items-center gap-3">
-                  <h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2>
-                  <span id="brokerTrustedBadge" class="badge-trusted hidden"><i class="fas fa-star"></i> Trusted</span>
-                </div>
-                <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm">
-                  <span class="stars" id="brokerStars"></span>
-                  <span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span>
-                  <span class="badge-lead" id="brokerLeadScore">⚡ 0</span>
-                </div>
-                <div id="brokerReviewStats" class="review-stats mt-1">
-                  <span class="stat"><span class="value" id="statTotalReviews">0</span> <span class="label">reviews</span></span>
-                  <span class="stat"><span class="value" id="statAvgRating">0.0</span> <span class="label">avg rating</span></span>
-                </div>
+                <div class="flex items-center gap-3"><h2 id="brokerBusinessName" class="text-2xl md:text-3xl font-bold text-slate-800">Broker Name</h2><span id="brokerTrustedBadge" class="badge-trusted hidden"><i class="fas fa-star"></i> Trusted</span></div>
+                <div id="brokerRatingDisplay" class="mt-2 flex items-center gap-2 text-sm"><span class="stars" id="brokerStars"></span><span class="text-slate-600" id="brokerReviewCount">(0 reviews)</span><span class="badge-lead" id="brokerLeadScore">⚡ 0</span></div>
+                <div id="brokerReviewStats" class="review-stats mt-1"><span class="stat"><span class="value" id="statTotalReviews">0</span> <span class="label">reviews</span></span><span class="stat"><span class="value" id="statAvgRating">0.0</span> <span class="label">avg rating</span></span></div>
               </div>
               <div class="flex items-center gap-3 flex-wrap">
-                <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-star"></i> Rate
-                </button>
-                <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-comment"></i> Reviews
-                </button>
-                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden">
-                  <i class="fas fa-flag"></i> Report
-                </button>
-                <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden">
-                  <i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp
-                </a>
+                <button id="rateBrokerBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden"><i class="fas fa-star"></i> Rate</button>
+                <button id="viewReviewsBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden"><i class="fas fa-comment"></i> Reviews</button>
+                <button id="reportBrokerBtn" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm flex items-center gap-2 hidden"><i class="fas fa-flag"></i> Report</button>
+                <a id="brokerWhatsAppLink" href="#" target="_blank" class="btn-whatsapp px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2 shadow-md hover:shadow-lg transition hidden"><i class="fab fa-whatsapp text-lg"></i> Chat on WhatsApp</a>
               </div>
             </div>
-            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl">
-              <i class="fas fa-store mr-1.5 text-slate-400"></i>
-              <span class="italic">Browse all properties listed by this broker.</span>
-            </p>
-            <div id="brokerReportNotice" class="mt-3 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 hidden">
-              <i class="fas fa-exclamation-triangle mr-1"></i>
-              <span class="font-medium">⚠️ This broker has reported issues.</span>
-              <span> Proceed with caution.</span>
-            </div>
+            <p id="brokerBio" class="mt-3 text-slate-600 text-sm max-w-2xl"><i class="fas fa-store mr-1.5 text-slate-400"></i><span class="italic">Browse all properties listed by this broker.</span></p>
+            <div id="brokerReportNotice" class="mt-3 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700 hidden"><i class="fas fa-exclamation-triangle mr-1"></i><span class="font-medium">⚠️ This broker has reported issues.</span><span> Proceed with caution.</span></div>
           </div>
           <div id="brokerListingsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
           <div id="brokerEmptyState" class="hidden text-center py-20"><i class="fas fa-box-open text-5xl text-slate-300 mb-4"></i><p class="text-slate-500 text-lg">This broker has no listings yet.</p></div>
@@ -863,46 +644,20 @@
 
           <!-- ===== TOOLBAR ===== -->
           <div class="dashboard-toolbar">
-            <div class="wallet-pill">
-              <span class="wallet-label">Wallet</span>
-              <i class="fas fa-wallet"></i>
-              <span class="balance" id="walletBalanceDisplay">0</span> UGX
-              <button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button>
-            </div>
-
-            <button id="refreshWalletBtn" class="toolbar-btn" style="background:#334155;color:white;">
-              <i class="fas fa-sync-alt"></i>
-            </button>
-
-            <button id="dashboardEditProfileBtn" class="toolbar-btn">
-              <i class="fas fa-user-edit"></i> Edit Profile
-            </button>
-            <button id="dashboardAddPropertyBtn" class="toolbar-btn primary">
-              <i class="fas fa-plus-circle"></i> Add Property
-            </button>
-            <button id="dashboardVerificationBtn" class="toolbar-btn amber">
-              <i class="fas fa-shield-alt"></i> Verification
-            </button>
+            <div class="wallet-pill"><span class="wallet-label">Wallet</span><i class="fas fa-wallet"></i><span class="balance" id="walletBalanceDisplay">0</span> UGX<button id="topupBtn" class="ml-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-0.5 rounded-full transition">+ Top Up</button></div>
+            <button id="refreshWalletBtn" class="toolbar-btn" style="background:#334155;color:white;"><i class="fas fa-sync-alt"></i></button>
+            <button id="dashboardEditProfileBtn" class="toolbar-btn"><i class="fas fa-user-edit"></i> Edit Profile</button>
+            <button id="dashboardAddPropertyBtn" class="toolbar-btn primary"><i class="fas fa-plus-circle"></i> Add Property</button>
+            <button id="dashboardPropertyVerificationBtn" class="toolbar-btn amber"><i class="fas fa-shield-alt"></i> Property Verification</button>
           </div>
 
           <!-- ===== PROFILE FORM ===== -->
           <div id="profileFormContainer" class="profile-form-container">
             <h4 class="font-semibold text-slate-700 mb-3">⚙️ Edit Profile</h4>
             <form id="profileSettingsForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label>
-                <input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label>
-                <input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" />
-              </div>
-              <div class="md:col-span-2">
-                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm">
-                  <i class="fas fa-save mr-2"></i> Save Profile
-                </button>
-                <button type="button" id="cancelProfileEditBtn" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button>
-              </div>
+              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Business Name</label><input type="text" id="settingsBusinessName" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Phone</label><input type="text" id="settingsPhone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" placeholder="+256 700 000 000" /></div>
+              <div class="md:col-span-2"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-6 rounded-xl transition shadow-sm"><i class="fas fa-save mr-2"></i> Save Profile</button><button type="button" id="cancelProfileEditBtn" class="ml-2 text-sm text-slate-500 hover:text-slate-700">Cancel</button></div>
             </form>
             <div id="profileStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
@@ -913,59 +668,33 @@
             <form id="addPropertyForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title *</label><input type="text" id="propTitle" required placeholder="e.g. Modern 3-Bedroom Villa" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Price (UGX) *</label><input type="number" id="propPrice" required placeholder="e.g. 250000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
-              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white">
-                <option value="Rentals">Rentals</option>
-                <option value="Properties">Properties</option>
-                <option value="Lodges">Lodges</option>
-              </select></div>
+              <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Type *</label><select id="propType" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm bg-white"><option value="Rentals">Rentals</option><option value="Properties">Properties</option><option value="Lodges">Lodges</option></select></div>
               <div><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Address *</label><input type="text" id="propAddress" required placeholder="e.g. Kampala, Uganda" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
               <div class="md:col-span-2"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Images</label><input type="file" id="propImage" accept="image/*" multiple class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" /></div>
-              <div class="md:col-span-2 flex items-center gap-3 mt-2">
-                <input type="checkbox" id="addRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
-                <label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
-                <span class="text-xs text-slate-400">(Admin will review and approve)</span>
-              </div>
-              <div id="addVerificationInfo" class="verification-info-panel">
-                <p class="font-medium">🔍 Verification Process</p>
-                <ul>
-                  <li>Your property will be reviewed by our admin team.</li>
-                  <li>We check listing accuracy, images, and broker details.</li>
-                  <li>Once approved, your property gets a <span class="badge-verified">Verified</span> badge.</li>
-                  <li>Verified properties rank higher and build more trust with clients.</li>
-                  <li>You will be notified once the review is complete.</li>
-                </ul>
-              </div>
-              <div class="md:col-span-2">
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">
-                  <i class="fas fa-plus mr-2"></i> Add Property
-                </button>
-                <p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Verified properties rank higher. Build your reputation with good reviews to earn a "Trusted" badge.</p>
-              </div>
+              <div class="md:col-span-2 flex items-center gap-3 mt-2"><input type="checkbox" id="addRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" /><label for="addRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label><span class="text-xs text-slate-400">(You'll provide details later)</span></div>
+              <div id="addVerificationInfo" class="verification-info-panel"><p class="font-medium">🔍 Verification Process</p><ul><li>After saving, go to the Verification panel to submit required documents.</li><li>We'll review your property and approve it.</li><li>Verified properties rank higher.</li></ul></div>
+              <div class="md:col-span-2"><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-plus mr-2"></i> Add Property</button><p class="text-xs text-slate-500 mt-2"><i class="fas fa-info-circle"></i> Verified properties rank higher. Build your reputation with good reviews to earn a "Trusted" badge.</p></div>
             </form>
             <div id="uploadStatus" class="mt-3 text-sm text-slate-600"></div>
           </div>
 
           <!-- ===== PROPERTY VERIFICATION PANEL ===== -->
-          <div id="verificationContainer" class="verification-form-container">
+          <div id="propertyVerificationContainer" class="verification-form-container">
             <div class="flex items-center justify-between mb-4">
               <h4 class="font-semibold text-slate-700">🛡️ Property Verification</h4>
               <span id="verificationInfoBadge" class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200 text-slate-600">Manage verifications</span>
             </div>
-
             <div class="verification-info-panel visible mb-4">
               <p class="font-medium">🔍 Verification Process</p>
               <ul>
                 <li>Request verification for any of your properties.</li>
-                <li>Our admin team will review the listing, images, and details.</li>
-                <li>Once approved, the property gets a <span class="badge-verified">Verified</span> badge.</li>
+                <li>Provide the required documents and contacts based on the property type.</li>
+                <li>Our admin team will review and approve if everything is correct.</li>
+                <li>Once approved, your property gets a <span class="badge-verified">Verified</span> badge.</li>
                 <li>Verified properties rank higher and attract more trust.</li>
-                <li>You will be notified when the review is complete.</li>
               </ul>
             </div>
-
-            <div id="propertyVerificationList">
-              <p class="text-slate-500 text-sm">Loading your properties...</p>
-            </div>
+            <div id="propertyVerificationList"><p class="text-slate-500 text-sm">Loading your properties...</p></div>
             <div id="propertyVerificationEmpty" class="hidden text-center py-4 text-slate-400 text-sm">
               You don't have any properties yet. <a href="#" id="gotoAddPropertyFromVerification" class="text-indigo-600 hover:underline">Add a property</a> to request verification.
             </div>
@@ -973,26 +702,24 @@
 
           <!-- ===== MY PROPERTIES LIST ===== -->
           <div id="myPropertiesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-          <div id="myPropertiesEmpty" class="text-center py-16 text-slate-400 hidden">
-            <i class="fas fa-home text-4xl mb-3 text-slate-300"></i>
-            <p class="text-lg font-medium text-slate-500">No properties yet</p>
-            <p class="text-sm text-slate-400">Click "Add Property" to list your first property.</p>
-          </div>
+          <div id="myPropertiesEmpty" class="text-center py-16 text-slate-400 hidden"><i class="fas fa-home text-4xl mb-3 text-slate-300"></i><p class="text-lg font-medium text-slate-500">No properties yet</p><p class="text-sm text-slate-400">Click "Add Property" to list your first property.</p></div>
         </div>
       </section>
     </main>
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – SUPABASE & FULL APP
+  JAVASCRIPT – SUPABASE + FULL APP
   ============================================================ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
   </script>
 
   <script>
-    // ─── Supabase Config ──────────────────────────────────────────────
+    // ─── Supabase & Cloudinary Config ──────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
+    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // REPLACE
+    const CLOUDINARY_UPLOAD_PRESET = 'your_upload_preset'; // REPLACE
 
     // ─── Wait for Supabase ──────────────────────────────────────────
     function waitForSupabase() {
@@ -1008,8 +735,7 @@
     }
 
     function hideLoading() {
-      const overlay = document.getElementById('loadingOverlay');
-      if (overlay) overlay.classList.add('hidden');
+      document.getElementById('loadingOverlay').classList.add('hidden');
     }
 
     // ─── Start App ──────────────────────────────────────────────────
@@ -1129,10 +855,10 @@
 
       const dashboardEditProfileBtn = $('#dashboardEditProfileBtn');
       const dashboardAddPropertyBtn = $('#dashboardAddPropertyBtn');
-      const dashboardVerificationBtn = $('#dashboardVerificationBtn');
+      const dashboardPropertyVerificationBtn = $('#dashboardPropertyVerificationBtn');
       const profileFormContainer = $('#profileFormContainer');
       const addPropertyContainer = $('#addPropertyContainer');
-      const verificationContainer = $('#verificationContainer');
+      const propertyVerificationContainer = $('#propertyVerificationContainer');
       const cancelProfileEditBtn = $('#cancelProfileEditBtn');
 
       const profileSettingsForm = $('#profileSettingsForm');
@@ -1181,9 +907,17 @@
       const topupAmount = $('#topupAmount');
       const topupStatus = $('#topupStatus');
 
+      // Property verification
       const propertyVerificationList = $('#propertyVerificationList');
       const propertyVerificationEmpty = $('#propertyVerificationEmpty');
       const gotoAddPropertyFromVerification = $('#gotoAddPropertyFromVerification');
+      const propertyVerificationModal = $('#propertyVerificationModal');
+      const closeVerificationModal = $('#closeVerificationModal');
+      const propertyVerificationForm = $('#propertyVerificationForm');
+      const verifPropertyId = $('#verifPropertyId');
+      const verifPropertyType = $('#verifPropertyType');
+      const verifDynamicFields = $('#verifDynamicFields');
+      const verifStatus = $('#verifStatus');
 
       const securityNotification = $('#securityNotification');
       const closeSecurityNotification = $('#closeSecurityNotification');
@@ -1357,7 +1091,498 @@
       topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
       refreshWalletBtn.addEventListener('click', loadWallet);
 
-      // ─── Reviews (updated for comment + client_name) ──────────────
+      // ─── Cloudinary Upload Helper ──────────────────────────────────
+      function initCloudinaryUpload(btnSelector, targetInputId, previewId, fileNameId) {
+        document.querySelectorAll(btnSelector).forEach(btn => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const widget = cloudinary.createUploadWidget({
+              cloudName: CLOUDINARY_CLOUD_NAME,
+              uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+              sources: ['local', 'url', 'camera'],
+              multiple: false,
+              cropping: false,
+              folder: 'property_verifications',
+              resourceType: 'auto',
+            }, (error, result) => {
+              if (!error && result && result.event === "success") {
+                const url = result.info.secure_url;
+                document.getElementById(targetInputId).value = url;
+                if (previewId) {
+                  const preview = document.getElementById(previewId);
+                  preview.src = url;
+                  preview.classList.remove('hidden');
+                }
+                if (fileNameId) {
+                  document.getElementById(fileNameId).textContent = result.info.original_filename || 'Uploaded';
+                }
+              }
+            });
+            widget.open();
+          });
+        });
+      }
+
+      // ─── Property Verification Modal ──────────────────────────────
+      async function openPropertyVerificationModal(propertyId) {
+        const { data: prop, error } = await supabase
+          .from('properties')
+          .select('id, property_type')
+          .eq('id', propertyId)
+          .single();
+        if (error || !prop) {
+          alert('Error loading property details.');
+          return;
+        }
+
+        verifPropertyId.value = prop.id;
+        verifPropertyType.value = prop.property_type;
+
+        let html = '';
+        const type = prop.property_type;
+
+        if (type === 'property') {
+          html = `
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Land Title Document *</label>
+              <div class="flex gap-2 items-center">
+                <input type="hidden" id="landTitleUrl" />
+                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="landTitleUrl" data-preview="landTitlePreview" data-filename="landTitleFileName">
+                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
+                </button>
+                <span id="landTitleFileName" class="text-xs text-slate-500">No file chosen</span>
+              </div>
+              <div id="landTitlePreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Contact Name *</label>
+              <input type="text" id="localLeaderName" placeholder="e.g. LC1 Chairperson" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Phone *</label>
+              <input type="text" id="localLeaderPhone" placeholder="e.g. 256700000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Address</label>
+              <input type="text" id="localLeaderAddress" placeholder="e.g. Village, Parish, District" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
+              <textarea id="propertyNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+            </div>
+          `;
+        } else { // rentals or lodges
+          html = `
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Proof of Ownership (e.g., receipt, tenancy agreement) *</label>
+              <div class="flex gap-2 items-center">
+                <input type="hidden" id="proofOwnershipUrl" />
+                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="proofOwnershipUrl" data-preview="proofPreview" data-filename="proofFileName">
+                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
+                </button>
+                <span id="proofFileName" class="text-xs text-slate-500">No file chosen</span>
+              </div>
+              <div id="proofPreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Manager Contact *</label>
+              <input type="text" id="managerContact" placeholder="Name and phone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Utility Bills (optional)</label>
+              <div class="flex gap-2 items-center">
+                <input type="hidden" id="utilityBillsUrl" />
+                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="utilityBillsUrl" data-preview="utilityPreview" data-filename="utilityFileName">
+                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Bills
+                </button>
+                <span id="utilityFileName" class="text-xs text-slate-500">No file chosen</span>
+              </div>
+              <div id="utilityPreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
+              <textarea id="rentalNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+            </div>
+          `;
+        }
+        verifDynamicFields.innerHTML = html;
+
+        // Init Cloudinary uploads for this modal instance
+        initCloudinaryUpload('.cloudinary-upload-btn', '', '', '');
+
+        propertyVerificationModal.classList.remove('hidden');
+        verifStatus.textContent = '';
+      }
+
+      closeVerificationModal.addEventListener('click', () => propertyVerificationModal.classList.add('hidden'));
+      propertyVerificationModal.addEventListener('click', (e) => {
+        if (e.target === propertyVerificationModal) propertyVerificationModal.classList.add('hidden');
+      });
+
+      propertyVerificationForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const propertyId = verifPropertyId.value;
+        const propertyType = verifPropertyType.value;
+
+        let submittedData = {};
+        if (propertyType === 'property') {
+          const landTitle = document.getElementById('landTitleUrl').value;
+          const leaderName = document.getElementById('localLeaderName').value.trim();
+          const leaderPhone = document.getElementById('localLeaderPhone').value.trim();
+          const leaderAddress = document.getElementById('localLeaderAddress').value.trim();
+          const notes = document.getElementById('propertyNotes').value.trim();
+
+          if (!landTitle || !leaderName || !leaderPhone) {
+            verifStatus.textContent = 'Please fill in all required fields and upload the land title document.';
+            verifStatus.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+          submittedData = { landTitle, leaderName, leaderPhone, leaderAddress, notes };
+        } else {
+          const proof = document.getElementById('proofOwnershipUrl').value;
+          const manager = document.getElementById('managerContact').value.trim();
+          const utility = document.getElementById('utilityBillsUrl').value;
+          const notes = document.getElementById('rentalNotes').value.trim();
+
+          if (!proof || !manager) {
+            verifStatus.textContent = 'Please fill in all required fields and upload proof of ownership.';
+            verifStatus.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+          submittedData = { proof, manager, utility, notes };
+        }
+
+        verifStatus.textContent = 'Submitting request...';
+        verifStatus.className = 'mt-3 text-sm text-indigo-600';
+
+        try {
+          const { data, error } = await supabase
+            .from('property_verification_requests')
+            .insert({
+              property_id: propertyId,
+              broker_id: state.currentUser.id,
+              submitted_data: submittedData,
+              status: 'pending',
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          // Update property status
+          await supabase
+            .from('properties')
+            .update({ verification_status: 'pending', is_verified: false })
+            .eq('id', propertyId);
+
+          verifStatus.textContent = '✅ Verification request submitted! Admin will review it shortly.';
+          verifStatus.className = 'mt-3 text-sm text-emerald-600';
+          propertyVerificationModal.classList.add('hidden');
+
+          loadPropertyVerificationList();
+          loadMyProperties();
+          fetchAllData();
+        } catch (err) {
+          verifStatus.textContent = '❌ Submission failed: ' + err.message;
+          verifStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Load Property Verification List ──────────────────────────
+      async function loadPropertyVerificationList() {
+        if (!state.currentUser) return;
+        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
+        try {
+          const { data: properties, error: pErr } = await supabase
+            .from('properties')
+            .select(`
+              *,
+              verification_requests:property_verification_requests (
+                id, status, submitted_data, created_at
+              )
+            `)
+            .eq(fk, state.currentUser.id)
+            .order('created_at', { ascending: false });
+
+          if (pErr) throw pErr;
+
+          if (!properties || properties.length === 0) {
+            propertyVerificationList.innerHTML = '';
+            propertyVerificationEmpty.classList.remove('hidden');
+            return;
+          }
+          propertyVerificationEmpty.classList.add('hidden');
+
+          let html = '';
+          properties.forEach(prop => {
+            const req = prop.verification_requests?.[0] || null;
+            const status = req ? req.status : 'Not requested';
+            const statusClass = status === 'approved' ? 'approved' :
+                                status === 'pending' ? 'pending' :
+                                status === 'rejected' ? 'rejected' : 'unverified';
+            const statusLabel = status === 'approved' ? '✅ Approved' :
+                                status === 'pending' ? '⏳ Pending' :
+                                status === 'rejected' ? '❌ Rejected' : 'Not requested';
+
+            const canRequest = (!req || req.status === 'rejected') && status !== 'pending';
+
+            html += `
+              <div class="verification-property-item">
+                <div class="property-title">${prop.title || 'Untitled'}</div>
+                <div><span class="property-status ${statusClass}">${statusLabel}</span></div>
+                <div>
+                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` :
+                  `<span class="text-xs text-slate-400">${status === 'approved' ? 'Verified' : 'In progress'}</span>`}
+                  ${req ? `<button class="view-verification-details text-xs text-blue-600 hover:underline ml-2" data-request-id="${req.id}">Details</button>` : ''}
+                </div>
+              </div>
+            `;
+          });
+          propertyVerificationList.innerHTML = html;
+
+          propertyVerificationList.querySelectorAll('.request-verification-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              openPropertyVerificationModal(this.dataset.propertyId);
+            });
+          });
+
+          propertyVerificationList.querySelectorAll('.view-verification-details').forEach(btn => {
+            btn.addEventListener('click', async function() {
+              const requestId = this.dataset.requestId;
+              const { data: req, error } = await supabase
+                .from('property_verification_requests')
+                .select('submitted_data, status, created_at')
+                .eq('id', requestId)
+                .single();
+              if (error) {
+                alert('Error loading details.');
+                return;
+              }
+              const data = req.submitted_data;
+              let msg = `Status: ${req.status}\nSubmitted: ${new Date(req.created_at).toLocaleString()}\n\n`;
+              for (const [key, value] of Object.entries(data)) {
+                msg += `${key}: ${value}\n`;
+              }
+              alert(msg);
+            });
+          });
+
+        } catch (err) {
+          console.error('Error loading property verifications:', err);
+          propertyVerificationList.innerHTML = `<p class="text-red-500 text-sm">Error loading: ${err.message}</p>`;
+        }
+      }
+
+      // ─── Dashboard toggles ────────────────────────────────────────
+      function toggleProfileForm() {
+        const isVisible = profileFormContainer.classList.contains('visible');
+        if (isVisible) {
+          profileFormContainer.classList.remove('visible');
+        } else {
+          profileFormContainer.classList.add('visible');
+          addPropertyContainer.classList.remove('visible');
+          propertyVerificationContainer.classList.remove('visible');
+        }
+      }
+
+      function toggleAddPropertyForm() {
+        const isVisible = addPropertyContainer.classList.contains('visible');
+        if (isVisible) {
+          addPropertyContainer.classList.remove('visible');
+        } else {
+          addPropertyContainer.classList.add('visible');
+          profileFormContainer.classList.remove('visible');
+          propertyVerificationContainer.classList.remove('visible');
+        }
+      }
+
+      function togglePropertyVerificationForm() {
+        const isVisible = propertyVerificationContainer.classList.contains('visible');
+        if (isVisible) {
+          propertyVerificationContainer.classList.remove('visible');
+        } else {
+          propertyVerificationContainer.classList.add('visible');
+          profileFormContainer.classList.remove('visible');
+          addPropertyContainer.classList.remove('visible');
+          loadPropertyVerificationList();
+        }
+      }
+
+      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
+      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
+      dashboardPropertyVerificationBtn?.addEventListener('click', togglePropertyVerificationForm);
+      cancelProfileEditBtn?.addEventListener('click', () => {
+        profileFormContainer.classList.remove('visible');
+      });
+      gotoAddPropertyFromVerification?.addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAddPropertyForm();
+      });
+
+      // ─── CRUD ──────────────────────────────────────────────────────
+      async function deleteProperty(propId) {
+        try {
+          const { error } = await supabase.from('properties').delete().eq('id', propId);
+          if (error) throw error;
+          state.myProperties = state.myProperties.filter(p => p.id !== propId);
+          renderMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Delete failed: ' + err.message); }
+      }
+
+      async function openEditModal(propertyId) {
+        const prop = state.myProperties.find(p => p.id === propertyId);
+        if (!prop) return;
+        editPropertyId.value = propertyId;
+        editTitle.value = prop[COLUMNS.TITLE] || '';
+        editPrice.value = prop[COLUMNS.PRICE] || '';
+        const dbType = prop[COLUMNS.TYPE] || '';
+        let formType = 'Rentals';
+        if (dbType === 'property') formType = 'Properties';
+        else if (dbType === 'lodge') formType = 'Lodges';
+        else if (dbType === 'rental') formType = 'Rentals';
+        editType.value = formType;
+        editAddress.value = prop[COLUMNS.ADDRESS] || '';
+
+        const images = getImageArray(prop);
+        renderEditImagePreviews(images);
+        editModal._currentImages = images;
+        editModal._currentProperty = prop;
+
+        editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
+        if (editRequestVerification.checked) {
+          editVerificationInfo.classList.add('visible');
+        } else {
+          editVerificationInfo.classList.remove('visible');
+        }
+        editModal.classList.remove('hidden');
+      }
+
+      function renderEditImagePreviews(images) {
+        editImagePreviews.innerHTML = '';
+        images.forEach((url, index) => {
+          const div = document.createElement('div');
+          div.className = 'image-thumb';
+          div.innerHTML = `
+            <img src="${url}" alt="Property image" />
+            <button class="remove-img" data-index="${index}">&times;</button>
+          `;
+          div.querySelector('.remove-img').addEventListener('click', () => {
+            const current = editModal._currentImages || [];
+            current.splice(index, 1);
+            renderEditImagePreviews(current);
+            editModal._currentImages = current;
+          });
+          editImagePreviews.appendChild(div);
+        });
+      }
+
+      editPropertyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = editPropertyId.value;
+        if (!id) return;
+        const title = editTitle.value.trim();
+        const price = parseFloat(editPrice.value);
+        const type = editType.value;
+        const address = editAddress.value.trim();
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+        let currentImages = editModal._currentImages || [];
+        const files = editImageInput.files;
+        if (files && files.length > 0) {
+          for (const file of files) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `${state.currentUser.id}/${fileName}`;
+            const { error: uploadError } = await supabase.storage.from('property-media').upload(filePath, file);
+            if (uploadError) {
+              alert('Image upload failed: ' + uploadError.message);
+              return;
+            }
+            const { data: urlData } = supabase.storage.from('property-media').getPublicUrl(filePath);
+            currentImages.push(urlData.publicUrl);
+          }
+          editImageInput.value = '';
+        }
+
+        const dbType = TYPE_MAP[type] || type;
+        const requestVerification = editRequestVerification.checked;
+        let verificationStatus = 'unverified';
+        let isVerified = false;
+        if (requestVerification) {
+          verificationStatus = 'pending';
+          isVerified = false;
+        }
+
+        const updateData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: currentImages,
+          [COLUMNS.IS_VERIFIED]: isVerified,
+          [COLUMNS.VERIFICATION_STATUS]: verificationStatus,
+        };
+
+        try {
+          const { error } = await supabase.from('properties').update(updateData).eq('id', id);
+          if (error) throw error;
+          alert(requestVerification ? '✅ Property updated! Verification requested.' : '✅ Property updated!');
+          editModal.classList.add('hidden');
+          await loadMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Update failed: ' + err.message); }
+      });
+
+      closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
+      editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
+
+      // ─── Profile ────────────────────────────────────────────────────
+      async function loadProfileSettings() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('business_name, phone, is_admin')
+            .eq('id', state.currentUser.id)
+            .single();
+          if (error) throw error;
+          settingsBusinessName.value = data.business_name || '';
+          settingsPhone.value = data.phone || '';
+          state.isAdmin = data.is_admin || false;
+        } catch (err) {
+          console.error('Error loading profile:', err);
+        }
+      }
+
+      profileSettingsForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) return;
+        const businessName = settingsBusinessName.value.trim();
+        const phone = settingsPhone.value.trim();
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ business_name: businessName, phone: phone })
+            .eq('id', state.currentUser.id);
+          if (error) throw error;
+          profileStatus.textContent = '✅ Profile updated successfully!';
+          profileStatus.className = 'mt-3 text-sm text-emerald-600';
+          if (state.currentUser) {
+            state.currentUser.business_name = businessName;
+            state.currentUser.phone = phone;
+          }
+          await fetchAllData();
+          if (state.currentUser) await loadMyProperties();
+        } catch (err) {
+          profileStatus.textContent = '❌ Update failed: ' + err.message;
+          profileStatus.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Reviews ────────────────────────────────────────────────────
       toggleWriteReview.addEventListener('click', function() {
         const isHidden = reviewFormContainer.classList.contains('hidden');
         if (isHidden) {
@@ -1448,14 +1673,13 @@
         const brokerId = reviewBrokerId.value;
         const rating = parseInt(reviewRating.value);
         const comment = reviewComment.value.trim();
-        const clientName = reviewClientName.value.trim() || null; // optional
+        const clientName = reviewClientName.value.trim() || null;
 
         if (!rating || rating < 1 || rating > 5) {
           alert('Please select a rating (1-5 stars).');
           return;
         }
         try {
-          // Insert using your table columns: rating, comment, client_name, broker_id
           const { error } = await supabase.from('reviews').insert({
             broker_id: brokerId,
             rating: rating,
@@ -1759,281 +1983,6 @@
           myPropertiesList.appendChild(card);
         });
       }
-
-      // ─── Property Verification ──────────────────────────────────────
-      async function loadPropertyVerificationList() {
-        if (!state.currentUser) return;
-        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
-        try {
-          const { data, error } = await supabase
-            .from('properties')
-            .select('*')
-            .eq(fk, state.currentUser.id)
-            .order('created_at', { ascending: false });
-          if (error) throw error;
-          if (!data || data.length === 0) {
-            propertyVerificationList.innerHTML = '';
-            propertyVerificationEmpty.classList.remove('hidden');
-            return;
-          }
-          propertyVerificationEmpty.classList.add('hidden');
-          let html = '';
-          data.forEach(prop => {
-            const status = prop[COLUMNS.VERIFICATION_STATUS] || 'unverified';
-            let statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-            let statusClass = status;
-            if (status === 'approved') { statusLabel = '✅ Approved'; statusClass = 'approved'; }
-            else if (status === 'pending') { statusLabel = '⏳ Pending'; statusClass = 'pending'; }
-            else if (status === 'rejected') { statusLabel = '❌ Rejected'; statusClass = 'rejected'; }
-            else { statusLabel = 'Not requested'; statusClass = 'unverified'; }
-
-            const canRequest = (status === 'unverified' || status === 'rejected');
-            html += `
-              <div class="verification-property-item">
-                <div class="property-title">${prop[COLUMNS.TITLE] || 'Untitled'}</div>
-                <div><span class="property-status ${statusClass}">${statusLabel}</span></div>
-                <div>
-                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` : `<span class="text-xs text-slate-400">${status === 'approved' ? 'Verified' : 'In progress'}</span>`}
-                </div>
-              </div>
-            `;
-          });
-          propertyVerificationList.innerHTML = html;
-          propertyVerificationList.querySelectorAll('.request-verification-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-              const propertyId = this.dataset.propertyId;
-              if (confirm('Request verification for this property? An admin will review it.')) {
-                try {
-                  const { error } = await supabase
-                    .from('properties')
-                    .update({
-                      [COLUMNS.VERIFICATION_STATUS]: 'pending',
-                      [COLUMNS.IS_VERIFIED]: false,
-                    })
-                    .eq('id', propertyId);
-                  if (error) throw error;
-                  alert('✅ Verification requested. You will be notified once reviewed.');
-                  await loadPropertyVerificationList();
-                  await loadMyProperties();
-                  await fetchAllData();
-                } catch (err) {
-                  alert('Error requesting verification: ' + err.message);
-                }
-              }
-            });
-          });
-        } catch (err) {
-          propertyVerificationList.innerHTML = `<p class="text-red-500 text-sm">Error loading properties: ${err.message}</p>`;
-        }
-      }
-
-      // ─── Dashboard toggles ────────────────────────────────────────
-      function toggleProfileForm() {
-        const isVisible = profileFormContainer.classList.contains('visible');
-        if (isVisible) {
-          profileFormContainer.classList.remove('visible');
-        } else {
-          profileFormContainer.classList.add('visible');
-          addPropertyContainer.classList.remove('visible');
-          verificationContainer.classList.remove('visible');
-        }
-      }
-
-      function toggleAddPropertyForm() {
-        const isVisible = addPropertyContainer.classList.contains('visible');
-        if (isVisible) {
-          addPropertyContainer.classList.remove('visible');
-        } else {
-          addPropertyContainer.classList.add('visible');
-          profileFormContainer.classList.remove('visible');
-          verificationContainer.classList.remove('visible');
-        }
-      }
-
-      function toggleVerificationForm() {
-        const isVisible = verificationContainer.classList.contains('visible');
-        if (isVisible) {
-          verificationContainer.classList.remove('visible');
-        } else {
-          verificationContainer.classList.add('visible');
-          profileFormContainer.classList.remove('visible');
-          addPropertyContainer.classList.remove('visible');
-          loadPropertyVerificationList();
-        }
-      }
-
-      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
-      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
-      dashboardVerificationBtn?.addEventListener('click', toggleVerificationForm);
-      cancelProfileEditBtn?.addEventListener('click', () => {
-        profileFormContainer.classList.remove('visible');
-      });
-      gotoAddPropertyFromVerification?.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleAddPropertyForm();
-      });
-
-      // ─── CRUD ──────────────────────────────────────────────────────
-      async function deleteProperty(propId) {
-        try {
-          const { error } = await supabase.from('properties').delete().eq('id', propId);
-          if (error) throw error;
-          state.myProperties = state.myProperties.filter(p => p.id !== propId);
-          renderMyProperties();
-          await fetchAllData();
-        } catch (err) { alert('Delete failed: ' + err.message); }
-      }
-
-      async function openEditModal(propertyId) {
-        const prop = state.myProperties.find(p => p.id === propertyId);
-        if (!prop) return;
-        editPropertyId.value = propertyId;
-        editTitle.value = prop[COLUMNS.TITLE] || '';
-        editPrice.value = prop[COLUMNS.PRICE] || '';
-        const dbType = prop[COLUMNS.TYPE] || '';
-        let formType = 'Rentals';
-        if (dbType === 'property') formType = 'Properties';
-        else if (dbType === 'lodge') formType = 'Lodges';
-        else if (dbType === 'rental') formType = 'Rentals';
-        editType.value = formType;
-        editAddress.value = prop[COLUMNS.ADDRESS] || '';
-
-        const images = getImageArray(prop);
-        renderEditImagePreviews(images);
-        editModal._currentImages = images;
-        editModal._currentProperty = prop;
-
-        editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
-        if (editRequestVerification.checked) {
-          editVerificationInfo.classList.add('visible');
-        } else {
-          editVerificationInfo.classList.remove('visible');
-        }
-        editModal.classList.remove('hidden');
-      }
-
-      function renderEditImagePreviews(images) {
-        editImagePreviews.innerHTML = '';
-        images.forEach((url, index) => {
-          const div = document.createElement('div');
-          div.className = 'image-thumb';
-          div.innerHTML = `
-            <img src="${url}" alt="Property image" />
-            <button class="remove-img" data-index="${index}">&times;</button>
-          `;
-          div.querySelector('.remove-img').addEventListener('click', () => {
-            const current = editModal._currentImages || [];
-            current.splice(index, 1);
-            renderEditImagePreviews(current);
-            editModal._currentImages = current;
-          });
-          editImagePreviews.appendChild(div);
-        });
-      }
-
-      editPropertyForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = editPropertyId.value;
-        if (!id) return;
-        const title = editTitle.value.trim();
-        const price = parseFloat(editPrice.value);
-        const type = editType.value;
-        const address = editAddress.value.trim();
-        if (!title || !price || !address) {
-          alert('Please fill in all required fields.');
-          return;
-        }
-        let currentImages = editModal._currentImages || [];
-        const files = editImageInput.files;
-        if (files && files.length > 0) {
-          for (const file of files) {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
-            const filePath = `${state.currentUser.id}/${fileName}`;
-            const { error: uploadError } = await supabase.storage.from('property-media').upload(filePath, file);
-            if (uploadError) {
-              alert('Image upload failed: ' + uploadError.message);
-              return;
-            }
-            const { data: urlData } = supabase.storage.from('property-media').getPublicUrl(filePath);
-            currentImages.push(urlData.publicUrl);
-          }
-          editImageInput.value = '';
-        }
-
-        const dbType = TYPE_MAP[type] || type;
-        const requestVerification = editRequestVerification.checked;
-        let verificationStatus = 'unverified';
-        let isVerified = false;
-        if (requestVerification) {
-          verificationStatus = 'pending';
-          isVerified = false;
-        }
-
-        const updateData = {
-          [COLUMNS.TITLE]: title,
-          [COLUMNS.PRICE]: price,
-          [COLUMNS.TYPE]: dbType,
-          [COLUMNS.ADDRESS]: address,
-          [COLUMNS.IMAGE]: currentImages,
-          [COLUMNS.IS_VERIFIED]: isVerified,
-          [COLUMNS.VERIFICATION_STATUS]: verificationStatus,
-        };
-
-        try {
-          const { error } = await supabase.from('properties').update(updateData).eq('id', id);
-          if (error) throw error;
-          alert(requestVerification ? '✅ Property updated! Verification requested.' : '✅ Property updated!');
-          editModal.classList.add('hidden');
-          await loadMyProperties();
-          await fetchAllData();
-        } catch (err) { alert('Update failed: ' + err.message); }
-      });
-
-      closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
-      editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
-
-      // ─── Profile ────────────────────────────────────────────────────
-      async function loadProfileSettings() {
-        if (!state.currentUser) return;
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('business_name, phone')
-            .eq('id', state.currentUser.id)
-            .single();
-          if (error) throw error;
-          settingsBusinessName.value = data.business_name || '';
-          settingsPhone.value = data.phone || '';
-        } catch (err) {
-          console.error('Error loading profile:', err);
-        }
-      }
-
-      profileSettingsForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!state.currentUser) return;
-        const businessName = settingsBusinessName.value.trim();
-        const phone = settingsPhone.value.trim();
-        try {
-          const { error } = await supabase
-            .from('profiles')
-            .update({ business_name: businessName, phone: phone })
-            .eq('id', state.currentUser.id);
-          if (error) throw error;
-          profileStatus.textContent = '✅ Profile updated successfully!';
-          profileStatus.className = 'mt-3 text-sm text-emerald-600';
-          if (state.currentUser) {
-            state.currentUser.business_name = businessName;
-            state.currentUser.phone = phone;
-          }
-          await fetchAllData();
-          if (state.currentUser) await loadMyProperties();
-        } catch (err) {
-          profileStatus.textContent = '❌ Update failed: ' + err.message;
-          profileStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
 
       // ─── Fetch all data ──────────────────────────────────────────────
       async function fetchAllData() {
@@ -2735,6 +2684,5 @@
       startApp();
     }
   </script>
-
 </body>
 </html>

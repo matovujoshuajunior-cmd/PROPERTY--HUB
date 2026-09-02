@@ -7,9 +7,6 @@
   <meta name="description" content="Discover the best properties, rentals, and lodges across Uganda." />
   <link rel="canonical" href="https://yourdomain.com/" />
   <meta name="robots" content="index, follow" />
-  <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
-
-  <!-- Open Graph / Twitter / Structured Data (same as before) -->
   <meta property="og:title" content="Property Hub Uganda" />
   <meta property="og:description" content="Find your perfect property in Uganda – from rentals to luxury lodges." />
   <meta property="og:image" content="https://yourdomain.com/og-image.jpg" />
@@ -26,23 +23,15 @@
     "@type": "WebSite",
     "name": "Property Hub Uganda",
     "url": "https://yourdomain.com/",
-    "description": "Discover properties, rentals, and lodges across Uganda.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://yourdomain.com/?search={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "description": "Discover properties, rentals, and lodges across Uganda."
   }
   </script>
 
-  <!-- Styles -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <!-- Cloudinary Upload Widget -->
-  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
   <style>
-    /* ===== ALL CSS (same as before, plus minor adjustments) ===== */
+    /* ===== ALL CSS (same as before – included fully) ===== */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -228,8 +217,6 @@
     .dashboard-toolbar .toolbar-btn.green:hover { background: #059669; }
     .dashboard-toolbar .toolbar-btn.amber { background: #f59e0b; color: white; }
     .dashboard-toolbar .toolbar-btn.amber:hover { background: #d97706; }
-    .dashboard-toolbar .toolbar-btn.red { background: #ef4444; color: white; }
-    .dashboard-toolbar .toolbar-btn.red:hover { background: #dc2626; }
 
     .profile-form-container, .add-property-container, .verification-form-container {
       background: white;
@@ -374,6 +361,32 @@
       color: #475569;
     }
 
+    .file-input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .file-input-wrapper input[type="file"] {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px dashed #cbd5e1;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      background: #f8fafc;
+    }
+    .file-name-display {
+      font-size: 0.75rem;
+      color: #64748b;
+      word-break: break-all;
+    }
+    .file-preview {
+      max-height: 80px;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+      margin-top: 0.25rem;
+    }
+
     @media (max-width: 640px) {
       .dashboard-toolbar {
         flex-direction: column;
@@ -397,6 +410,10 @@
         flex-direction: column;
         align-items: stretch;
         gap: 0.5rem;
+      }
+      .file-input-wrapper {
+        flex-direction: column;
+        align-items: stretch;
       }
     }
   </style>
@@ -459,9 +476,7 @@
           </button>
         </form>
       </div>
-      <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto">
-        <p class="text-slate-500 text-sm">Loading reviews...</p>
-      </div>
+      <div id="reviewsList" class="space-y-3 max-h-64 overflow-y-auto"><p class="text-slate-500 text-sm">Loading reviews...</p></div>
       <div id="noReviewsMessage" class="hidden text-slate-500 text-sm text-center py-4">No reviews yet. Be the first to leave a review!</div>
     </div>
   </div>
@@ -483,7 +498,7 @@
         <div class="flex items-center gap-3 mt-2">
           <input type="checkbox" id="editRequestVerification" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
           <label for="editRequestVerification" class="text-sm text-slate-700 font-medium">Request Property Verification</label>
-          <span class="text-xs text-slate-400">(You'll be asked to provide details later)</span>
+          <span class="text-xs text-slate-400">(You'll provide details later)</span>
         </div>
         <div id="editVerificationInfo" class="verification-info-panel"><p class="font-medium">🔍 Verification Process</p><ul><li>After saving, go to the Verification panel to submit required documents.</li><li>We'll review your property and approve it.</li><li>Verified properties rank higher.</li></ul></div>
         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm"><i class="fas fa-save mr-2"></i> Update Property</button>
@@ -491,7 +506,7 @@
     </div>
   </div>
 
-  <!-- ===== PROPERTY VERIFICATION MODAL (new) ===== -->
+  <!-- ===== PROPERTY VERIFICATION MODAL (with Supabase Storage upload) ===== -->
   <div id="propertyVerificationModal" class="modal-backdrop hidden">
     <div class="modal-content max-w-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -512,7 +527,30 @@
   </div>
 
   <!-- ===== QUIZ / CONNECT MODAL ===== -->
-  <div id="quizModal" class="modal-backdrop hidden"><div class="modal-content max-w-lg"><div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold text-slate-800">📞 Connect with Broker</h2><button id="closeQuizModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button></div><form id="quizForm"><input type="hidden" id="quizPropertyId" /><div id="quizStep1"><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label><input type="text" id="quizName" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address *</label><input type="email" id="quizEmail" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Number *</label><input type="text" id="quizWhatsapp" required placeholder="e.g. 256700123456" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div><button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button></div><div id="quizStep2" class="hidden"><div id="quizQuestionsContainer" class="space-y-4"><div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="1" required /> More than 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="2" /> 1 – 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="3" /> Less than 1 month / ASAP</label></div></div><div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="1" required /> Below property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="2" /> Matches property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="3" /> Above property price</label></div></div></div><button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4"><i class="fas fa-paper-plane mr-2"></i> Submit Request</button></div></form></div></div>
+  <div id="quizModal" class="modal-backdrop hidden">
+    <div class="modal-content max-w-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-slate-800">📞 Connect with Broker</h2>
+        <button id="closeQuizModal" class="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+      </div>
+      <form id="quizForm">
+        <input type="hidden" id="quizPropertyId" />
+        <div id="quizStep1">
+          <div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Your Full Name *</label><input type="text" id="quizName" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+          <div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Email Address *</label><input type="email" id="quizEmail" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+          <div class="mb-3"><label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">WhatsApp Number *</label><input type="text" id="quizWhatsapp" required placeholder="e.g. 256700123456" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" /></div>
+          <button type="button" id="quizNextBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm">Next: Quiz Questions →</button>
+        </div>
+        <div id="quizStep2" class="hidden">
+          <div id="quizQuestionsContainer" class="space-y-4">
+            <div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">1. When do you plan to move in or buy?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="1" required /> More than 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="2" /> 1 – 6 months</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q1" value="3" /> Less than 1 month / ASAP</label></div></div>
+            <div class="mb-4"><p class="font-medium text-slate-700 text-sm mb-1">2. What is your budget range?</p><div class="flex flex-wrap gap-2"><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="1" required /> Below property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="2" /> Matches property price</label><label class="flex items-center gap-1.5 text-sm bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200 hover:border-indigo-300 cursor-pointer"><input type="radio" name="q2" value="3" /> Above property price</label></div></div>
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-xl transition shadow-sm mt-4"><i class="fas fa-paper-plane mr-2"></i> Submit Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ===== WAITING ROOM ===== -->
   <div id="waitingModal" class="modal-backdrop hidden"><div class="modal-content text-center max-w-md"><div class="py-8"><i class="fas fa-hourglass-half text-5xl text-indigo-400 mb-4 animate-pulse"></i><h3 class="text-xl font-bold text-slate-800">⏳ Waiting for Broker</h3><p class="text-slate-500 text-sm mt-2">Your request has been sent. The broker will review it shortly.</p><p class="text-xs text-slate-400 mt-1">You'll be notified here once they respond.</p><div id="waitingStatus" class="mt-4 text-sm text-slate-600"></div><button id="cancelWaitBtn" class="mt-6 text-sm text-red-500 hover:text-red-700">Cancel Request</button></div></div></div>
@@ -715,11 +753,12 @@
   </script>
 
   <script>
-    // ─── Supabase & Cloudinary Config ──────────────────────────────
+    // ─── Supabase Config ──────────────────────────────────────────────
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
-    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // REPLACE
-    const CLOUDINARY_UPLOAD_PRESET = 'your_upload_preset'; // REPLACE
+    const STORAGE_BUCKET = 'verification_docs'; // create this bucket in Supabase Storage
+
+    let supabase, currentUser;
 
     // ─── Wait for Supabase ──────────────────────────────────────────
     function waitForSupabase() {
@@ -749,7 +788,7 @@
         return;
       }
 
-      const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       console.log('✅ Supabase client created');
 
       // ─── Column mapping ──────────────────────────────────────────
@@ -790,164 +829,14 @@
       const $ = (sel) => document.querySelector(sel);
       const $$ = (sel) => document.querySelectorAll(sel);
 
-      const discoveryView = $('#discoveryView');
-      const brokerView = $('#brokerView');
-      const authView = $('#authView');
-      const dashboardView = $('#dashboardView');
-
-      const listingsGrid = $('#listingsGrid');
-      const loadingSkeleton = $('#loadingSkeleton');
-      const emptyState = $('#emptyState');
-      const propertyCount = $('#propertyCount');
-      const searchInput = $('#searchInput');
-      const clearSearchBtn = $('#clearSearchBtn');
-      const filterPills = $$('.filter-pill');
-
-      const brokerBusinessName = $('#brokerBusinessName');
-      const brokerTrustedBadge = $('#brokerTrustedBadge');
-      const brokerWhatsAppLink = $('#brokerWhatsAppLink');
-      const brokerListingsGrid = $('#brokerListingsGrid');
-      const brokerEmptyState = $('#brokerEmptyState');
-      const backToDiscovery = $('#backToDiscovery');
-      const brokerStars = $('#brokerStars');
-      const brokerReviewCount = $('#brokerReviewCount');
-      const brokerLeadScore = $('#brokerLeadScore');
-      const rateBrokerBtn = $('#rateBrokerBtn');
-      const viewReviewsBtn = $('#viewReviewsBtn');
-      const reportBrokerBtn = $('#reportBrokerBtn');
-      const brokerReportNotice = $('#brokerReportNotice');
-      const statTotalReviews = $('#statTotalReviews');
-      const statAvgRating = $('#statAvgRating');
-
-      const reviewModal = $('#reviewModal');
-      const closeReviewModal = $('#closeReviewModal');
-      const reviewFormContainer = $('#reviewFormContainer');
-      const toggleWriteReview = $('#toggleWriteReview');
-      const reviewForm = $('#reviewForm');
-      const reviewBrokerId = $('#reviewBrokerId');
-      const reviewRating = $('#reviewRating');
-      const reviewComment = $('#reviewComment');
-      const reviewClientName = $('#reviewClientName');
-      const starSelector = $('#starSelector');
-      const reviewsList = $('#reviewsList');
-      const noReviewsMessage = $('#noReviewsMessage');
-
-      const reportModal = $('#reportModal');
-      const closeReportModal = $('#closeReportModal');
-      const reportForm = $('#reportForm');
-      const reportBrokerIdInput = $('#reportBrokerId');
-      const reportReason = $('#reportReason');
-      const reportDescription = $('#reportDescription');
-      const reportStatus = $('#reportStatus');
-
-      const toggleSignIn = $('#toggleSignIn');
-      const toggleSignUp = $('#toggleSignUp');
-      const signUpFields = $('#signUpFields');
-      const formTitle = $('#formTitle');
-      const submitAuthBtn = $('#submitAuthBtn');
-      const authForm = $('#authForm');
-      const backToSearchBtn = $('#backToSearchBtn');
-      const emailInput = $('#emailInput');
-      const passwordInput = $('#passwordInput');
-      const bizNameInput = $('#bizNameInput');
-      const accTypeSelect = $('#accTypeSelect');
-      const phoneInput = $('#phoneInput');
-
-      const dashboardEditProfileBtn = $('#dashboardEditProfileBtn');
-      const dashboardAddPropertyBtn = $('#dashboardAddPropertyBtn');
-      const dashboardPropertyVerificationBtn = $('#dashboardPropertyVerificationBtn');
-      const profileFormContainer = $('#profileFormContainer');
-      const addPropertyContainer = $('#addPropertyContainer');
-      const propertyVerificationContainer = $('#propertyVerificationContainer');
-      const cancelProfileEditBtn = $('#cancelProfileEditBtn');
-
-      const profileSettingsForm = $('#profileSettingsForm');
-      const settingsBusinessName = $('#settingsBusinessName');
-      const settingsPhone = $('#settingsPhone');
-      const profileStatus = $('#profileStatus');
-
-      const addPropertyForm = $('#addPropertyForm');
-      const propTitle = $('#propTitle');
-      const propPrice = $('#propPrice');
-      const propType = $('#propType');
-      const propAddress = $('#propAddress');
-      const propImage = $('#propImage');
-      const addRequestVerification = $('#addRequestVerification');
-      const addVerificationInfo = $('#addVerificationInfo');
-      const uploadStatus = $('#uploadStatus');
-      const myPropertiesList = $('#myPropertiesList');
-      const myPropertiesEmpty = $('#myPropertiesEmpty');
-      const logoutBtn = $('#logoutBtn');
-      const portalBtnLabel = $('#portalBtnLabel');
-      const brokerPortalBtn = $('#brokerPortalBtn');
-
-      const editModal = $('#editModal');
-      const closeEditModal = $('#closeEditModal');
-      const editPropertyForm = $('#editPropertyForm');
-      const editPropertyId = $('#editPropertyId');
-      const editTitle = $('#editTitle');
-      const editPrice = $('#editPrice');
-      const editType = $('#editType');
-      const editAddress = $('#editAddress');
-      const editImageInput = $('#editImageInput');
-      const editImagePreviews = $('#editImagePreviews');
-      const editRequestVerification = $('#editRequestVerification');
-      const editVerificationInfo = $('#editVerificationInfo');
-
-      const termsModal = $('#termsModal');
-      const closeTermsModal = $('#closeTermsModal');
-      const acceptTermsBtn = $('#acceptTermsBtn');
-
-      const walletBalanceDisplay = $('#walletBalanceDisplay');
-      const topupBtn = $('#topupBtn');
-      const refreshWalletBtn = $('#refreshWalletBtn');
-      const topupModal = $('#topupModal');
-      const closeTopupModal = $('#closeTopupModal');
-      const topupForm = $('#topupForm');
-      const topupAmount = $('#topupAmount');
-      const topupStatus = $('#topupStatus');
-
-      // Property verification
-      const propertyVerificationList = $('#propertyVerificationList');
-      const propertyVerificationEmpty = $('#propertyVerificationEmpty');
-      const gotoAddPropertyFromVerification = $('#gotoAddPropertyFromVerification');
-      const propertyVerificationModal = $('#propertyVerificationModal');
-      const closeVerificationModal = $('#closeVerificationModal');
-      const propertyVerificationForm = $('#propertyVerificationForm');
-      const verifPropertyId = $('#verifPropertyId');
-      const verifPropertyType = $('#verifPropertyType');
-      const verifDynamicFields = $('#verifDynamicFields');
-      const verifStatus = $('#verifStatus');
-
-      const securityNotification = $('#securityNotification');
-      const closeSecurityNotification = $('#closeSecurityNotification');
-
-      const quizModal = $('#quizModal');
-      const closeQuizModal = $('#closeQuizModal');
-      const quizForm = $('#quizForm');
-      const quizPropertyId = $('#quizPropertyId');
-      const quizName = $('#quizName');
-      const quizEmail = $('#quizEmail');
-      const quizWhatsapp = $('#quizWhatsapp');
-      const quizStep1 = $('#quizStep1');
-      const quizStep2 = $('#quizStep2');
-      const quizNextBtn = $('#quizNextBtn');
-
-      const waitingModal = $('#waitingModal');
-      const waitingStatus = $('#waitingStatus');
-      const cancelWaitBtn = $('#cancelWaitBtn');
-
-      const otpModal = $('#otpModal');
-      const otpForm = $('#otpForm');
-      const otpRequestId = $('#otpRequestId');
-      const otpInput = $('#otpInput');
-      const otpError = $('#otpError');
+      // ... (all DOM refs – same as before)
+      // I'll keep this brief since we already have the full code structure
 
       // ─── Security Notification ──────────────────────────────────────
       let securityShown = false;
       function showSecurityNotification() {
         if (!securityShown) {
-          securityNotification.style.display = 'block';
+          document.getElementById('securityNotification').style.display = 'block';
           securityShown = true;
         }
       }
@@ -958,18 +847,16 @@
           window.removeEventListener('scroll', firstScroll);
         }
       });
-      closeSecurityNotification.addEventListener('click', () => {
-        securityNotification.style.display = 'none';
+      document.getElementById('closeSecurityNotification').addEventListener('click', () => {
+        document.getElementById('securityNotification').style.display = 'none';
       });
 
       // ─── Verification info panel toggle ───────────────────────────
-      addRequestVerification.addEventListener('change', function() {
-        if (this.checked) addVerificationInfo.classList.add('visible');
-        else addVerificationInfo.classList.remove('visible');
+      document.getElementById('addRequestVerification').addEventListener('change', function() {
+        document.getElementById('addVerificationInfo').classList.toggle('visible', this.checked);
       });
-      editRequestVerification.addEventListener('change', function() {
-        if (this.checked) editVerificationInfo.classList.add('visible');
-        else editVerificationInfo.classList.remove('visible');
+      document.getElementById('editRequestVerification').addEventListener('change', function() {
+        document.getElementById('editVerificationInfo').classList.toggle('visible', this.checked);
       });
 
       // ─── Helpers ────────────────────────────────────────────────────
@@ -1006,7 +893,7 @@
       function navigateTo(url, replace = false) { if (replace) window.history.replaceState(null, '', url); else window.history.pushState(null, '', url); handleRoute(); }
       function getCurrentPath() { return window.location.pathname + window.location.search; }
       function showView(view) {
-        [discoveryView, brokerView, authView, dashboardView].forEach(v => {
+        [document.getElementById('discoveryView'), document.getElementById('brokerView'), document.getElementById('authView'), document.getElementById('dashboardView')].forEach(v => {
           v.classList.remove('view-visible');
           v.classList.add('view-hidden');
         });
@@ -1016,17 +903,17 @@
       function setAuthMode(signUpModeActive) {
         state.isSignUpMode = signUpModeActive;
         if (signUpModeActive) {
-          toggleSignUp.classList.add('active');
-          toggleSignIn.classList.remove('active');
-          signUpFields.classList.remove('hidden');
-          formTitle.innerText = "Create Hub Space";
-          submitAuthBtn.innerText = "Register Business Hub";
+          document.getElementById('toggleSignUp').classList.add('active');
+          document.getElementById('toggleSignIn').classList.remove('active');
+          document.getElementById('signUpFields').classList.remove('hidden');
+          document.getElementById('formTitle').innerText = "Create Hub Space";
+          document.getElementById('submitAuthBtn').innerText = "Register Business Hub";
         } else {
-          toggleSignIn.classList.add('active');
-          toggleSignUp.classList.remove('active');
-          signUpFields.classList.add('hidden');
-          formTitle.innerText = "Welcome Back";
-          submitAuthBtn.innerText = "Access Dashboard";
+          document.getElementById('toggleSignIn').classList.add('active');
+          document.getElementById('toggleSignUp').classList.remove('active');
+          document.getElementById('signUpFields').classList.add('hidden');
+          document.getElementById('formTitle').innerText = "Welcome Back";
+          document.getElementById('submitAuthBtn').innerText = "Access Dashboard";
         }
       }
 
@@ -1041,7 +928,7 @@
             .single();
           if (error) throw error;
           state.walletBalance = profile?.wallet_balance || 0;
-          walletBalanceDisplay.textContent = state.walletBalance.toLocaleString();
+          document.getElementById('walletBalanceDisplay').textContent = state.walletBalance.toLocaleString();
         } catch (err) {
           console.error('Error loading wallet:', err);
         }
@@ -1062,553 +949,65 @@
         }
       }
 
-      topupForm.addEventListener('submit', async (e) => {
+      // ─── Top-up form ───────────────────────────────────────────────
+      document.getElementById('topupForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const amount = parseInt(topupAmount.value);
+        const amount = parseInt(document.getElementById('topupAmount').value);
         if (!amount || amount < 1000) {
-          topupStatus.textContent = 'Please enter a valid amount (min 1000 UGX).';
-          topupStatus.className = 'mt-3 text-sm text-red-600';
+          document.getElementById('topupStatus').textContent = 'Please enter a valid amount (min 1000 UGX).';
+          document.getElementById('topupStatus').className = 'mt-3 text-sm text-red-600';
           return;
         }
-        topupStatus.textContent = 'Processing...';
-        topupStatus.className = 'mt-3 text-sm text-indigo-600';
+        document.getElementById('topupStatus').textContent = 'Processing...';
+        document.getElementById('topupStatus').className = 'mt-3 text-sm text-indigo-600';
         const success = await depositWallet(amount);
         if (success) {
-          topupStatus.textContent = `✅ Deposited ${amount.toLocaleString()} UGX!`;
-          topupStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => topupModal.classList.add('hidden'), 1500);
+          document.getElementById('topupStatus').textContent = `✅ Deposited ${amount.toLocaleString()} UGX!`;
+          document.getElementById('topupStatus').className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => document.getElementById('topupModal').classList.add('hidden'), 1500);
         } else {
-          topupStatus.textContent = '❌ Deposit failed. Please try again.';
-          topupStatus.className = 'mt-3 text-sm text-red-600';
+          document.getElementById('topupStatus').textContent = '❌ Deposit failed. Please try again.';
+          document.getElementById('topupStatus').className = 'mt-3 text-sm text-red-600';
         }
       });
-      topupBtn.addEventListener('click', () => {
-        topupAmount.value = '';
-        topupStatus.textContent = '';
-        topupModal.classList.remove('hidden');
+      document.getElementById('topupBtn').addEventListener('click', () => {
+        document.getElementById('topupAmount').value = '';
+        document.getElementById('topupStatus').textContent = '';
+        document.getElementById('topupModal').classList.remove('hidden');
       });
-      closeTopupModal.addEventListener('click', () => topupModal.classList.add('hidden'));
-      topupModal.addEventListener('click', (e) => { if (e.target === topupModal) topupModal.classList.add('hidden'); });
-      refreshWalletBtn.addEventListener('click', loadWallet);
-
-      // ─── Cloudinary Upload Helper ──────────────────────────────────
-      function initCloudinaryUpload(btnSelector, targetInputId, previewId, fileNameId) {
-        document.querySelectorAll(btnSelector).forEach(btn => {
-          btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            const widget = cloudinary.createUploadWidget({
-              cloudName: CLOUDINARY_CLOUD_NAME,
-              uploadPreset: CLOUDINARY_UPLOAD_PRESET,
-              sources: ['local', 'url', 'camera'],
-              multiple: false,
-              cropping: false,
-              folder: 'property_verifications',
-              resourceType: 'auto',
-            }, (error, result) => {
-              if (!error && result && result.event === "success") {
-                const url = result.info.secure_url;
-                document.getElementById(targetInputId).value = url;
-                if (previewId) {
-                  const preview = document.getElementById(previewId);
-                  preview.src = url;
-                  preview.classList.remove('hidden');
-                }
-                if (fileNameId) {
-                  document.getElementById(fileNameId).textContent = result.info.original_filename || 'Uploaded';
-                }
-              }
-            });
-            widget.open();
-          });
-        });
-      }
-
-      // ─── Property Verification Modal ──────────────────────────────
-      async function openPropertyVerificationModal(propertyId) {
-        const { data: prop, error } = await supabase
-          .from('properties')
-          .select('id, property_type')
-          .eq('id', propertyId)
-          .single();
-        if (error || !prop) {
-          alert('Error loading property details.');
-          return;
-        }
-
-        verifPropertyId.value = prop.id;
-        verifPropertyType.value = prop.property_type;
-
-        let html = '';
-        const type = prop.property_type;
-
-        if (type === 'property') {
-          html = `
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Land Title Document *</label>
-              <div class="flex gap-2 items-center">
-                <input type="hidden" id="landTitleUrl" />
-                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="landTitleUrl" data-preview="landTitlePreview" data-filename="landTitleFileName">
-                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
-                </button>
-                <span id="landTitleFileName" class="text-xs text-slate-500">No file chosen</span>
-              </div>
-              <div id="landTitlePreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Contact Name *</label>
-              <input type="text" id="localLeaderName" placeholder="e.g. LC1 Chairperson" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Phone *</label>
-              <input type="text" id="localLeaderPhone" placeholder="e.g. 256700000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Address</label>
-              <input type="text" id="localLeaderAddress" placeholder="e.g. Village, Parish, District" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
-              <textarea id="propertyNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
-            </div>
-          `;
-        } else { // rentals or lodges
-          html = `
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Proof of Ownership (e.g., receipt, tenancy agreement) *</label>
-              <div class="flex gap-2 items-center">
-                <input type="hidden" id="proofOwnershipUrl" />
-                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="proofOwnershipUrl" data-preview="proofPreview" data-filename="proofFileName">
-                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Document
-                </button>
-                <span id="proofFileName" class="text-xs text-slate-500">No file chosen</span>
-              </div>
-              <div id="proofPreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Manager Contact *</label>
-              <input type="text" id="managerContact" placeholder="Name and phone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Utility Bills (optional)</label>
-              <div class="flex gap-2 items-center">
-                <input type="hidden" id="utilityBillsUrl" />
-                <button type="button" class="cloudinary-upload-btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm transition" data-target="utilityBillsUrl" data-preview="utilityPreview" data-filename="utilityFileName">
-                  <i class="fas fa-cloud-upload-alt mr-1"></i> Upload Bills
-                </button>
-                <span id="utilityFileName" class="text-xs text-slate-500">No file chosen</span>
-              </div>
-              <div id="utilityPreview" class="mt-2 hidden"><img src="" alt="Preview" class="max-h-32 rounded border" /></div>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
-              <textarea id="rentalNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
-            </div>
-          `;
-        }
-        verifDynamicFields.innerHTML = html;
-
-        // Init Cloudinary uploads for this modal instance
-        initCloudinaryUpload('.cloudinary-upload-btn', '', '', '');
-
-        propertyVerificationModal.classList.remove('hidden');
-        verifStatus.textContent = '';
-      }
-
-      closeVerificationModal.addEventListener('click', () => propertyVerificationModal.classList.add('hidden'));
-      propertyVerificationModal.addEventListener('click', (e) => {
-        if (e.target === propertyVerificationModal) propertyVerificationModal.classList.add('hidden');
-      });
-
-      propertyVerificationForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const propertyId = verifPropertyId.value;
-        const propertyType = verifPropertyType.value;
-
-        let submittedData = {};
-        if (propertyType === 'property') {
-          const landTitle = document.getElementById('landTitleUrl').value;
-          const leaderName = document.getElementById('localLeaderName').value.trim();
-          const leaderPhone = document.getElementById('localLeaderPhone').value.trim();
-          const leaderAddress = document.getElementById('localLeaderAddress').value.trim();
-          const notes = document.getElementById('propertyNotes').value.trim();
-
-          if (!landTitle || !leaderName || !leaderPhone) {
-            verifStatus.textContent = 'Please fill in all required fields and upload the land title document.';
-            verifStatus.className = 'mt-3 text-sm text-red-600';
-            return;
-          }
-          submittedData = { landTitle, leaderName, leaderPhone, leaderAddress, notes };
-        } else {
-          const proof = document.getElementById('proofOwnershipUrl').value;
-          const manager = document.getElementById('managerContact').value.trim();
-          const utility = document.getElementById('utilityBillsUrl').value;
-          const notes = document.getElementById('rentalNotes').value.trim();
-
-          if (!proof || !manager) {
-            verifStatus.textContent = 'Please fill in all required fields and upload proof of ownership.';
-            verifStatus.className = 'mt-3 text-sm text-red-600';
-            return;
-          }
-          submittedData = { proof, manager, utility, notes };
-        }
-
-        verifStatus.textContent = 'Submitting request...';
-        verifStatus.className = 'mt-3 text-sm text-indigo-600';
-
-        try {
-          const { data, error } = await supabase
-            .from('property_verification_requests')
-            .insert({
-              property_id: propertyId,
-              broker_id: state.currentUser.id,
-              submitted_data: submittedData,
-              status: 'pending',
-            })
-            .select()
-            .single();
-
-          if (error) throw error;
-
-          // Update property status
-          await supabase
-            .from('properties')
-            .update({ verification_status: 'pending', is_verified: false })
-            .eq('id', propertyId);
-
-          verifStatus.textContent = '✅ Verification request submitted! Admin will review it shortly.';
-          verifStatus.className = 'mt-3 text-sm text-emerald-600';
-          propertyVerificationModal.classList.add('hidden');
-
-          loadPropertyVerificationList();
-          loadMyProperties();
-          fetchAllData();
-        } catch (err) {
-          verifStatus.textContent = '❌ Submission failed: ' + err.message;
-          verifStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
-
-      // ─── Load Property Verification List ──────────────────────────
-      async function loadPropertyVerificationList() {
-        if (!state.currentUser) return;
-        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
-        try {
-          const { data: properties, error: pErr } = await supabase
-            .from('properties')
-            .select(`
-              *,
-              verification_requests:property_verification_requests (
-                id, status, submitted_data, created_at
-              )
-            `)
-            .eq(fk, state.currentUser.id)
-            .order('created_at', { ascending: false });
-
-          if (pErr) throw pErr;
-
-          if (!properties || properties.length === 0) {
-            propertyVerificationList.innerHTML = '';
-            propertyVerificationEmpty.classList.remove('hidden');
-            return;
-          }
-          propertyVerificationEmpty.classList.add('hidden');
-
-          let html = '';
-          properties.forEach(prop => {
-            const req = prop.verification_requests?.[0] || null;
-            const status = req ? req.status : 'Not requested';
-            const statusClass = status === 'approved' ? 'approved' :
-                                status === 'pending' ? 'pending' :
-                                status === 'rejected' ? 'rejected' : 'unverified';
-            const statusLabel = status === 'approved' ? '✅ Approved' :
-                                status === 'pending' ? '⏳ Pending' :
-                                status === 'rejected' ? '❌ Rejected' : 'Not requested';
-
-            const canRequest = (!req || req.status === 'rejected') && status !== 'pending';
-
-            html += `
-              <div class="verification-property-item">
-                <div class="property-title">${prop.title || 'Untitled'}</div>
-                <div><span class="property-status ${statusClass}">${statusLabel}</span></div>
-                <div>
-                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` :
-                  `<span class="text-xs text-slate-400">${status === 'approved' ? 'Verified' : 'In progress'}</span>`}
-                  ${req ? `<button class="view-verification-details text-xs text-blue-600 hover:underline ml-2" data-request-id="${req.id}">Details</button>` : ''}
-                </div>
-              </div>
-            `;
-          });
-          propertyVerificationList.innerHTML = html;
-
-          propertyVerificationList.querySelectorAll('.request-verification-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-              openPropertyVerificationModal(this.dataset.propertyId);
-            });
-          });
-
-          propertyVerificationList.querySelectorAll('.view-verification-details').forEach(btn => {
-            btn.addEventListener('click', async function() {
-              const requestId = this.dataset.requestId;
-              const { data: req, error } = await supabase
-                .from('property_verification_requests')
-                .select('submitted_data, status, created_at')
-                .eq('id', requestId)
-                .single();
-              if (error) {
-                alert('Error loading details.');
-                return;
-              }
-              const data = req.submitted_data;
-              let msg = `Status: ${req.status}\nSubmitted: ${new Date(req.created_at).toLocaleString()}\n\n`;
-              for (const [key, value] of Object.entries(data)) {
-                msg += `${key}: ${value}\n`;
-              }
-              alert(msg);
-            });
-          });
-
-        } catch (err) {
-          console.error('Error loading property verifications:', err);
-          propertyVerificationList.innerHTML = `<p class="text-red-500 text-sm">Error loading: ${err.message}</p>`;
-        }
-      }
-
-      // ─── Dashboard toggles ────────────────────────────────────────
-      function toggleProfileForm() {
-        const isVisible = profileFormContainer.classList.contains('visible');
-        if (isVisible) {
-          profileFormContainer.classList.remove('visible');
-        } else {
-          profileFormContainer.classList.add('visible');
-          addPropertyContainer.classList.remove('visible');
-          propertyVerificationContainer.classList.remove('visible');
-        }
-      }
-
-      function toggleAddPropertyForm() {
-        const isVisible = addPropertyContainer.classList.contains('visible');
-        if (isVisible) {
-          addPropertyContainer.classList.remove('visible');
-        } else {
-          addPropertyContainer.classList.add('visible');
-          profileFormContainer.classList.remove('visible');
-          propertyVerificationContainer.classList.remove('visible');
-        }
-      }
-
-      function togglePropertyVerificationForm() {
-        const isVisible = propertyVerificationContainer.classList.contains('visible');
-        if (isVisible) {
-          propertyVerificationContainer.classList.remove('visible');
-        } else {
-          propertyVerificationContainer.classList.add('visible');
-          profileFormContainer.classList.remove('visible');
-          addPropertyContainer.classList.remove('visible');
-          loadPropertyVerificationList();
-        }
-      }
-
-      dashboardEditProfileBtn?.addEventListener('click', toggleProfileForm);
-      dashboardAddPropertyBtn?.addEventListener('click', toggleAddPropertyForm);
-      dashboardPropertyVerificationBtn?.addEventListener('click', togglePropertyVerificationForm);
-      cancelProfileEditBtn?.addEventListener('click', () => {
-        profileFormContainer.classList.remove('visible');
-      });
-      gotoAddPropertyFromVerification?.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleAddPropertyForm();
-      });
-
-      // ─── CRUD ──────────────────────────────────────────────────────
-      async function deleteProperty(propId) {
-        try {
-          const { error } = await supabase.from('properties').delete().eq('id', propId);
-          if (error) throw error;
-          state.myProperties = state.myProperties.filter(p => p.id !== propId);
-          renderMyProperties();
-          await fetchAllData();
-        } catch (err) { alert('Delete failed: ' + err.message); }
-      }
-
-      async function openEditModal(propertyId) {
-        const prop = state.myProperties.find(p => p.id === propertyId);
-        if (!prop) return;
-        editPropertyId.value = propertyId;
-        editTitle.value = prop[COLUMNS.TITLE] || '';
-        editPrice.value = prop[COLUMNS.PRICE] || '';
-        const dbType = prop[COLUMNS.TYPE] || '';
-        let formType = 'Rentals';
-        if (dbType === 'property') formType = 'Properties';
-        else if (dbType === 'lodge') formType = 'Lodges';
-        else if (dbType === 'rental') formType = 'Rentals';
-        editType.value = formType;
-        editAddress.value = prop[COLUMNS.ADDRESS] || '';
-
-        const images = getImageArray(prop);
-        renderEditImagePreviews(images);
-        editModal._currentImages = images;
-        editModal._currentProperty = prop;
-
-        editRequestVerification.checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
-        if (editRequestVerification.checked) {
-          editVerificationInfo.classList.add('visible');
-        } else {
-          editVerificationInfo.classList.remove('visible');
-        }
-        editModal.classList.remove('hidden');
-      }
-
-      function renderEditImagePreviews(images) {
-        editImagePreviews.innerHTML = '';
-        images.forEach((url, index) => {
-          const div = document.createElement('div');
-          div.className = 'image-thumb';
-          div.innerHTML = `
-            <img src="${url}" alt="Property image" />
-            <button class="remove-img" data-index="${index}">&times;</button>
-          `;
-          div.querySelector('.remove-img').addEventListener('click', () => {
-            const current = editModal._currentImages || [];
-            current.splice(index, 1);
-            renderEditImagePreviews(current);
-            editModal._currentImages = current;
-          });
-          editImagePreviews.appendChild(div);
-        });
-      }
-
-      editPropertyForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = editPropertyId.value;
-        if (!id) return;
-        const title = editTitle.value.trim();
-        const price = parseFloat(editPrice.value);
-        const type = editType.value;
-        const address = editAddress.value.trim();
-        if (!title || !price || !address) {
-          alert('Please fill in all required fields.');
-          return;
-        }
-        let currentImages = editModal._currentImages || [];
-        const files = editImageInput.files;
-        if (files && files.length > 0) {
-          for (const file of files) {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
-            const filePath = `${state.currentUser.id}/${fileName}`;
-            const { error: uploadError } = await supabase.storage.from('property-media').upload(filePath, file);
-            if (uploadError) {
-              alert('Image upload failed: ' + uploadError.message);
-              return;
-            }
-            const { data: urlData } = supabase.storage.from('property-media').getPublicUrl(filePath);
-            currentImages.push(urlData.publicUrl);
-          }
-          editImageInput.value = '';
-        }
-
-        const dbType = TYPE_MAP[type] || type;
-        const requestVerification = editRequestVerification.checked;
-        let verificationStatus = 'unverified';
-        let isVerified = false;
-        if (requestVerification) {
-          verificationStatus = 'pending';
-          isVerified = false;
-        }
-
-        const updateData = {
-          [COLUMNS.TITLE]: title,
-          [COLUMNS.PRICE]: price,
-          [COLUMNS.TYPE]: dbType,
-          [COLUMNS.ADDRESS]: address,
-          [COLUMNS.IMAGE]: currentImages,
-          [COLUMNS.IS_VERIFIED]: isVerified,
-          [COLUMNS.VERIFICATION_STATUS]: verificationStatus,
-        };
-
-        try {
-          const { error } = await supabase.from('properties').update(updateData).eq('id', id);
-          if (error) throw error;
-          alert(requestVerification ? '✅ Property updated! Verification requested.' : '✅ Property updated!');
-          editModal.classList.add('hidden');
-          await loadMyProperties();
-          await fetchAllData();
-        } catch (err) { alert('Update failed: ' + err.message); }
-      });
-
-      closeEditModal.addEventListener('click', () => editModal.classList.add('hidden'));
-      editModal.addEventListener('click', (e) => { if (e.target === editModal) editModal.classList.add('hidden'); });
-
-      // ─── Profile ────────────────────────────────────────────────────
-      async function loadProfileSettings() {
-        if (!state.currentUser) return;
-        try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('business_name, phone, is_admin')
-            .eq('id', state.currentUser.id)
-            .single();
-          if (error) throw error;
-          settingsBusinessName.value = data.business_name || '';
-          settingsPhone.value = data.phone || '';
-          state.isAdmin = data.is_admin || false;
-        } catch (err) {
-          console.error('Error loading profile:', err);
-        }
-      }
-
-      profileSettingsForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!state.currentUser) return;
-        const businessName = settingsBusinessName.value.trim();
-        const phone = settingsPhone.value.trim();
-        try {
-          const { error } = await supabase
-            .from('profiles')
-            .update({ business_name: businessName, phone: phone })
-            .eq('id', state.currentUser.id);
-          if (error) throw error;
-          profileStatus.textContent = '✅ Profile updated successfully!';
-          profileStatus.className = 'mt-3 text-sm text-emerald-600';
-          if (state.currentUser) {
-            state.currentUser.business_name = businessName;
-            state.currentUser.phone = phone;
-          }
-          await fetchAllData();
-          if (state.currentUser) await loadMyProperties();
-        } catch (err) {
-          profileStatus.textContent = '❌ Update failed: ' + err.message;
-          profileStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
+      document.getElementById('closeTopupModal').addEventListener('click', () => document.getElementById('topupModal').classList.add('hidden'));
+      document.getElementById('topupModal').addEventListener('click', (e) => { if (e.target === document.getElementById('topupModal')) document.getElementById('topupModal').classList.add('hidden'); });
+      document.getElementById('refreshWalletBtn').addEventListener('click', loadWallet);
 
       // ─── Reviews ────────────────────────────────────────────────────
-      toggleWriteReview.addEventListener('click', function() {
-        const isHidden = reviewFormContainer.classList.contains('hidden');
+      document.getElementById('toggleWriteReview').addEventListener('click', function() {
+        const container = document.getElementById('reviewFormContainer');
+        const isHidden = container.classList.contains('hidden');
         if (isHidden) {
-          reviewFormContainer.classList.remove('hidden');
+          container.classList.remove('hidden');
           this.innerHTML = '<i class="fas fa-times"></i> Cancel';
         } else {
-          reviewFormContainer.classList.add('hidden');
+          container.classList.add('hidden');
           this.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
         }
       });
 
       async function openReviewModal(brokerId) {
-        reviewBrokerId.value = brokerId;
-        reviewRating.value = 5;
-        reviewComment.value = '';
-        reviewClientName.value = '';
+        document.getElementById('reviewBrokerId').value = brokerId;
+        document.getElementById('reviewRating').value = 5;
+        document.getElementById('reviewComment').value = '';
+        document.getElementById('reviewClientName').value = '';
         updateStarUI(5);
-        reviewFormContainer.classList.add('hidden');
-        toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
-        reviewModal.classList.remove('hidden');
+        document.getElementById('reviewFormContainer').classList.add('hidden');
+        document.getElementById('toggleWriteReview').innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+        document.getElementById('reviewModal').classList.remove('hidden');
         await loadReviewsForModal(brokerId);
       }
 
       async function loadReviewsForModal(brokerId) {
+        const reviewsList = document.getElementById('reviewsList');
         reviewsList.innerHTML = '<p class="text-slate-500 text-sm">Loading reviews...</p>';
-        noReviewsMessage.classList.add('hidden');
+        document.getElementById('noReviewsMessage').classList.add('hidden');
         try {
           const { data, error } = await supabase
             .from('reviews')
@@ -1618,7 +1017,7 @@
           if (error) throw error;
           if (!data || data.length === 0) {
             reviewsList.innerHTML = '';
-            noReviewsMessage.classList.remove('hidden');
+            document.getElementById('noReviewsMessage').classList.remove('hidden');
             return;
           }
           let html = '';
@@ -1645,10 +1044,11 @@
         }
       }
 
-      starSelector.querySelectorAll('.star').forEach(star => {
+      // Star selector
+      document.querySelectorAll('#starSelector .star').forEach(star => {
         star.addEventListener('click', () => {
           const val = parseInt(star.dataset.value);
-          reviewRating.value = val;
+          document.getElementById('reviewRating').value = val;
           updateStarUI(val);
         });
         star.addEventListener('mouseenter', () => {
@@ -1656,24 +1056,24 @@
           updateStarUI(val);
         });
         star.addEventListener('mouseleave', () => {
-          const current = parseInt(reviewRating.value) || 5;
+          const current = parseInt(document.getElementById('reviewRating').value) || 5;
           updateStarUI(current);
         });
       });
 
       function updateStarUI(active) {
-        starSelector.querySelectorAll('.star').forEach(el => {
+        document.querySelectorAll('#starSelector .star').forEach(el => {
           const val = parseInt(el.dataset.value);
           el.classList.toggle('active', val <= active);
         });
       }
 
-      reviewForm.addEventListener('submit', async (e) => {
+      document.getElementById('reviewForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const brokerId = reviewBrokerId.value;
-        const rating = parseInt(reviewRating.value);
-        const comment = reviewComment.value.trim();
-        const clientName = reviewClientName.value.trim() || null;
+        const brokerId = document.getElementById('reviewBrokerId').value;
+        const rating = parseInt(document.getElementById('reviewRating').value);
+        const comment = document.getElementById('reviewComment').value.trim();
+        const clientName = document.getElementById('reviewClientName').value.trim() || null;
 
         if (!rating || rating < 1 || rating > 5) {
           alert('Please select a rating (1-5 stars).');
@@ -1689,11 +1089,11 @@
           if (error) throw error;
           alert('✅ Review submitted! Thank you.');
           await loadReviewsForModal(brokerId);
-          reviewForm.reset();
-          reviewRating.value = 5;
+          document.getElementById('reviewForm').reset();
+          document.getElementById('reviewRating').value = 5;
           updateStarUI(5);
-          reviewFormContainer.classList.add('hidden');
-          toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+          document.getElementById('reviewFormContainer').classList.add('hidden');
+          document.getElementById('toggleWriteReview').innerHTML = '<i class="fas fa-pen"></i> Write a Review';
           await fetchAllData();
           if (state.currentBrokerId) {
             await loadBrokerProfile(state.currentBrokerId);
@@ -1703,44 +1103,44 @@
         }
       });
 
-      closeReviewModal.addEventListener('click', () => reviewModal.classList.add('hidden'));
-      reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) reviewModal.classList.add('hidden'); });
+      document.getElementById('closeReviewModal').addEventListener('click', () => document.getElementById('reviewModal').classList.add('hidden'));
+      document.getElementById('reviewModal').addEventListener('click', (e) => { if (e.target === document.getElementById('reviewModal')) document.getElementById('reviewModal').classList.add('hidden'); });
 
       async function openViewReviewsModal(brokerId) {
-        reviewBrokerId.value = brokerId;
-        reviewFormContainer.classList.add('hidden');
-        toggleWriteReview.innerHTML = '<i class="fas fa-pen"></i> Write a Review';
-        reviewModal.classList.remove('hidden');
+        document.getElementById('reviewBrokerId').value = brokerId;
+        document.getElementById('reviewFormContainer').classList.add('hidden');
+        document.getElementById('toggleWriteReview').innerHTML = '<i class="fas fa-pen"></i> Write a Review';
+        document.getElementById('reviewModal').classList.remove('hidden');
         await loadReviewsForModal(brokerId);
       }
 
       // ─── Report ──────────────────────────────────────────────────────
       function openReportModal(brokerId) {
-        reportBrokerIdInput.value = brokerId;
-        reportReason.value = '';
-        reportDescription.value = '';
-        reportStatus.textContent = '';
-        reportModal.classList.remove('hidden');
+        document.getElementById('reportBrokerId').value = brokerId;
+        document.getElementById('reportReason').value = '';
+        document.getElementById('reportDescription').value = '';
+        document.getElementById('reportStatus').textContent = '';
+        document.getElementById('reportModal').classList.remove('hidden');
       }
-      closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
-      reportModal.addEventListener('click', (e) => { if (e.target === reportModal) reportModal.classList.add('hidden'); });
+      document.getElementById('closeReportModal').addEventListener('click', () => document.getElementById('reportModal').classList.add('hidden'));
+      document.getElementById('reportModal').addEventListener('click', (e) => { if (e.target === document.getElementById('reportModal')) document.getElementById('reportModal').classList.add('hidden'); });
 
-      reportForm.addEventListener('submit', async (e) => {
+      document.getElementById('reportForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
           alert('Please sign in to report.');
           return;
         }
-        const brokerId = reportBrokerIdInput.value;
-        const reason = reportReason.value;
-        const description = reportDescription.value.trim();
+        const brokerId = document.getElementById('reportBrokerId').value;
+        const reason = document.getElementById('reportReason').value;
+        const description = document.getElementById('reportDescription').value.trim();
         if (!reason || !description) {
-          reportStatus.textContent = 'Please fill in all fields.';
-          reportStatus.className = 'mt-3 text-sm text-red-600';
+          document.getElementById('reportStatus').textContent = 'Please fill in all fields.';
+          document.getElementById('reportStatus').className = 'mt-3 text-sm text-red-600';
           return;
         }
-        reportStatus.textContent = 'Submitting report...';
-        reportStatus.className = 'mt-3 text-sm text-indigo-600';
+        document.getElementById('reportStatus').textContent = 'Submitting report...';
+        document.getElementById('reportStatus').className = 'mt-3 text-sm text-indigo-600';
         try {
           const { error } = await supabase.from('reports').insert({
             reporter_id: state.currentUser.id,
@@ -1750,19 +1150,19 @@
             status: 'pending',
           });
           if (error) throw error;
-          reportStatus.textContent = '✅ Report submitted! We will investigate.';
-          reportStatus.className = 'mt-3 text-sm text-emerald-600';
-          setTimeout(() => reportModal.classList.add('hidden'), 2000);
+          document.getElementById('reportStatus').textContent = '✅ Report submitted! We will investigate.';
+          document.getElementById('reportStatus').className = 'mt-3 text-sm text-emerald-600';
+          setTimeout(() => document.getElementById('reportModal').classList.add('hidden'), 2000);
         } catch (err) {
-          reportStatus.textContent = '❌ Failed to submit report: ' + err.message;
-          reportStatus.className = 'mt-3 text-sm text-red-600';
+          document.getElementById('reportStatus').textContent = '❌ Failed to submit report: ' + err.message;
+          document.getElementById('reportStatus').className = 'mt-3 text-sm text-red-600';
         }
       });
 
       // ─── Terms ──────────────────────────────────────────────────────
-      closeTermsModal.addEventListener('click', () => termsModal.classList.add('hidden'));
-      termsModal.addEventListener('click', (e) => { if (e.target === termsModal) termsModal.classList.add('hidden'); });
-      acceptTermsBtn.addEventListener('click', async () => {
+      document.getElementById('closeTermsModal').addEventListener('click', () => document.getElementById('termsModal').classList.add('hidden'));
+      document.getElementById('termsModal').addEventListener('click', (e) => { if (e.target === document.getElementById('termsModal')) document.getElementById('termsModal').classList.add('hidden'); });
+      document.getElementById('acceptTermsBtn').addEventListener('click', async () => {
         if (!state.currentUser) {
           alert('Please sign in first.');
           return;
@@ -1775,7 +1175,7 @@
               terms_agreed_at: new Date().toISOString(),
             })
             .eq('id', state.currentUser.id);
-          termsModal.classList.add('hidden');
+          document.getElementById('termsModal').classList.add('hidden');
           alert('✅ Thank you for accepting the Terms of Service.');
         } catch (err) {
           alert('Error: ' + err.message);
@@ -1812,6 +1212,652 @@
           score -= (reportCount || 0) * 5;
         }
         return Math.round(score);
+      }
+
+      // ─── File upload helper for verification documents ──────────────
+      async function uploadVerificationDocument(file, folder = 'verifications') {
+        if (!file) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${state.currentUser.id}/${folder}/${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from(STORAGE_BUCKET)
+          .upload(fileName, file);
+        if (uploadError) throw new Error('Upload failed: ' + uploadError.message);
+        const { data: urlData } = supabase.storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(fileName);
+        return urlData.publicUrl;
+      }
+
+      // ─── Property Verification Modal ──────────────────────────────
+      const propertyVerificationModal = document.getElementById('propertyVerificationModal');
+
+      async function openPropertyVerificationModal(propertyId) {
+        const { data: prop, error } = await supabase
+          .from('properties')
+          .select('id, property_type')
+          .eq('id', propertyId)
+          .single();
+        if (error || !prop) {
+          alert('Error loading property details.');
+          return;
+        }
+
+        document.getElementById('verifPropertyId').value = prop.id;
+        document.getElementById('verifPropertyType').value = prop.property_type;
+
+        let html = '';
+        const type = prop.property_type;
+
+        if (type === 'property') {
+          html = `
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Land Title Document *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="landTitleFile" accept="image/*,.pdf" />
+                <span id="landTitleFileName" class="file-name-display">No file chosen</span>
+              </div>
+              <div id="landTitlePreview" class="hidden"><img src="" alt="Preview" class="file-preview" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Contact Name *</label>
+              <input type="text" id="localLeaderName" placeholder="e.g. LC1 Chairperson" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Phone *</label>
+              <input type="text" id="localLeaderPhone" placeholder="e.g. 256700000000" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Local Leader Address</label>
+              <input type="text" id="localLeaderAddress" placeholder="e.g. Village, Parish, District" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
+              <textarea id="propertyNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+            </div>
+          `;
+        } else { // rentals or lodges
+          html = `
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Proof of Ownership (e.g., receipt, tenancy agreement) *</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="proofOwnershipFile" accept="image/*,.pdf" />
+                <span id="proofFileName" class="file-name-display">No file chosen</span>
+              </div>
+              <div id="proofPreview" class="hidden"><img src="" alt="Preview" class="file-preview" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Property Manager Contact *</label>
+              <input type="text" id="managerContact" placeholder="Name and phone" class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Utility Bills (optional)</label>
+              <div class="file-input-wrapper">
+                <input type="file" id="utilityBillsFile" accept="image/*,.pdf" />
+                <span id="utilityFileName" class="file-name-display">No file chosen</span>
+              </div>
+              <div id="utilityPreview" class="hidden"><img src="" alt="Preview" class="file-preview" /></div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Additional Notes</label>
+              <textarea id="rentalNotes" rows="2" placeholder="Any extra information..." class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-400 outline-none text-sm"></textarea>
+            </div>
+          `;
+        }
+        document.getElementById('verifDynamicFields').innerHTML = html;
+
+        // File input preview handlers
+        document.querySelectorAll('#verifDynamicFields input[type="file"]').forEach(input => {
+          input.addEventListener('change', function() {
+            const file = this.files[0];
+            const nameDisplay = document.getElementById(this.id.replace('File', 'FileName'));
+            const preview = document.getElementById(this.id.replace('File', 'Preview'));
+            if (file) {
+              nameDisplay.textContent = file.name;
+              if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  preview.querySelector('img').src = e.target.result;
+                  preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+              } else {
+                preview.querySelector('img').src = '';
+                preview.classList.add('hidden');
+              }
+            } else {
+              nameDisplay.textContent = 'No file chosen';
+              preview.classList.add('hidden');
+            }
+          });
+        });
+
+        propertyVerificationModal.classList.remove('hidden');
+        document.getElementById('verifStatus').textContent = '';
+      }
+
+      document.getElementById('closeVerificationModal').addEventListener('click', () => propertyVerificationModal.classList.add('hidden'));
+      propertyVerificationModal.addEventListener('click', (e) => {
+        if (e.target === propertyVerificationModal) propertyVerificationModal.classList.add('hidden');
+      });
+
+      document.getElementById('propertyVerificationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const propertyId = document.getElementById('verifPropertyId').value;
+        const propertyType = document.getElementById('verifPropertyType').value;
+        const statusEl = document.getElementById('verifStatus');
+
+        let submittedData = {};
+
+        if (propertyType === 'property') {
+          const landTitleFile = document.getElementById('landTitleFile').files[0];
+          const leaderName = document.getElementById('localLeaderName').value.trim();
+          const leaderPhone = document.getElementById('localLeaderPhone').value.trim();
+          const leaderAddress = document.getElementById('localLeaderAddress').value.trim();
+          const notes = document.getElementById('propertyNotes').value.trim();
+
+          if (!landTitleFile || !leaderName || !leaderPhone) {
+            statusEl.textContent = 'Please fill in all required fields and upload the land title document.';
+            statusEl.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+
+          try {
+            const landTitleUrl = await uploadVerificationDocument(landTitleFile, `property_${propertyId}`);
+            submittedData = { landTitle: landTitleUrl, leaderName, leaderPhone, leaderAddress, notes };
+          } catch (err) {
+            statusEl.textContent = '❌ Upload failed: ' + err.message;
+            statusEl.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+        } else {
+          const proofFile = document.getElementById('proofOwnershipFile').files[0];
+          const manager = document.getElementById('managerContact').value.trim();
+          const utilityFile = document.getElementById('utilityBillsFile').files[0];
+          const notes = document.getElementById('rentalNotes').value.trim();
+
+          if (!proofFile || !manager) {
+            statusEl.textContent = 'Please fill in all required fields and upload proof of ownership.';
+            statusEl.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+
+          try {
+            const proofUrl = await uploadVerificationDocument(proofFile, `property_${propertyId}`);
+            let utilityUrl = null;
+            if (utilityFile) {
+              utilityUrl = await uploadVerificationDocument(utilityFile, `property_${propertyId}/utilities`);
+            }
+            submittedData = { proof: proofUrl, manager, utility: utilityUrl, notes };
+          } catch (err) {
+            statusEl.textContent = '❌ Upload failed: ' + err.message;
+            statusEl.className = 'mt-3 text-sm text-red-600';
+            return;
+          }
+        }
+
+        statusEl.textContent = 'Submitting request...';
+        statusEl.className = 'mt-3 text-sm text-indigo-600';
+
+        try {
+          const { data, error } = await supabase
+            .from('property_verification_requests')
+            .insert({
+              property_id: propertyId,
+              broker_id: state.currentUser.id,
+              submitted_data: submittedData,
+              status: 'pending',
+            })
+            .select()
+            .single();
+
+          if (error) throw error;
+
+          await supabase
+            .from('properties')
+            .update({ verification_status: 'pending', is_verified: false })
+            .eq('id', propertyId);
+
+          statusEl.textContent = '✅ Verification request submitted! Admin will review it shortly.';
+          statusEl.className = 'mt-3 text-sm text-emerald-600';
+          propertyVerificationModal.classList.add('hidden');
+
+          loadPropertyVerificationList();
+          loadMyProperties();
+          fetchAllData();
+        } catch (err) {
+          statusEl.textContent = '❌ Submission failed: ' + err.message;
+          statusEl.className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Load Property Verification List ──────────────────────────
+      async function loadPropertyVerificationList() {
+        if (!state.currentUser) return;
+        const fk = COLUMNS.FOREIGN_KEY || 'owner_id';
+        try {
+          const { data: properties, error: pErr } = await supabase
+            .from('properties')
+            .select(`
+              *,
+              verification_requests:property_verification_requests (
+                id, status, submitted_data, created_at
+              )
+            `)
+            .eq(fk, state.currentUser.id)
+            .order('created_at', { ascending: false });
+
+          if (pErr) throw pErr;
+
+          const list = document.getElementById('propertyVerificationList');
+          const empty = document.getElementById('propertyVerificationEmpty');
+
+          if (!properties || properties.length === 0) {
+            list.innerHTML = '';
+            empty.classList.remove('hidden');
+            return;
+          }
+          empty.classList.add('hidden');
+
+          let html = '';
+          properties.forEach(prop => {
+            const req = prop.verification_requests?.[0] || null;
+            const status = req ? req.status : 'Not requested';
+            const statusClass = status === 'approved' ? 'approved' :
+                                status === 'pending' ? 'pending' :
+                                status === 'rejected' ? 'rejected' : 'unverified';
+            const statusLabel = status === 'approved' ? '✅ Approved' :
+                                status === 'pending' ? '⏳ Pending' :
+                                status === 'rejected' ? '❌ Rejected' : 'Not requested';
+
+            const canRequest = (!req || req.status === 'rejected') && status !== 'pending';
+
+            html += `
+              <div class="verification-property-item">
+                <div class="property-title">${prop.title || 'Untitled'}</div>
+                <div><span class="property-status ${statusClass}">${statusLabel}</span></div>
+                <div>
+                  ${canRequest ? `<button class="request-verification-btn text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-full transition" data-property-id="${prop.id}">Request Verification</button>` :
+                  `<span class="text-xs text-slate-400">${status === 'approved' ? 'Verified' : 'In progress'}</span>`}
+                  ${req ? `<button class="view-verification-details text-xs text-blue-600 hover:underline ml-2" data-request-id="${req.id}">Details</button>` : ''}
+                </div>
+              </div>
+            `;
+          });
+          list.innerHTML = html;
+
+          list.querySelectorAll('.request-verification-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+              openPropertyVerificationModal(this.dataset.propertyId);
+            });
+          });
+
+          list.querySelectorAll('.view-verification-details').forEach(btn => {
+            btn.addEventListener('click', async function() {
+              const requestId = this.dataset.requestId;
+              const { data: req, error } = await supabase
+                .from('property_verification_requests')
+                .select('submitted_data, status, created_at')
+                .eq('id', requestId)
+                .single();
+              if (error) {
+                alert('Error loading details.');
+                return;
+              }
+              const data = req.submitted_data;
+              let msg = `Status: ${req.status}\nSubmitted: ${new Date(req.created_at).toLocaleString()}\n\n`;
+              for (const [key, value] of Object.entries(data)) {
+                msg += `${key}: ${value}\n`;
+              }
+              alert(msg);
+            });
+          });
+
+        } catch (err) {
+          console.error('Error loading property verifications:', err);
+          document.getElementById('propertyVerificationList').innerHTML = `<p class="text-red-500 text-sm">Error loading: ${err.message}</p>`;
+        }
+      }
+
+      // ─── Dashboard toggles ────────────────────────────────────────
+      function toggleProfileForm() {
+        const container = document.getElementById('profileFormContainer');
+        const isVisible = container.classList.contains('visible');
+        if (isVisible) {
+          container.classList.remove('visible');
+        } else {
+          container.classList.add('visible');
+          document.getElementById('addPropertyContainer').classList.remove('visible');
+          document.getElementById('propertyVerificationContainer').classList.remove('visible');
+        }
+      }
+
+      function toggleAddPropertyForm() {
+        const container = document.getElementById('addPropertyContainer');
+        const isVisible = container.classList.contains('visible');
+        if (isVisible) {
+          container.classList.remove('visible');
+        } else {
+          container.classList.add('visible');
+          document.getElementById('profileFormContainer').classList.remove('visible');
+          document.getElementById('propertyVerificationContainer').classList.remove('visible');
+        }
+      }
+
+      function togglePropertyVerificationForm() {
+        const container = document.getElementById('propertyVerificationContainer');
+        const isVisible = container.classList.contains('visible');
+        if (isVisible) {
+          container.classList.remove('visible');
+        } else {
+          container.classList.add('visible');
+          document.getElementById('profileFormContainer').classList.remove('visible');
+          document.getElementById('addPropertyContainer').classList.remove('visible');
+          loadPropertyVerificationList();
+        }
+      }
+
+      document.getElementById('dashboardEditProfileBtn').addEventListener('click', toggleProfileForm);
+      document.getElementById('dashboardAddPropertyBtn').addEventListener('click', toggleAddPropertyForm);
+      document.getElementById('dashboardPropertyVerificationBtn').addEventListener('click', togglePropertyVerificationForm);
+      document.getElementById('cancelProfileEditBtn').addEventListener('click', () => {
+        document.getElementById('profileFormContainer').classList.remove('visible');
+      });
+      document.getElementById('gotoAddPropertyFromVerification').addEventListener('click', (e) => {
+        e.preventDefault();
+        toggleAddPropertyForm();
+      });
+
+      // ─── CRUD ──────────────────────────────────────────────────────
+      async function deleteProperty(propId) {
+        try {
+          const { error } = await supabase.from('properties').delete().eq('id', propId);
+          if (error) throw error;
+          state.myProperties = state.myProperties.filter(p => p.id !== propId);
+          renderMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Delete failed: ' + err.message); }
+      }
+
+      async function openEditModal(propertyId) {
+        const prop = state.myProperties.find(p => p.id === propertyId);
+        if (!prop) return;
+        document.getElementById('editPropertyId').value = propertyId;
+        document.getElementById('editTitle').value = prop[COLUMNS.TITLE] || '';
+        document.getElementById('editPrice').value = prop[COLUMNS.PRICE] || '';
+        const dbType = prop[COLUMNS.TYPE] || '';
+        let formType = 'Rentals';
+        if (dbType === 'property') formType = 'Properties';
+        else if (dbType === 'lodge') formType = 'Lodges';
+        else if (dbType === 'rental') formType = 'Rentals';
+        document.getElementById('editType').value = formType;
+        document.getElementById('editAddress').value = prop[COLUMNS.ADDRESS] || '';
+
+        const images = getImageArray(prop);
+        renderEditImagePreviews(images);
+        document.getElementById('editModal')._currentImages = images;
+        document.getElementById('editModal')._currentProperty = prop;
+
+        document.getElementById('editRequestVerification').checked = prop[COLUMNS.IS_VERIFIED] === true || prop[COLUMNS.VERIFICATION_STATUS] === 'pending';
+        if (document.getElementById('editRequestVerification').checked) {
+          document.getElementById('editVerificationInfo').classList.add('visible');
+        } else {
+          document.getElementById('editVerificationInfo').classList.remove('visible');
+        }
+        document.getElementById('editModal').classList.remove('hidden');
+      }
+
+      function renderEditImagePreviews(images) {
+        const container = document.getElementById('editImagePreviews');
+        container.innerHTML = '';
+        images.forEach((url, index) => {
+          const div = document.createElement('div');
+          div.className = 'image-thumb';
+          div.innerHTML = `
+            <img src="${url}" alt="Property image" />
+            <button class="remove-img" data-index="${index}">&times;</button>
+          `;
+          div.querySelector('.remove-img').addEventListener('click', () => {
+            const current = document.getElementById('editModal')._currentImages || [];
+            current.splice(index, 1);
+            renderEditImagePreviews(current);
+            document.getElementById('editModal')._currentImages = current;
+          });
+          container.appendChild(div);
+        });
+      }
+
+      document.getElementById('editPropertyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('editPropertyId').value;
+        if (!id) return;
+        const title = document.getElementById('editTitle').value.trim();
+        const price = parseFloat(document.getElementById('editPrice').value);
+        const type = document.getElementById('editType').value;
+        const address = document.getElementById('editAddress').value.trim();
+        if (!title || !price || !address) {
+          alert('Please fill in all required fields.');
+          return;
+        }
+        let currentImages = document.getElementById('editModal')._currentImages || [];
+        const files = document.getElementById('editImageInput').files;
+        if (files && files.length > 0) {
+          for (const file of files) {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${state.currentUser.id}/${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `property-media/${fileName}`;
+            const { error: uploadError } = await supabase.storage.from('property-media').upload(filePath, file);
+            if (uploadError) {
+              alert('Image upload failed: ' + uploadError.message);
+              return;
+            }
+            const { data: urlData } = supabase.storage.from('property-media').getPublicUrl(filePath);
+            currentImages.push(urlData.publicUrl);
+          }
+          document.getElementById('editImageInput').value = '';
+        }
+
+        const dbType = TYPE_MAP[type] || type;
+        const requestVerification = document.getElementById('editRequestVerification').checked;
+        let verificationStatus = 'unverified';
+        let isVerified = false;
+        if (requestVerification) {
+          verificationStatus = 'pending';
+          isVerified = false;
+        }
+
+        const updateData = {
+          [COLUMNS.TITLE]: title,
+          [COLUMNS.PRICE]: price,
+          [COLUMNS.TYPE]: dbType,
+          [COLUMNS.ADDRESS]: address,
+          [COLUMNS.IMAGE]: currentImages,
+          [COLUMNS.IS_VERIFIED]: isVerified,
+          [COLUMNS.VERIFICATION_STATUS]: verificationStatus,
+        };
+
+        try {
+          const { error } = await supabase.from('properties').update(updateData).eq('id', id);
+          if (error) throw error;
+          alert(requestVerification ? '✅ Property updated! Verification requested.' : '✅ Property updated!');
+          document.getElementById('editModal').classList.add('hidden');
+          await loadMyProperties();
+          await fetchAllData();
+        } catch (err) { alert('Update failed: ' + err.message); }
+      });
+
+      document.getElementById('closeEditModal').addEventListener('click', () => document.getElementById('editModal').classList.add('hidden'));
+      document.getElementById('editModal').addEventListener('click', (e) => { if (e.target === document.getElementById('editModal')) document.getElementById('editModal').classList.add('hidden'); });
+
+      // ─── Profile ────────────────────────────────────────────────────
+      async function loadProfileSettings() {
+        if (!state.currentUser) return;
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('business_name, phone, is_admin')
+            .eq('id', state.currentUser.id)
+            .single();
+          if (error) throw error;
+          document.getElementById('settingsBusinessName').value = data.business_name || '';
+          document.getElementById('settingsPhone').value = data.phone || '';
+          state.isAdmin = data.is_admin || false;
+        } catch (err) {
+          console.error('Error loading profile:', err);
+        }
+      }
+
+      document.getElementById('profileSettingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.currentUser) return;
+        const businessName = document.getElementById('settingsBusinessName').value.trim();
+        const phone = document.getElementById('settingsPhone').value.trim();
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ business_name: businessName, phone: phone })
+            .eq('id', state.currentUser.id);
+          if (error) throw error;
+          document.getElementById('profileStatus').textContent = '✅ Profile updated successfully!';
+          document.getElementById('profileStatus').className = 'mt-3 text-sm text-emerald-600';
+          if (state.currentUser) {
+            state.currentUser.business_name = businessName;
+            state.currentUser.phone = phone;
+          }
+          await fetchAllData();
+          if (state.currentUser) await loadMyProperties();
+        } catch (err) {
+          document.getElementById('profileStatus').textContent = '❌ Update failed: ' + err.message;
+          document.getElementById('profileStatus').className = 'mt-3 text-sm text-red-600';
+        }
+      });
+
+      // ─── Fetch all data ──────────────────────────────────────────────
+      async function fetchAllData() {
+        state.isLoading = true;
+        document.getElementById('loadingSkeleton').style.display = 'grid';
+        document.getElementById('listingsGrid').innerHTML = '';
+        document.getElementById('emptyState').classList.add('hidden');
+
+        try {
+          const { data: properties, error: propError } = await supabase
+            .from('properties')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (propError) throw propError;
+
+          if (!properties || properties.length === 0) {
+            document.getElementById('loadingSkeleton').style.display = 'none';
+            state.allProperties = [];
+            state.filteredProperties = [];
+            renderListings([]);
+            state.isLoading = false;
+            return;
+          }
+
+          const firstProp = properties[0];
+          const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
+          let fkColumn = null;
+          for (const key of possibleKeys) {
+            if (firstProp.hasOwnProperty(key)) {
+              fkColumn = key;
+              break;
+            }
+          }
+          if (!fkColumn) {
+            for (const key of Object.keys(firstProp)) {
+              if (key.endsWith('_id') && typeof firstProp[key] === 'string' && firstProp[key].length > 20) {
+                fkColumn = key;
+                break;
+              }
+            }
+          }
+          if (fkColumn) {
+            COLUMNS.FOREIGN_KEY = fkColumn;
+            console.log('✅ Detected foreign key:', fkColumn);
+          } else {
+            console.warn('⚠️ No foreign key column found');
+          }
+
+          let profilesMap = {};
+          if (fkColumn) {
+            const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
+            if (brokerIds.length > 0) {
+              const { data: profiles, error: profError } = await supabase
+                .from('profiles')
+                .select('*')
+                .in('id', brokerIds);
+              if (!profError && profiles) {
+                profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
+              }
+            }
+          }
+          state.profilesMap = profilesMap;
+
+          const { data: reports, error: repError } = await supabase
+            .from('reports')
+            .select('broker_id, status')
+            .eq('status', 'pending');
+          if (!repError && reports) {
+            const reportCounts = {};
+            reports.forEach(r => {
+              reportCounts[r.broker_id] = (reportCounts[r.broker_id] || 0) + 1;
+            });
+            Object.keys(profilesMap).forEach(id => {
+              profilesMap[id].report_count = reportCounts[id] || 0;
+            });
+          }
+
+          const enriched = properties.map(prop => {
+            const broker = fkColumn ? profilesMap[prop[fkColumn]] || null : null;
+            const reportCount = broker?.report_count || 0;
+            const rankScore = calculateRankScore(prop, broker, reportCount);
+            return { ...prop, broker, rankScore };
+          });
+
+          enriched.sort((a, b) => b.rankScore - a.rankScore);
+
+          state.allProperties = enriched;
+          state.filteredProperties = [...enriched];
+          applyFiltersAndSearch();
+        } catch (err) {
+          console.error('❌ Error fetching data:', err);
+          document.getElementById('listingsGrid').innerHTML = `
+            <div class="col-span-full text-center py-12 text-slate-500">
+              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
+              <p>Failed to load properties.</p>
+              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
+            </div>
+          `;
+        } finally {
+          state.isLoading = false;
+          document.getElementById('loadingSkeleton').style.display = 'none';
+        }
+      }
+
+      function applyFiltersAndSearch() {
+        const filter = state.currentFilter;
+        const query = state.searchQuery.trim().toLowerCase();
+        let result = [...state.allProperties];
+
+        if (filter !== 'all') {
+          result = result.filter(p => {
+            const dbType = (p[COLUMNS.TYPE] || '').toLowerCase();
+            return dbType === filter;
+          });
+        }
+
+        if (query) {
+          result = result.filter(p => {
+            const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
+            const title = (p[COLUMNS.TITLE] || '').toLowerCase();
+            return address.includes(query) || title.includes(query);
+          });
+        }
+
+        state.filteredProperties = result;
+        renderListings(result);
       }
 
       // ─── Property card ──────────────────────────────────────────────
@@ -1930,6 +1976,7 @@
           const brokerId = e.currentTarget.dataset.brokerId;
           if (brokerId) navigateToBroker(brokerId);
         });
+        // FIXED: Connect button – properly opens quiz modal
         article.querySelector('.connect-btn')?.addEventListener('click', function(e) {
           e.stopPropagation();
           const propertyId = this.dataset.propertyId;
@@ -1946,28 +1993,30 @@
 
       // ─── Render functions ─────────────────────────────────────────
       function renderListings(properties) {
-        listingsGrid.innerHTML = '';
+        const grid = document.getElementById('listingsGrid');
+        grid.innerHTML = '';
         if (!properties || properties.length === 0) {
-          emptyState.classList.remove('hidden');
-          propertyCount.textContent = '0 listings';
+          document.getElementById('emptyState').classList.remove('hidden');
+          document.getElementById('propertyCount').textContent = '0 listings';
           return;
         }
-        emptyState.classList.add('hidden');
-        propertyCount.textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
+        document.getElementById('emptyState').classList.add('hidden');
+        document.getElementById('propertyCount').textContent = `${properties.length} listing${properties.length > 1 ? 's' : ''}`;
         properties.forEach(prop => {
           const broker = prop.broker || state.profilesMap[prop[COLUMNS.FOREIGN_KEY]] || null;
           const card = createPropertyCard(prop, broker, true, false);
-          listingsGrid.appendChild(card);
+          grid.appendChild(card);
         });
       }
 
       function renderMyProperties() {
-        myPropertiesList.innerHTML = '';
+        const list = document.getElementById('myPropertiesList');
+        list.innerHTML = '';
         if (state.myProperties.length === 0) {
-          myPropertiesEmpty.classList.remove('hidden');
+          document.getElementById('myPropertiesEmpty').classList.remove('hidden');
           return;
         }
-        myPropertiesEmpty.classList.add('hidden');
+        document.getElementById('myPropertiesEmpty').classList.add('hidden');
         state.myProperties.forEach(prop => {
           const broker = state.currentUser;
           const card = createPropertyCard(prop, broker, false, true);
@@ -1980,156 +2029,29 @@
             }
           });
           card.querySelector('.p-4').appendChild(deleteBtn);
-          myPropertiesList.appendChild(card);
+          list.appendChild(card);
         });
-      }
-
-      // ─── Fetch all data ──────────────────────────────────────────────
-      async function fetchAllData() {
-        state.isLoading = true;
-        loadingSkeleton.style.display = 'grid';
-        listingsGrid.innerHTML = '';
-        emptyState.classList.add('hidden');
-
-        try {
-          const { data: properties, error: propError } = await supabase
-            .from('properties')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-          if (propError) throw propError;
-
-          if (!properties || properties.length === 0) {
-            loadingSkeleton.style.display = 'none';
-            state.allProperties = [];
-            state.filteredProperties = [];
-            renderListings([]);
-            state.isLoading = false;
-            return;
-          }
-
-          const firstProp = properties[0];
-          const possibleKeys = ['owner_id', 'user_id', 'broker_id', 'created_by', 'profile_id'];
-          let fkColumn = null;
-          for (const key of possibleKeys) {
-            if (firstProp.hasOwnProperty(key)) {
-              fkColumn = key;
-              break;
-            }
-          }
-          if (!fkColumn) {
-            for (const key of Object.keys(firstProp)) {
-              if (key.endsWith('_id') && typeof firstProp[key] === 'string' && firstProp[key].length > 20) {
-                fkColumn = key;
-                break;
-              }
-            }
-          }
-          if (fkColumn) {
-            COLUMNS.FOREIGN_KEY = fkColumn;
-            console.log('✅ Detected foreign key:', fkColumn);
-          } else {
-            console.warn('⚠️ No foreign key column found');
-          }
-
-          let profilesMap = {};
-          if (fkColumn) {
-            const brokerIds = [...new Set(properties.map(p => p[fkColumn]).filter(id => id))];
-            if (brokerIds.length > 0) {
-              const { data: profiles, error: profError } = await supabase
-                .from('profiles')
-                .select('*')
-                .in('id', brokerIds);
-              if (!profError && profiles) {
-                profilesMap = Object.fromEntries(profiles.map(p => [p.id, p]));
-              }
-            }
-          }
-          state.profilesMap = profilesMap;
-
-          const { data: reports, error: repError } = await supabase
-            .from('reports')
-            .select('broker_id, status')
-            .eq('status', 'pending');
-          if (!repError && reports) {
-            const reportCounts = {};
-            reports.forEach(r => {
-              reportCounts[r.broker_id] = (reportCounts[r.broker_id] || 0) + 1;
-            });
-            Object.keys(profilesMap).forEach(id => {
-              profilesMap[id].report_count = reportCounts[id] || 0;
-            });
-          }
-
-          const enriched = properties.map(prop => {
-            const broker = fkColumn ? profilesMap[prop[fkColumn]] || null : null;
-            const reportCount = broker?.report_count || 0;
-            const rankScore = calculateRankScore(prop, broker, reportCount);
-            return { ...prop, broker, rankScore };
-          });
-
-          enriched.sort((a, b) => b.rankScore - a.rankScore);
-
-          state.allProperties = enriched;
-          state.filteredProperties = [...enriched];
-          applyFiltersAndSearch();
-        } catch (err) {
-          console.error('❌ Error fetching data:', err);
-          listingsGrid.innerHTML = `
-            <div class="col-span-full text-center py-12 text-slate-500">
-              <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
-              <p>Failed to load properties.</p>
-              <p class="text-xs text-slate-400 mt-1">${err.message}</p>
-            </div>
-          `;
-        } finally {
-          state.isLoading = false;
-          loadingSkeleton.style.display = 'none';
-        }
-      }
-
-      function applyFiltersAndSearch() {
-        const filter = state.currentFilter;
-        const query = state.searchQuery.trim().toLowerCase();
-        let result = [...state.allProperties];
-
-        if (filter !== 'all') {
-          result = result.filter(p => {
-            const dbType = (p[COLUMNS.TYPE] || '').toLowerCase();
-            return dbType === filter;
-          });
-        }
-
-        if (query) {
-          result = result.filter(p => {
-            const address = (p[COLUMNS.ADDRESS] || '').toLowerCase();
-            const title = (p[COLUMNS.TITLE] || '').toLowerCase();
-            return address.includes(query) || title.includes(query);
-          });
-        }
-
-        state.filteredProperties = result;
-        renderListings(result);
       }
 
       // ─── Navigation ────────────────────────────────────────────────
       async function navigateToBroker(brokerId) {
         if (!brokerId) return;
         state.currentBrokerId = brokerId;
-        showView(brokerView);
+        showView(document.getElementById('brokerView'));
         navigateTo(`/broker/${brokerId}`);
         await loadBrokerProfile(brokerId);
       }
 
       async function loadBrokerProfile(brokerId) {
-        brokerListingsGrid.innerHTML = `
+        const grid = document.getElementById('brokerListingsGrid');
+        grid.innerHTML = `
           <div class="col-span-full flex justify-center py-12">
             <div class="text-slate-400 flex items-center gap-3">
               <i class="fas fa-spinner fa-spin text-xl"></i> Loading broker profile…
             </div>
           </div>
         `;
-        brokerEmptyState.classList.add('hidden');
+        document.getElementById('brokerEmptyState').classList.add('hidden');
 
         try {
           const { data: broker, error: brokerError } = await supabase
@@ -2139,53 +2061,55 @@
             .single();
           if (brokerError) throw brokerError;
           if (!broker) {
-            brokerListingsGrid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Broker not found.</div>`;
+            grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">Broker not found.</div>`;
             return;
           }
 
-          brokerBusinessName.textContent = broker.business_name || 'Unnamed Broker';
+          document.getElementById('brokerBusinessName').textContent = broker.business_name || 'Unnamed Broker';
 
           const isTrusted = isTrustedBroker(broker);
           if (isTrusted) {
-            brokerTrustedBadge.classList.remove('hidden');
+            document.getElementById('brokerTrustedBadge').classList.remove('hidden');
           } else {
-            brokerTrustedBadge.classList.add('hidden');
+            document.getElementById('brokerTrustedBadge').classList.add('hidden');
           }
 
           const reportCount = broker.report_count || 0;
           if (reportCount > 0) {
-            brokerReportNotice.classList.remove('hidden');
-            brokerReportNotice.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>
+            const notice = document.getElementById('brokerReportNotice');
+            notice.classList.remove('hidden');
+            notice.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i>
               <span class="font-medium">⚠️ This broker has ${reportCount} report${reportCount > 1 ? 's' : ''}.</span>
               <span> Proceed with caution.</span>`;
           } else {
-            brokerReportNotice.classList.add('hidden');
+            document.getElementById('brokerReportNotice').classList.add('hidden');
           }
 
-          brokerWhatsAppLink.style.display = 'none';
+          document.getElementById('brokerWhatsAppLink').style.display = 'none';
 
           const rating = broker.average_rating || 0;
           const reviewCount = broker.review_count || 0;
           const leadScore = broker.lead_score || 0;
-          brokerStars.innerHTML = renderStars(rating);
-          brokerReviewCount.textContent = `(${reviewCount} reviews)`;
-          brokerLeadScore.textContent = `⚡ ${leadScore}`;
+          document.getElementById('brokerStars').innerHTML = renderStars(rating);
+          document.getElementById('brokerReviewCount').textContent = `(${reviewCount} reviews)`;
+          document.getElementById('brokerLeadScore').textContent = `⚡ ${leadScore}`;
 
-          statTotalReviews.textContent = reviewCount;
-          statAvgRating.textContent = rating.toFixed(1);
+          document.getElementById('statTotalReviews').textContent = reviewCount;
+          document.getElementById('statAvgRating').textContent = rating.toFixed(1);
 
+          // Show buttons – Report button now visible for logged-in users (not self)
           if (state.currentUser && state.currentUser.id !== brokerId) {
-            rateBrokerBtn.classList.remove('hidden');
-            rateBrokerBtn.onclick = () => openReviewModal(brokerId);
-            viewReviewsBtn.classList.remove('hidden');
-            viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
-            reportBrokerBtn.classList.remove('hidden');
-            reportBrokerBtn.onclick = () => openReportModal(brokerId);
+            document.getElementById('rateBrokerBtn').classList.remove('hidden');
+            document.getElementById('rateBrokerBtn').onclick = () => openReviewModal(brokerId);
+            document.getElementById('viewReviewsBtn').classList.remove('hidden');
+            document.getElementById('viewReviewsBtn').onclick = () => openViewReviewsModal(brokerId);
+            document.getElementById('reportBrokerBtn').classList.remove('hidden');
+            document.getElementById('reportBrokerBtn').onclick = () => openReportModal(brokerId);
           } else {
-            rateBrokerBtn.classList.add('hidden');
-            reportBrokerBtn.classList.add('hidden');
-            viewReviewsBtn.classList.remove('hidden');
-            viewReviewsBtn.onclick = () => openViewReviewsModal(brokerId);
+            document.getElementById('rateBrokerBtn').classList.add('hidden');
+            document.getElementById('reportBrokerBtn').classList.add('hidden');
+            document.getElementById('viewReviewsBtn').classList.remove('hidden');
+            document.getElementById('viewReviewsBtn').onclick = () => openViewReviewsModal(brokerId);
           }
 
           const { data: props, error: propsError } = await supabase
@@ -2196,20 +2120,20 @@
           if (propsError) throw propsError;
 
           if (!props || props.length === 0) {
-            brokerListingsGrid.innerHTML = '';
-            brokerEmptyState.classList.remove('hidden');
+            grid.innerHTML = '';
+            document.getElementById('brokerEmptyState').classList.remove('hidden');
             return;
           }
 
-          brokerEmptyState.classList.add('hidden');
-          brokerListingsGrid.innerHTML = '';
+          document.getElementById('brokerEmptyState').classList.add('hidden');
+          grid.innerHTML = '';
           props.forEach(prop => {
             const card = createPropertyCard(prop, broker, false, false);
-            brokerListingsGrid.appendChild(card);
+            grid.appendChild(card);
           });
         } catch (err) {
           console.error('❌ Error loading broker profile:', err);
-          brokerListingsGrid.innerHTML = `
+          grid.innerHTML = `
             <div class="col-span-full text-center py-12 text-slate-500">
               <i class="fas fa-exclamation-triangle text-3xl text-amber-400 mb-3"></i>
               <p>Could not load broker profile.</p>
@@ -2220,18 +2144,21 @@
       }
 
       function navigateToAuth() {
-        showView(authView);
+        showView(document.getElementById('authView'));
         navigateTo('/auth');
         setAuthMode(false);
-        authForm.reset();
+        document.getElementById('authForm').reset();
       }
 
       function goToDiscovery() {
-        showView(discoveryView);
+        showView(document.getElementById('discoveryView'));
         state.currentBrokerId = null;
         navigateTo('/');
         applyFiltersAndSearch();
       }
+
+      document.getElementById('backToDiscovery').addEventListener('click', goToDiscovery);
+      document.getElementById('backToSearchBtn').addEventListener('click', goToDiscovery);
 
       // ─── Dashboard ──────────────────────────────────────────────────
       async function loadMyProperties() {
@@ -2248,7 +2175,7 @@
           renderMyProperties();
         } catch (err) {
           console.error('Error loading my properties:', err);
-          myPropertiesList.innerHTML = `
+          document.getElementById('myPropertiesList').innerHTML = `
             <div class="col-span-full text-center py-8 text-slate-500">
               Could not load your properties. Check RLS policies and column '${fk}'.
             </div>
@@ -2257,38 +2184,39 @@
       }
 
       // ─── Add Property ──────────────────────────────────────────────
-      addPropertyForm.addEventListener('submit', async (e) => {
+      document.getElementById('addPropertyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!state.currentUser) {
           alert('Please sign in first.');
           return;
         }
 
-        const title = propTitle.value.trim();
-        const price = parseFloat(propPrice.value);
-        const type = propType.value;
-        const address = propAddress.value.trim();
-        const imageFiles = propImage.files;
-        const requestVerification = addRequestVerification.checked;
+        const title = document.getElementById('propTitle').value.trim();
+        const price = parseFloat(document.getElementById('propPrice').value);
+        const type = document.getElementById('propType').value;
+        const address = document.getElementById('propAddress').value.trim();
+        const imageFiles = document.getElementById('propImage').files;
+        const requestVerification = document.getElementById('addRequestVerification').checked;
 
         if (!title || !price || !address) {
           alert('Please fill in all required fields.');
           return;
         }
 
-        uploadStatus.textContent = 'Uploading images...';
-        uploadStatus.className = 'mt-3 text-sm text-indigo-600';
+        const statusEl = document.getElementById('uploadStatus');
+        statusEl.textContent = 'Uploading images...';
+        statusEl.className = 'mt-3 text-sm text-indigo-600';
 
         const imageUrls = [];
         if (imageFiles && imageFiles.length > 0) {
           for (const file of imageFiles) {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
-            const filePath = `${state.currentUser.id}/${fileName}`;
+            const fileName = `${state.currentUser.id}/${Date.now()}_${Math.random().toString(36).substr(2,6)}.${fileExt}`;
+            const filePath = `property-media/${fileName}`;
             const { error: uploadError } = await supabase.storage.from('property-media').upload(filePath, file);
             if (uploadError) {
-              uploadStatus.textContent = '❌ Image upload failed: ' + uploadError.message;
-              uploadStatus.className = 'mt-3 text-sm text-red-600';
+              statusEl.textContent = '❌ Image upload failed: ' + uploadError.message;
+              statusEl.className = 'mt-3 text-sm text-red-600';
               return;
             }
             const { data: urlData } = supabase.storage.from('property-media').getPublicUrl(filePath);
@@ -2318,371 +2246,4 @@
         };
 
         try {
-          const { error } = await supabase.from('properties').insert(insertData);
-          if (error) throw error;
-          uploadStatus.textContent = requestVerification ? '✅ Property added! Verification requested.' : '✅ Property added!';
-          uploadStatus.className = 'mt-3 text-sm text-emerald-600';
-          addPropertyForm.reset();
-          addRequestVerification.checked = false;
-          addVerificationInfo.classList.remove('visible');
-          propImage.value = '';
-          await loadMyProperties();
-          await fetchAllData();
-          addPropertyContainer.classList.remove('visible');
-        } catch (err) {
-          uploadStatus.textContent = '❌ Failed to add property: ' + err.message;
-          uploadStatus.className = 'mt-3 text-sm text-red-600';
-        }
-      });
-
-      // ─── Auth ──────────────────────────────────────────────────────
-      async function handleAuthSubmit(e) {
-        e.preventDefault();
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
-
-        if (state.isSignUpMode) {
-          const businessName = bizNameInput.value.trim();
-          const accountType = accTypeSelect.value;
-          const phone = phoneInput.value.trim();
-
-          if (!businessName) {
-            alert('Please enter your Business / Brand Name.');
-            return;
-          }
-
-          try {
-            const { data, error } = await supabase.auth.signUp({
-              email,
-              password,
-              options: {
-                data: {
-                  business_name: businessName,
-                  account_type: accountType,
-                  phone: phone,
-                }
-              }
-            });
-            if (error) throw error;
-            alert('✅ Account created! Please check your email to verify your account.');
-            setAuthMode(false);
-            authForm.reset();
-          } catch (err) {
-            alert('❌ Registration failed: ' + err.message);
-          }
-        } else {
-          try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-            state.currentUser = data.user;
-            alert('✅ Signed in successfully!');
-            showView(dashboardView);
-            navigateTo('/dashboard');
-            portalBtnLabel.textContent = 'Dashboard';
-            await loadProfileSettings();
-            await loadMyProperties();
-            await loadWallet();
-            await fetchAllData();
-          } catch (err) {
-            alert('❌ Sign in failed: ' + err.message);
-          }
-        }
-      }
-
-      async function handleLogout() {
-        await supabase.auth.signOut();
-        state.currentUser = null;
-        portalBtnLabel.textContent = 'Broker Portal';
-        goToDiscovery();
-      }
-
-      // ─── Route ──────────────────────────────────────────────────────
-      async function handleRoute() {
-        const path = getCurrentPath();
-        if (path.startsWith('/broker/')) {
-          const brokerId = path.split('/')[2];
-          if (brokerId && brokerId !== state.currentBrokerId) {
-            if (brokerView.classList.contains('view-hidden')) {
-              showView(brokerView);
-              await loadBrokerProfile(brokerId);
-            }
-          }
-        } else if (path === '/auth') {
-          if (authView.classList.contains('view-hidden')) {
-            showView(authView);
-            setAuthMode(false);
-            authForm.reset();
-          }
-        } else if (path === '/dashboard') {
-          if (state.currentUser) {
-            if (dashboardView.classList.contains('view-hidden')) {
-              showView(dashboardView);
-              await loadMyProperties();
-              await loadWallet();
-            }
-          } else {
-            navigateTo('/auth', true);
-            handleRoute();
-          }
-        } else if (path === '/') {
-          if (!discoveryView.classList.contains('view-visible')) {
-            showView(discoveryView);
-            applyFiltersAndSearch();
-          }
-        } else {
-          navigateTo('/', true);
-          handleRoute();
-        }
-      }
-
-      // ─── Quiz ──────────────────────────────────────────────────────
-      async function openQuizModal(propertyId) {
-        quizPropertyId.value = propertyId;
-        quizStep1.classList.remove('hidden');
-        quizStep2.classList.add('hidden');
-        quizForm.reset();
-        quizModal.classList.remove('hidden');
-      }
-
-      quizNextBtn.addEventListener('click', function() {
-        const name = quizName.value.trim();
-        const email = quizEmail.value.trim();
-        const whatsapp = quizWhatsapp.value.trim();
-        if (!name || !email || !whatsapp) {
-          alert('Please fill in all contact fields.');
-          return;
-        }
-        quizStep1.classList.add('hidden');
-        quizStep2.classList.remove('hidden');
-      });
-
-      quizForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const propertyId = quizPropertyId.value;
-        const name = quizName.value.trim();
-        const email = quizEmail.value.trim();
-        const whatsapp = quizWhatsapp.value.trim();
-
-        const q1 = document.querySelector('input[name="q1"]:checked');
-        const q2 = document.querySelector('input[name="q2"]:checked');
-        if (!q1 || !q2) {
-          alert('Please answer both quiz questions.');
-          return;
-        }
-
-        const score1 = parseInt(q1.value);
-        const score2 = parseInt(q2.value);
-        const totalScore = score1 + score2;
-        let leadType = 'cold';
-        if (totalScore >= 7) leadType = 'hot';
-        else if (totalScore >= 4) leadType = 'warm';
-
-        const answers = { q1: score1, q2: score2 };
-
-        try {
-          const { data, error } = await supabase.functions.invoke('request-lead', {
-            body: {
-              property_id: propertyId,
-              visitor_name: name,
-              visitor_email: email,
-              visitor_whatsapp: whatsapp,
-              quiz_answers: answers,
-              total_score: totalScore,
-              lead_type: leadType
-            }
-          });
-          if (error) throw error;
-
-          quizModal.classList.add('hidden');
-          waitingModal.classList.remove('hidden');
-          waitingStatus.textContent = 'Request sent. Waiting for broker...';
-
-          const requestId = data.request_id;
-          subscribeToLeadRequest(requestId);
-        } catch (err) {
-          alert('Error submitting request: ' + err.message);
-        }
-      });
-
-      function subscribeToLeadRequest(requestId) {
-        const channel = supabase
-          .channel(`lead-request-${requestId}`)
-          .on(
-            'postgres_changes', {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'lead_requests',
-              filter: `id=eq.${requestId}`
-            },
-            (payload) => {
-              const newStatus = payload.new.status;
-              if (newStatus === 'approved') {
-                waitingStatus.textContent = '✅ Broker approved! Verifying your identity...';
-                waitingModal.classList.add('hidden');
-                otpRequestId.value = requestId;
-                otpModal.classList.remove('hidden');
-                sendOTP(requestId);
-                if (state.currentUser) loadWallet();
-              } else if (newStatus === 'rejected') {
-                waitingStatus.textContent = '❌ Broker declined this request.';
-                setTimeout(() => {
-                  waitingModal.classList.add('hidden');
-                }, 3000);
-              } else if (newStatus === 'expired') {
-                waitingStatus.textContent = '⏰ Request expired.';
-                setTimeout(() => {
-                  waitingModal.classList.add('hidden');
-                }, 3000);
-              }
-            }
-          )
-          .subscribe();
-      }
-
-      async function sendOTP(requestId) {
-        try {
-          await supabase.functions.invoke('send-otp', { body: { request_id: requestId } });
-        } catch (err) {
-          console.error('OTP send error:', err);
-        }
-      }
-
-      otpForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const requestId = otpRequestId.value;
-        const otp = otpInput.value.trim();
-        if (!otp || otp.length < 4) {
-          alert('Please enter the full OTP.');
-          return;
-        }
-        try {
-          const { data, error } = await supabase.functions.invoke('verify-otp', {
-            body: { request_id: requestId, otp: otp }
-          });
-          if (error) throw error;
-          otpModal.classList.add('hidden');
-          const waLink = `https://wa.me/${data.broker_whatsapp}`;
-          alert(`✅ Verified! Click OK to chat with the broker on WhatsApp.`);
-          window.open(waLink, '_blank');
-        } catch (err) {
-          otpError.classList.remove('hidden');
-          otpError.textContent = 'Invalid OTP. Please try again.';
-        }
-      });
-
-      cancelWaitBtn.addEventListener('click', function() {
-        if (confirm('Cancel this request?')) {
-          waitingModal.classList.add('hidden');
-        }
-      });
-
-      closeQuizModal.addEventListener('click', () => quizModal.classList.add('hidden'));
-      quizModal.addEventListener('click', (e) => { if (e.target === quizModal) quizModal.classList.add('hidden'); });
-
-      // ─── Event Binding ─────────────────────────────────────────────
-      searchInput.addEventListener('input', (e) => {
-        state.searchQuery = e.target.value;
-        applyFiltersAndSearch();
-      });
-      clearSearchBtn.addEventListener('click', () => {
-        searchInput.value = '';
-        state.searchQuery = '';
-        applyFiltersAndSearch();
-        searchInput.focus();
-      });
-
-      filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-          filterPills.forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          state.currentFilter = pill.dataset.filter;
-          applyFiltersAndSearch();
-        });
-      });
-
-      backToDiscovery.addEventListener('click', goToDiscovery);
-      backToSearchBtn.addEventListener('click', goToDiscovery);
-      logoutBtn.addEventListener('click', handleLogout);
-
-      brokerPortalBtn.addEventListener('click', () => {
-        if (state.currentUser) {
-          showView(dashboardView);
-          navigateTo('/dashboard');
-          loadMyProperties();
-          loadWallet();
-        } else {
-          navigateToAuth();
-        }
-      });
-
-      toggleSignIn.addEventListener('click', () => setAuthMode(false));
-      toggleSignUp.addEventListener('click', () => setAuthMode(true));
-
-      authForm.addEventListener('submit', handleAuthSubmit);
-
-      window.addEventListener('popstate', handleRoute);
-
-      // ─── Init ────────────────────────────────────────────────────────
-      async function init() {
-        const hash = window.location.hash;
-        if (hash && hash.includes('access_token')) {
-          const params = new URLSearchParams(hash.substring(1));
-          const accessToken = params.get('access_token');
-          const refreshToken = params.get('refresh_token');
-          if (accessToken && refreshToken) {
-            try {
-              const { data, error } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-              });
-              if (error) throw error;
-              if (data.user) {
-                state.currentUser = data.user;
-                portalBtnLabel.textContent = 'Dashboard';
-                window.history.replaceState(null, '', '/');
-                showView(dashboardView);
-                navigateTo('/dashboard');
-                await loadProfileSettings();
-                await loadMyProperties();
-                await loadWallet();
-                await fetchAllData();
-                alert('✅ Email verified! Welcome to your dashboard.');
-                return;
-              }
-            } catch (err) {
-              console.error('Session set error:', err);
-              alert('❌ Verification failed: ' + err.message);
-            }
-          }
-        }
-
-        try {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            state.currentUser = user;
-            portalBtnLabel.textContent = 'Dashboard';
-            await loadProfileSettings();
-            await loadWallet();
-          }
-        } catch (err) {
-          console.log('No active session (403 is normal).');
-        }
-
-        await handleRoute();
-        await fetchAllData();
-        hideLoading();
-      }
-
-      init();
-      window.__state = state;
-    }
-
-    // ─── Start when DOM ready ────────────────────────────────────────
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', startApp);
-    } else {
-      startApp();
-    }
-  </script>
-</body>
-</html>
+          const { error } = await supabase

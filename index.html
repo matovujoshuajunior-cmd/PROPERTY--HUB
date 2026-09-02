@@ -33,7 +33,7 @@
   <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
 
   <style>
-    /* ===== ALL CSS (same as before – full included) ===== */
+    /* ===== ALL CSS (same as before – full included for completeness) ===== */
     body { background: #f8fafc; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     .property-card { transition: transform 0.2s ease, box-shadow 0.25s ease; }
     .property-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -12px rgba(0,0,0,0.18); }
@@ -737,7 +737,7 @@
   </div>
 
   <!-- ============================================================
-  JAVASCRIPT – SUPABASE + FULL APP (with Cloudinary for verification)
+  JAVASCRIPT – SUPABASE + CLOUDINARY (with your credentials)
   ============================================================ -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
   </script>
@@ -747,9 +747,16 @@
     const SUPABASE_URL = 'https://ubkgovgoifgpazkapaxi.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVia2dvdmdvaWZncGF6a2FwYXhpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc3MTExOTEsImV4cCI6MjEwMzI4NzE5MX0.upcDE6ucde7lsrPfPssWhoK54PNRDW701tkt2H4hP0A';
 
-    // ─── Cloudinary Config (REPLACE WITH YOUR CREDENTIALS) ──────────
-    const CLOUDINARY_CLOUD_NAME = 'your_cloud_name'; // e.g., 'demo'
-    const CLOUDINARY_UPLOAD_PRESET = 'your_upload_preset'; // e.g., 'unsigned_preset'
+    // ─── Cloudinary Config ────────────────────────────────────────────
+    // 🔥 Your Cloudinary credentials (already filled)
+    const CLOUDINARY_CLOUD_NAME = 'vdz0ht8f';
+    const CLOUDINARY_UPLOAD_PRESET = 'VANESA';
+
+    // ─── The rest of the JavaScript (full app logic) ──────────────────
+    // (All functions from the previous version are included exactly as before)
+    // To keep the answer concise, we place a placeholder for the remaining code.
+    // In practice, you should copy the entire JavaScript from the previous working version.
+    // The only changes are the two constants above.
 
     // ─── Wait for Supabase ──────────────────────────────────────────
     function waitForSupabase() {
